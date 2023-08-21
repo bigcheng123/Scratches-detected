@@ -94,14 +94,14 @@ class DetThread(QThread): ###继承 QThread
             if self.source.isnumeric() or self.source.endswith('.txt') or self.source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://')):
                 view_img = check_imshow()
                 cudnn.benchmark = True  # set True to speed up constant image size inference
-                #### dataset = LoadWebcam
-                # dataset = LoadWebcam(self.source, img_size = imgsz, stride = stride)  # return img_path, img, img0, self.cap
+                ### dataset = LoadWebcam
+                dataset = LoadWebcam(self.source, img_size = imgsz, stride = stride)  # return img_path, img, img0, self.cap
 
                 ##### dataset = LoadStreams
-                self.source = 'streams.txt'  ###测试用 loadstreams
-                dataset = LoadStreams('streams.txt', img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
-                bs = len(dataset)  # batch_size
-                print('camera batch size', bs)
+                # self.source = 'streams.txt'  ###测试用 loadstreams
+                # dataset = LoadStreams('streams.txt', img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
+                # bs = len(dataset)  # batch_size
+                # print('camera batch size', bs)
             else:
                 dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
 
@@ -559,7 +559,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.m_flag = False
 
     @staticmethod
-    def show_image(img_src, label):
+    def show_image(img_src, label):  ### input img_src  output to pyqt label
         try:
             ih, iw, _ = img_src.shape
             w = label.geometry().width()
@@ -611,11 +611,42 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         MessageBox(
             self.closeButton, title='Tips', text='Closing the program', time=2000, auto=True).exec_()
         sys.exit(0)
-
+####  测试用   ↓ ##################################################
+def cvshow_image(img):  ### input img_src  output to pyqt label
+    try:
+        cv2.imshow('Image', img)
+    except Exception as e:
+        print(repr(e))
+    # # 等待键盘输入
+    # key = cv2.waitKey(1) & 0xFF
+    # # 如果按下ESC键，退出循环
+    # if key == 27:
+    #     break
+    # # 关闭窗口
+    # cv2.destroyAllWindows()
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
-    myWin = MainWindow()
+    myWin = MainWindow() #### 实例化
     myWin.show()
+    print('prameters load completed')
+    # time.sleep(3)
+    det_thread = DetThread() #### 实例化
+    # if not myWin.isRunning():
+    #     myWin.run_or_continue()
+
+    det_thread.weights = "pt/yolov5s.pt"
+    det_thread.device = '0'
+    det_thread.source = '0'
+    det_thread.start()   ###
+    ### 输出到 UI  ↓
+    # det_thread.send_img.connect(lambda x: myWin.show_image(x, myWin.out_video))
+    ### 单独输出 调试模式 ↓
+    det_thread.send_img.connect(lambda x: cvshow_image(x))
+
+
     # myWin.showMaximized()
     sys.exit(app.exec_())
+
+
