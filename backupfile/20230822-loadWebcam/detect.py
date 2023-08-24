@@ -26,7 +26,7 @@ from utils.torch_utils import select_device, time_sync, load_classifier
 
 # @torch.no_grad()
 def run(weights='pt/yolov5s.pt',  # model.pt path(s)
-        source='0',  # file/dir/URL/glob, 0 for webcam
+        source='data/images',  # file/dir/URL/glob, 0 for webcam
         imgsz=640,  # inference size (pixels)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
@@ -94,13 +94,9 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
     if device.type != 'cpu':
         model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
     t0 = time.time()
-    # grab frame
     for path, img, im0s, vid_cap in dataset:
-
-        cv2.imshow('im0s-0', im0s[0])  ##### show raw images
-        cv2.imshow('im0s-1', im0s[1])  ##### show raw images
         print(type(path), type(img), type(im0s), type(vid_cap))
-        #### img recode
+
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -125,7 +121,6 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
                 p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
-                # cv2.imshow(str(p), im0)  ##### show raw images
             else:
                 p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
 
@@ -166,11 +161,11 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
             # print(f'FSP={FSP}')
 
             # Stream results
-            # if view_img:
-                # cv2.putText(im0, str(f'FSP={FSP}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0),1)
-                # res = cv2.resize(im0,None,fx=1,fy=1,interpolation=cv2.INTER_CUBIC)
-                # cv2.imshow(str(p), res)  ##### show images
-                # cv2.waitKey(1)  # 1 millisecond
+            if view_img:
+                cv2.putText(im0, str(f'FSP={FSP}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0),1)
+                res = cv2.resize(im0,None,fx=1,fy=1,interpolation=cv2.INTER_CUBIC)
+                cv2.imshow(str(p), res)  ##### show images
+                cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
             if save_img:

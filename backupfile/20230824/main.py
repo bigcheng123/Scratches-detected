@@ -49,7 +49,7 @@ class DetThread(QThread): ###继承 QThread
         self.percent_length = 1000              # progress bar
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
-        self.save_fold = None ####'./result'
+        self.save_fold =  None ####'./result'
 
     @torch.no_grad()
     def run(self,
@@ -124,25 +124,23 @@ class DetThread(QThread): ###继承 QThread
         if device.type != 'cpu':
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
         start_time = time.time()
-        t0 = time.time()
+        # t0 = time.time()
         count = 0
 
         # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
 
         while True: ##### 采用循环来 检查是否 停止推理
-            print('marker while loop')
             print(' while loop self.is_continue', self.is_continue)
             print(' while loop self.jump_out', self.jump_out)
             # print(' while loop camera.cap', type(self.vid_cap))
 
             if self.jump_out:
-                self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                print('vid_cap.release -1', type(self.vid_cap))
+                self.vid_cap.release()
                 self.send_percent.emit(0)
                 self.send_msg.emit('Stop')
                 if hasattr(self, 'out'):
                     self.out.release()
-                print('jump_out push-1', self.jump_out)
+                print('jump_out push', self.jump_out)
                 break
 
             # change model & device  20230810
@@ -246,7 +244,7 @@ class DetThread(QThread): ###继承 QThread
                             # print('detection is running')
 
                         FSP = int(1 / (t2 - t1))
-                        # print(f'{s}Done. ({t2 - t1:.3f}s FSP={FSP})')
+                        print(f'{s}Done. ({t2 - t1:.3f}s FSP={FSP})')
 
                         # Stream results   emit frame
                         if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
@@ -255,23 +253,23 @@ class DetThread(QThread): ###继承 QThread
                             res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
-                                self.send_img_ch0.emit(im0)  ### 发送图像
+                                self.send_img_ch0.emit(im0)  ### 发送处理后图像
                                 print('seng img : ch0')
                             ## chanel-1
                             if label_chanel == '1':
-                                self.send_img_ch1.emit(im0)  ### 发送图像
+                                self.send_img_ch1.emit(im0)  #### 发送原始图像
                                 print('seng img : ch1')
                             # chanel-2
                             if label_chanel == '2':
-                                self.send_img_ch2.emit(im0)  ### 发送图像
+                                self.send_img_ch2.emit(im0)  #### 发送原始图像
                                 print('seng img : ch2')
                             ## chanel-3
                             if label_chanel == '3':
-                                self.send_img_ch3.emit(im0)  #### 发送图像
+                                self.send_img_ch3.emit(im0)  #### 发送原始图像
                                 print('seng img : ch3')
                             ### ## 发送声明
                             self.send_statistic.emit(statistic_dic)
-                            # print('emit statistic_dic', statistic_dic)
+                            print('emit statistic_dic', statistic_dic)
                     if self.rate_check:
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
@@ -297,15 +295,14 @@ class DetThread(QThread): ###继承 QThread
                             self.out.write(im0)
 
                     if self.jump_out:
-                        print('jump_out push-2', self.jump_out)
+                        print('jump_out push', self.jump_out)
+                        print('self.vid_cap', type(self.vid_cap))
                         self.is_continue = False
-                        self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                        print('self.vid_cap.release-2', type(self.vid_cap))
+                        # self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
                         self.send_percent.emit(0)
                         self.send_msg.emit('Stop')
                         if hasattr(self, 'out'):
                             self.out.release()
-                            print('self.out.release')
                         break
 
                 if percent == self.percent_length:
@@ -317,14 +314,14 @@ class DetThread(QThread): ###继承 QThread
                     break
             else:
                 print('is_continue break', self.is_continue)
-        #### 生成结果文件夹
-        # if save_txt or save_img:
-        #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        #     print(f"Results saved to {save_dir}{s}")
 
-        if update:
-            strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
+            if save_txt or save_img:
+                s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
+                print(f"Results saved to {save_dir}{s}")
 
+            if update:
+                strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
+        #
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
 
@@ -437,8 +434,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print('self.det_thread.is_continue', self.det_thread.is_continue)
 
     def stop(self):
-        if not self.det_thread.jump_out:
-            self.det_thread.jump_out = True
+        self.det_thread.jump_out = True
         self.saveCheckBox.setEnabled(True)
         # self.det_thread.stop()  #### bug-1 加入 停止线程会卡死  未解决
 
@@ -602,6 +598,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def show_msg(self, msg):
         self.runButton.setChecked(Qt.Unchecked)
+        self.runButton_2.setChecked(Qt.Unchecked)
         self.statistic_msg(msg)
         if msg == "Finished":
             self.saveCheckBox.setEnabled(True)

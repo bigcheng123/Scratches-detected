@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         mainWindow.setObjectName("mainWindow")
-        mainWindow.resize(1448, 785)
+        mainWindow.resize(1440, 768)
         mainWindow.setMouseTracking(True)
         mainWindow.setStyleSheet("#mainWindow{border:none;}")
         self.centralwidget = QtWidgets.QWidget(mainWindow)
@@ -289,6 +289,86 @@ class Ui_mainWindow(object):
         self.comboBox_2.addItem("")
         self.horizontalLayout_2.addWidget(self.comboBox_2)
         self.verticalLayout_8.addLayout(self.horizontalLayout_2)
+        self.groupBox_6 = QtWidgets.QGroupBox(self.groupBox_8)
+        self.groupBox_6.setMinimumSize(QtCore.QSize(0, 0))
+        self.groupBox_6.setMaximumSize(QtCore.QSize(16777215, 42))
+        self.groupBox_6.setStyleSheet("#groupBox_6{\n"
+"border: 0px solid #42adff;\n"
+"border-radius:0px;}")
+        self.groupBox_6.setTitle("")
+        self.groupBox_6.setObjectName("groupBox_6")
+        self.horizontalLayout_12 = QtWidgets.QHBoxLayout(self.groupBox_6)
+        self.horizontalLayout_12.setContentsMargins(11, 0, 11, 0)
+        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
+        self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_15.setContentsMargins(11, -1, 11, -1)
+        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
+        self.saveCheckBox = QtWidgets.QCheckBox(self.groupBox_6)
+        self.saveCheckBox.setMinimumSize(QtCore.QSize(0, 28))
+        self.saveCheckBox.setStyleSheet("\n"
+"QCheckBox\n"
+"{font-size: 18px;\n"
+"    font-family: \"Microsoft YaHei\";\n"
+"    font-weight: bold;\n"
+"         border-radius:9px;\n"
+"        background:rgba(66, 195, 255, 0);\n"
+"color: rgb(218, 218, 218);;}\n"
+"\n"
+"QCheckBox::indicator {\n"
+"    width: 20px;\n"
+"    height: 20px;\n"
+"}\n"
+"QCheckBox::indicator:unchecked {\n"
+"    image: url(:/img/icon/button-off.png);\n"
+"}\n"
+"\n"
+"QCheckBox::indicator:checked {\n"
+"    \n"
+"    image: url(:/img/icon/button-on.png);\n"
+"}\n"
+"")
+        self.saveCheckBox.setChecked(False)
+        self.saveCheckBox.setObjectName("saveCheckBox")
+        self.horizontalLayout_15.addWidget(self.saveCheckBox)
+        self.comboBox_3 = QtWidgets.QComboBox(self.groupBox_6)
+        self.comboBox_3.setMinimumSize(QtCore.QSize(0, 28))
+        self.comboBox_3.setStyleSheet("QComboBox QAbstractItemView {\n"
+"font-family: \"Microsoft YaHei\";\n"
+"font-size: 16px;\n"
+"background:rgba(200, 200, 200,150);\n"
+"selection-background-color: rgba(200, 200, 200,50);\n"
+"color: rgb(218, 218, 218);\n"
+"outline:none;\n"
+"border:none;}\n"
+"QComboBox{\n"
+"font-family: \"Microsoft YaHei\";\n"
+"font-size: 16px;\n"
+"color: rgb(218, 218, 218);\n"
+"border-width:0px;\n"
+"border-color:white;\n"
+"border-style:solid;\n"
+"background-color: rgba(200, 200, 200,0);}\n"
+"\n"
+"QComboBox::drop-down {\n"
+"margin-top:8;\n"
+"height:20;\n"
+"background:rgba(255,255,255,0);\n"
+"border-image: url(:/img/icon/下拉_白色.png);\n"
+"}\n"
+"")
+        self.comboBox_3.setObjectName("comboBox_3")
+        self.comboBox_3.addItem("")
+        self.comboBox_3.addItem("")
+        self.comboBox_3.addItem("")
+        self.horizontalLayout_15.addWidget(self.comboBox_3)
+        self.horizontalLayout_12.addLayout(self.horizontalLayout_15)
+        self.verticalLayout_8.addWidget(self.groupBox_6)
+        self.line = QtWidgets.QFrame(self.groupBox_8)
+        self.line.setStyleSheet("")
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout_8.addWidget(self.line)
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setContentsMargins(11, -1, 0, -1)
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
@@ -440,39 +520,6 @@ class Ui_mainWindow(object):
         self.cameraButton.setIcon(icon4)
         self.cameraButton.setObjectName("cameraButton")
         self.horizontalLayout_8.addWidget(self.cameraButton)
-        self.comboBox_3 = QtWidgets.QComboBox(self.groupBox_5)
-        self.comboBox_3.setMinimumSize(QtCore.QSize(0, 28))
-        self.comboBox_3.setStyleSheet("QComboBox QAbstractItemView {\n"
-"font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
-"background:rgba(200, 200, 200,150);\n"
-"selection-background-color: rgba(200, 200, 200,50);\n"
-"color: rgb(218, 218, 218);\n"
-"outline:none;\n"
-"border:none;}\n"
-"QComboBox{\n"
-"font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
-"color: rgb(218, 218, 218);\n"
-"border-width:0px;\n"
-"border-color:white;\n"
-"border-style:solid;\n"
-"background-color: rgba(200, 200, 200,0);}\n"
-"\n"
-"QComboBox::drop-down {\n"
-"margin-top:8;\n"
-"height:20;\n"
-"background:rgba(255,255,255,0);\n"
-"border-image: url(:/img/icon/下拉_白色.png);\n"
-"}\n"
-"")
-        self.comboBox_3.setObjectName("comboBox_3")
-        self.comboBox_3.addItem("")
-        self.comboBox_3.addItem("")
-        self.comboBox_3.addItem("")
-        self.comboBox_3.addItem("")
-        self.comboBox_3.addItem("")
-        self.horizontalLayout_8.addWidget(self.comboBox_3)
         self.rtspButton = QtWidgets.QPushButton(self.groupBox_5)
         self.rtspButton.setMinimumSize(QtCore.QSize(55, 28))
         self.rtspButton.setMaximumSize(QtCore.QSize(16777215, 28))
@@ -536,74 +583,6 @@ class Ui_mainWindow(object):
         self.horizontalLayout_11.addWidget(self.groupBox_5)
         self.horizontalLayout_9.addLayout(self.horizontalLayout_11)
         self.verticalLayout_8.addLayout(self.horizontalLayout_9)
-        self.line = QtWidgets.QFrame(self.groupBox_8)
-        self.line.setStyleSheet("")
-        self.line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
-        self.verticalLayout_8.addWidget(self.line)
-        self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_15.setContentsMargins(11, -1, 11, -1)
-        self.horizontalLayout_15.setObjectName("horizontalLayout_15")
-        self.saveCheckBox = QtWidgets.QCheckBox(self.groupBox_8)
-        self.saveCheckBox.setMinimumSize(QtCore.QSize(0, 28))
-        self.saveCheckBox.setStyleSheet("\n"
-"QCheckBox\n"
-"{font-size: 18px;\n"
-"    font-family: \"Microsoft YaHei\";\n"
-"    font-weight: bold;\n"
-"         border-radius:9px;\n"
-"        background:rgba(66, 195, 255, 0);\n"
-"color: rgb(218, 218, 218);;}\n"
-"\n"
-"QCheckBox::indicator {\n"
-"    width: 20px;\n"
-"    height: 20px;\n"
-"}\n"
-"QCheckBox::indicator:unchecked {\n"
-"    image: url(:/img/icon/button-off.png);\n"
-"}\n"
-"\n"
-"QCheckBox::indicator:checked {\n"
-"    \n"
-"    image: url(:/img/icon/button-on.png);\n"
-"}\n"
-"")
-        self.saveCheckBox.setChecked(False)
-        self.saveCheckBox.setObjectName("saveCheckBox")
-        self.horizontalLayout_15.addWidget(self.saveCheckBox)
-        self.comboBox_5 = QtWidgets.QComboBox(self.groupBox_8)
-        self.comboBox_5.setMinimumSize(QtCore.QSize(0, 28))
-        self.comboBox_5.setStyleSheet("QComboBox QAbstractItemView {\n"
-"font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
-"background:rgba(200, 200, 200,150);\n"
-"selection-background-color: rgba(200, 200, 200,50);\n"
-"color: rgb(218, 218, 218);\n"
-"outline:none;\n"
-"border:none;}\n"
-"QComboBox{\n"
-"font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
-"color: rgb(218, 218, 218);\n"
-"border-width:0px;\n"
-"border-color:white;\n"
-"border-style:solid;\n"
-"background-color: rgba(200, 200, 200,0);}\n"
-"\n"
-"QComboBox::drop-down {\n"
-"margin-top:8;\n"
-"height:20;\n"
-"background:rgba(255,255,255,0);\n"
-"border-image: url(:/img/icon/下拉_白色.png);\n"
-"}\n"
-"")
-        self.comboBox_5.setObjectName("comboBox_5")
-        self.comboBox_5.addItem("")
-        self.comboBox_5.addItem("")
-        self.comboBox_5.addItem("")
-        self.horizontalLayout_15.addWidget(self.comboBox_5)
-        self.verticalLayout_8.addLayout(self.horizontalLayout_15)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setContentsMargins(11, -1, 11, -1)
         self.verticalLayout_3.setSpacing(4)
@@ -1010,99 +989,90 @@ class Ui_mainWindow(object):
         self.verticalLayout_4.addWidget(self.groupBox_3)
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.video_label_ch0 = Label_click_Mouse(self.groupBox_201)
-        self.video_label_ch0.setEnabled(True)
+        self.raw_video = Label_click_Mouse(self.groupBox_201)
+        self.raw_video.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch0.sizePolicy().hasHeightForWidth())
-        self.video_label_ch0.setSizePolicy(sizePolicy)
-        self.video_label_ch0.setMinimumSize(QtCore.QSize(200, 0))
+        sizePolicy.setHeightForWidth(self.raw_video.sizePolicy().hasHeightForWidth())
+        self.raw_video.setSizePolicy(sizePolicy)
+        self.raw_video.setMinimumSize(QtCore.QSize(200, 0))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(36)
-        self.video_label_ch0.setFont(font)
-        self.video_label_ch0.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch0.setAutoFillBackground(True)
-        self.video_label_ch0.setStyleSheet("color: rgb(218, 218, 218);\n"
+        self.raw_video.setFont(font)
+        self.raw_video.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.raw_video.setAutoFillBackground(True)
+        self.raw_video.setStyleSheet("color: rgb(218, 218, 218);\n"
 "")
-        self.video_label_ch0.setScaledContents(False)
-        self.video_label_ch0.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch0.setObjectName("video_label_ch0")
-        self.gridLayout.addWidget(self.video_label_ch0, 0, 0, 1, 1)
-        self.video_label_ch1 = Label_click_Mouse(self.groupBox_201)
-        self.video_label_ch1.setEnabled(True)
+        self.raw_video.setScaledContents(False)
+        self.raw_video.setAlignment(QtCore.Qt.AlignCenter)
+        self.raw_video.setObjectName("raw_video")
+        self.gridLayout.addWidget(self.raw_video, 0, 0, 1, 1)
+        self.out_video = Label_click_Mouse(self.groupBox_201)
+        self.out_video.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch1.sizePolicy().hasHeightForWidth())
-        self.video_label_ch1.setSizePolicy(sizePolicy)
-        self.video_label_ch1.setMinimumSize(QtCore.QSize(200, 0))
+        sizePolicy.setHeightForWidth(self.out_video.sizePolicy().hasHeightForWidth())
+        self.out_video.setSizePolicy(sizePolicy)
+        self.out_video.setMinimumSize(QtCore.QSize(200, 0))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(36)
-        self.video_label_ch1.setFont(font)
-        self.video_label_ch1.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch1.setAutoFillBackground(True)
-        self.video_label_ch1.setStyleSheet("color: rgb(218, 218, 218);\n"
+        self.out_video.setFont(font)
+        self.out_video.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.out_video.setAutoFillBackground(True)
+        self.out_video.setStyleSheet("color: rgb(218, 218, 218);\n"
 "")
-        self.video_label_ch1.setScaledContents(False)
-        self.video_label_ch1.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch1.setObjectName("video_label_ch1")
-        self.gridLayout.addWidget(self.video_label_ch1, 0, 1, 1, 1)
-        self.video_label_ch2 = Label_click_Mouse(self.groupBox_201)
-        self.video_label_ch2.setEnabled(True)
+        self.out_video.setScaledContents(False)
+        self.out_video.setAlignment(QtCore.Qt.AlignCenter)
+        self.out_video.setObjectName("out_video")
+        self.gridLayout.addWidget(self.out_video, 0, 1, 1, 1)
+        self.out_video_3 = Label_click_Mouse(self.groupBox_201)
+        self.out_video_3.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch2.sizePolicy().hasHeightForWidth())
-        self.video_label_ch2.setSizePolicy(sizePolicy)
-        self.video_label_ch2.setMinimumSize(QtCore.QSize(200, 0))
+        sizePolicy.setHeightForWidth(self.out_video_3.sizePolicy().hasHeightForWidth())
+        self.out_video_3.setSizePolicy(sizePolicy)
+        self.out_video_3.setMinimumSize(QtCore.QSize(200, 0))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(36)
-        self.video_label_ch2.setFont(font)
-        self.video_label_ch2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch2.setAutoFillBackground(True)
-        self.video_label_ch2.setStyleSheet("color: rgb(218, 218, 218);\n"
+        self.out_video_3.setFont(font)
+        self.out_video_3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.out_video_3.setAutoFillBackground(True)
+        self.out_video_3.setStyleSheet("color: rgb(218, 218, 218);\n"
 "")
-        self.video_label_ch2.setScaledContents(False)
-        self.video_label_ch2.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch2.setObjectName("video_label_ch2")
-        self.gridLayout.addWidget(self.video_label_ch2, 1, 0, 1, 1)
-        self.video_label_ch3 = Label_click_Mouse(self.groupBox_201)
-        self.video_label_ch3.setEnabled(True)
+        self.out_video_3.setScaledContents(False)
+        self.out_video_3.setAlignment(QtCore.Qt.AlignCenter)
+        self.out_video_3.setObjectName("out_video_3")
+        self.gridLayout.addWidget(self.out_video_3, 1, 0, 1, 1)
+        self.out_video_2 = Label_click_Mouse(self.groupBox_201)
+        self.out_video_2.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch3.sizePolicy().hasHeightForWidth())
-        self.video_label_ch3.setSizePolicy(sizePolicy)
-        self.video_label_ch3.setMinimumSize(QtCore.QSize(200, 0))
+        sizePolicy.setHeightForWidth(self.out_video_2.sizePolicy().hasHeightForWidth())
+        self.out_video_2.setSizePolicy(sizePolicy)
+        self.out_video_2.setMinimumSize(QtCore.QSize(200, 0))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(36)
-        self.video_label_ch3.setFont(font)
-        self.video_label_ch3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch3.setAutoFillBackground(True)
-        self.video_label_ch3.setStyleSheet("color: rgb(218, 218, 218);\n"
+        self.out_video_2.setFont(font)
+        self.out_video_2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.out_video_2.setAutoFillBackground(True)
+        self.out_video_2.setStyleSheet("color: rgb(218, 218, 218);\n"
 "")
-        self.video_label_ch3.setScaledContents(False)
-        self.video_label_ch3.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch3.setObjectName("video_label_ch3")
-        self.gridLayout.addWidget(self.video_label_ch3, 1, 1, 1, 1)
+        self.out_video_2.setScaledContents(False)
+        self.out_video_2.setAlignment(QtCore.Qt.AlignCenter)
+        self.out_video_2.setObjectName("out_video_2")
+        self.gridLayout.addWidget(self.out_video_2, 1, 1, 1, 1)
         self.verticalLayout_4.addLayout(self.gridLayout)
         self.gridLayout_2 = QtWidgets.QGridLayout()
         self.gridLayout_2.setContentsMargins(11, -1, 11, -1)
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.progressBar = QtWidgets.QProgressBar(self.groupBox_201)
-        self.progressBar.setMaximumSize(QtCore.QSize(16777215, 5))
-        self.progressBar.setStyleSheet("QProgressBar{ color: rgb(255, 255, 255); font:12pt; border-radius:2px; text-align:center; border:none; background-color: rgba(215, 215, 215,100);} \n"
-"QProgressBar:chunk{ border-radius:0px; background: rgba(55, 55, 55, 200);}")
-        self.progressBar.setMaximum(1000)
-        self.progressBar.setProperty("value", 0)
-        self.progressBar.setTextVisible(False)
-        self.progressBar.setObjectName("progressBar")
-        self.gridLayout_2.addWidget(self.progressBar, 0, 1, 1, 1)
         self.stopButton = QtWidgets.QPushButton(self.groupBox_201)
         self.stopButton.setMinimumSize(QtCore.QSize(40, 40))
         self.stopButton.setStyleSheet("QPushButton {\n"
@@ -1123,7 +1093,65 @@ class Ui_mainWindow(object):
         self.stopButton.setIcon(icon6)
         self.stopButton.setIconSize(QtCore.QSize(30, 30))
         self.stopButton.setObjectName("stopButton")
-        self.gridLayout_2.addWidget(self.stopButton, 0, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.stopButton, 0, 3, 1, 1)
+        self.progressBar = QtWidgets.QProgressBar(self.groupBox_201)
+        self.progressBar.setMaximumSize(QtCore.QSize(16777215, 5))
+        self.progressBar.setStyleSheet("QProgressBar{ color: rgb(255, 255, 255); font:12pt; border-radius:2px; text-align:center; border:none; background-color: rgba(215, 215, 215,100);} \n"
+"QProgressBar:chunk{ border-radius:0px; background: rgba(55, 55, 55, 200);}")
+        self.progressBar.setMaximum(1000)
+        self.progressBar.setProperty("value", 0)
+        self.progressBar.setTextVisible(False)
+        self.progressBar.setObjectName("progressBar")
+        self.gridLayout_2.addWidget(self.progressBar, 0, 2, 1, 1)
+        self.runButton_3 = QtWidgets.QPushButton(self.groupBox_201)
+        self.runButton_3.setMinimumSize(QtCore.QSize(40, 40))
+        self.runButton_3.setStyleSheet("QPushButton {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 0);\n"
+"}\n"
+"QPushButton::focus{outline: none;}\n"
+"QPushButton::hover {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 150);}")
+        self.runButton_3.setText("")
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Disabled, QtGui.QIcon.On)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Active, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Active, QtGui.QIcon.On)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Selected, QtGui.QIcon.Off)
+        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
+        self.runButton_3.setIcon(icon7)
+        self.runButton_3.setIconSize(QtCore.QSize(30, 30))
+        self.runButton_3.setCheckable(True)
+        self.runButton_3.setObjectName("runButton_3")
+        self.gridLayout_2.addWidget(self.runButton_3, 1, 0, 1, 1)
+        self.runButton_4 = QtWidgets.QPushButton(self.groupBox_201)
+        self.runButton_4.setMinimumSize(QtCore.QSize(40, 40))
+        self.runButton_4.setStyleSheet("QPushButton {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 0);\n"
+"}\n"
+"QPushButton::focus{outline: none;}\n"
+"QPushButton::hover {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 150);}")
+        self.runButton_4.setText("")
+        self.runButton_4.setIcon(icon7)
+        self.runButton_4.setIconSize(QtCore.QSize(30, 30))
+        self.runButton_4.setCheckable(True)
+        self.runButton_4.setObjectName("runButton_4")
+        self.gridLayout_2.addWidget(self.runButton_4, 1, 1, 1, 1)
         self.runButton = QtWidgets.QPushButton(self.groupBox_201)
         self.runButton.setMinimumSize(QtCore.QSize(40, 40))
         self.runButton.setStyleSheet("QPushButton {\n"
@@ -1139,20 +1167,31 @@ class Ui_mainWindow(object):
 "border-radius: 0px;\n"
 "background-color: rgba(223, 223, 223, 150);}")
         self.runButton.setText("")
-        icon7 = QtGui.QIcon()
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Disabled, QtGui.QIcon.Off)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Disabled, QtGui.QIcon.On)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Active, QtGui.QIcon.Off)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Active, QtGui.QIcon.On)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/运行.png"), QtGui.QIcon.Selected, QtGui.QIcon.Off)
-        icon7.addPixmap(QtGui.QPixmap(":/img/icon/暂停.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
         self.runButton.setIcon(icon7)
         self.runButton.setIconSize(QtCore.QSize(30, 30))
         self.runButton.setCheckable(True)
         self.runButton.setObjectName("runButton")
         self.gridLayout_2.addWidget(self.runButton, 0, 0, 1, 1)
+        self.runButton_2 = QtWidgets.QPushButton(self.groupBox_201)
+        self.runButton_2.setMinimumSize(QtCore.QSize(40, 40))
+        self.runButton_2.setStyleSheet("QPushButton {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 0);\n"
+"}\n"
+"QPushButton::focus{outline: none;}\n"
+"QPushButton::hover {\n"
+"border-style: solid;\n"
+"border-width: 0px;\n"
+"border-radius: 0px;\n"
+"background-color: rgba(223, 223, 223, 150);}")
+        self.runButton_2.setText("")
+        self.runButton_2.setIcon(icon7)
+        self.runButton_2.setIconSize(QtCore.QSize(30, 30))
+        self.runButton_2.setCheckable(True)
+        self.runButton_2.setObjectName("runButton_2")
+        self.gridLayout_2.addWidget(self.runButton_2, 0, 1, 1, 1)
         self.verticalLayout_4.addLayout(self.gridLayout_2)
         self.horizontalLayout_7.addWidget(self.groupBox_201)
         self.verticalLayout_6.addLayout(self.horizontalLayout_7)
@@ -1179,7 +1218,7 @@ class Ui_mainWindow(object):
         self.verticalLayout_2.addWidget(self.groupBox_18)
         mainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(mainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1448, 23))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1440, 22))
         self.menuBar.setObjectName("menuBar")
         self.menu = QtWidgets.QMenu(self.menuBar)
         self.menu.setObjectName("menu")
@@ -1258,7 +1297,7 @@ class Ui_mainWindow(object):
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "Scratch Dectected"))
-        self.label_4.setText(_translate("mainWindow", "一行代码3个BUG"))
+        self.label_4.setText(_translate("mainWindow", "YOLOv5 GUI"))
         self.fps_label.setText(_translate("mainWindow", "FSP"))
         self.label_5.setText(_translate("mainWindow", "Setting"))
         self.label_3.setText(_translate("mainWindow", "Model"))
@@ -1270,29 +1309,24 @@ class Ui_mainWindow(object):
         self.comboBox_2.setItemText(1, _translate("mainWindow", "1"))
         self.comboBox_2.setItemText(2, _translate("mainWindow", "2"))
         self.comboBox_2.setItemText(3, _translate("mainWindow", "cpu"))
+        self.saveCheckBox.setText(_translate("mainWindow", "Auto Save"))
+        self.comboBox_3.setItemText(0, _translate("mainWindow", ".jpeg"))
+        self.comboBox_3.setItemText(1, _translate("mainWindow", ".bmp"))
+        self.comboBox_3.setItemText(2, _translate("mainWindow", ".mp4"))
         self.label_10.setText(_translate("mainWindow", "Source"))
         self.fileButton.setToolTip(_translate("mainWindow", "file"))
         self.cameraButton.setToolTip(_translate("mainWindow", "camera"))
-        self.comboBox_3.setItemText(0, _translate("mainWindow", "streams.txt"))
-        self.comboBox_3.setItemText(1, _translate("mainWindow", "0"))
-        self.comboBox_3.setItemText(2, _translate("mainWindow", "1"))
-        self.comboBox_3.setItemText(3, _translate("mainWindow", "2"))
-        self.comboBox_3.setItemText(4, _translate("mainWindow", "3"))
         self.rtspButton.setToolTip(_translate("mainWindow", "rtsp"))
-        self.saveCheckBox.setText(_translate("mainWindow", "Auto Save"))
-        self.comboBox_5.setItemText(0, _translate("mainWindow", ".jpeg"))
-        self.comboBox_5.setItemText(1, _translate("mainWindow", ".bmp"))
-        self.comboBox_5.setItemText(2, _translate("mainWindow", ".mp4"))
         self.label_2.setText(_translate("mainWindow", "IoU"))
         self.label.setText(_translate("mainWindow", "Conf"))
         self.label_8.setText(_translate("mainWindow", "Latency"))
         self.checkBox.setText(_translate("mainWindow", "enable"))
         self.label_11.setText(_translate("mainWindow", "Result Statistics"))
         self.statistic_label.setText(_translate("mainWindow", "statistic_label"))
-        self.video_label_ch0.setText(_translate("mainWindow", "CAM 0"))
-        self.video_label_ch1.setText(_translate("mainWindow", "CAM 1"))
-        self.video_label_ch2.setText(_translate("mainWindow", "CAM 2"))
-        self.video_label_ch3.setText(_translate("mainWindow", "CAM 3"))
+        self.raw_video.setText(_translate("mainWindow", "CAM 0"))
+        self.out_video.setText(_translate("mainWindow", "CAM 1"))
+        self.out_video_3.setText(_translate("mainWindow", "CAM 2"))
+        self.out_video_2.setText(_translate("mainWindow", "CAM 3"))
         self.pushButton.setText(_translate("mainWindow", "PushButton"))
         self.menu.setTitle(_translate("mainWindow", "File"))
         self.menuSet.setTitle(_translate("mainWindow", "Edit"))

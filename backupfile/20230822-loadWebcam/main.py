@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QActi
 from main_win.win import Ui_mainWindow
 from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QIcon
-from pathlib import Path
+
 import sys
 import json
 import numpy as np
@@ -18,18 +18,16 @@ from utils.CustomMessageBox import MessageBox
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, non_max_suppression, \
     apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
 # from utils.plots import colors, plot_one_box, plot_one_box_PIL
-from utils.plots import Annotator, colors, save_one_box,plot_one_box
+from utils.plots import Annotator, colors, save_one_box
 
-from utils.torch_utils import select_device,time_sync,load_classifier
+from utils.torch_utils import select_device
 from utils.capnums import Camera
 from dialog.rtsp_win import Window
 
 
 class DetThread(QThread): ###继承 QThread
-    send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
-    send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch2 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch3 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img = pyqtSignal(np.ndarray)  ### output image
+    send_raw = pyqtSignal(np.ndarray)  ### raw image
     send_statistic = pyqtSignal(dict)  ###
     # emit：detecting/pause/stop/finished/error msg
     send_msg = pyqtSignal(str)
@@ -45,19 +43,19 @@ class DetThread(QThread): ###继承 QThread
         self.conf_thres = 0.25
         self.iou_thres = 0.45
         self.jump_out = False                   # jump out of the loop
-        self.is_continue = False                # continue/pause
+        self.is_continue = True                 # continue/pause
         self.percent_length = 1000              # progress bar
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
-        self.save_fold = None ####'./result'
+        self.save_fold =  None ####'./result'
 
     @torch.no_grad()
     def run(self,
             imgsz=640,  # inference size (pixels)
             max_det=1000,  # maximum detections per image
-            # self.source = '0'
-            # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-            view_img = False ,  # show results
+            # source = '0'
+            # device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+            view_img = True ,  # show results
             save_txt=False,  # save results to *.txt
             save_conf=False,  # save confidences in --save-txt labels
             save_crop=False,  # save cropped prediction boxes
@@ -76,107 +74,103 @@ class DetThread(QThread): ###继承 QThread
             half=False,  # use FP16 half-precision inference
             ):
 
-        save_img = not nosave and not self.source.endswith('.txt')  # save inference images
-        webcam = self.source.isnumeric() or self.source.endswith('.txt') or self.source.lower().startswith(
-            ('rtsp://', 'rtmp://', 'http://', 'https://'))
-
-        # Directories
-        save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-        (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
-
         # Initialize
-        # try:
-        set_logging()
-        device = select_device(self.device)  ### from utils.torch_utils import select_device
-        half &= device.type != 'cpu'  # half precision only supported on CUDA
+        try:
+            device = select_device(self.device)  ### from utils.torch_utils import select_device
+            half &= device.type != 'cpu'  # half precision only supported on CUDA
 
-        # Load model
-        model = attempt_load(self.weights, map_location=device)  # load FP32 model  from models.experimental import attempt_load
-        stride = int(model.stride.max())  # model stride
-        imgsz = check_img_size(imgsz, s=stride)  # check image size
-        names = model.module.names if hasattr(model, 'module') else model.names  # get class names
-        if half:
-            model.half()  # to FP16
+            # Load model
+            model = attempt_load(self.weights, map_location=device)  # load FP32 model  from models.experimental import attempt_load
+            num_params = 0
+            for param in model.parameters():
+                num_params += param.numel()
+            stride = int(model.stride.max())  # model stride
+            imgsz = check_img_size(imgsz, s=stride)  # check image size
+            names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+            if half:
+                model.half()  # to FP16
 
-        # Second-stage classifier
-        classify = False
-        if classify:
-            modelc = load_classifier(name='resnet50', n=2)  # initialize
-            modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+            # Dataloader  ###add  or source.endswith('.txt') 20230821
+            if self.source.isnumeric() or self.source.endswith('.txt') or self.source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://')):
+                view_img = check_imshow()
+                cudnn.benchmark = True  # set True to speed up constant image size inference
 
-        # Dataloader
-        if webcam: ###self.source.isnumeric() or self.source.endswith('.txt') or
-            view_img = check_imshow()
-            cudnn.benchmark = True  # set True to speed up constant image size inference
-            dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
-            print('dataset type', type(dataset), dataset)
-            bs = len(dataset)  # batch_size
-            print('len(bs)=', bs)
-            # #### streams = LoadStreams
+                ### stream = LoadWebcam
+                dataset = LoadWebcam(self.source, img_size = imgsz, stride = stride)  # return img_path, img, img0, self.cap
+                print('dataset type', type(dataset), dataset)
 
-        else:  ### load the images
-            dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
-            bs = 1  # batch_size
-        vid_path, vid_writer = [None] * bs, [None] * bs
+                # #### streams = LoadStreams
+                # self.source = 'streams.txt'  ###测试用 loadstreams
+                # dataset = LoadStreams('streams.txt', img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
+                # print('dataset type', type(dataset), dataset)
+                # bs = len(dataset)  # batch_size
+                # print('len(bs)=', bs)
+                # #### streams = LoadStreams
+
+            else:
+                dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
+
+            ##### vid_path, vid_writer = [None] * bs, [None] * bs
 
 
-        # Run inference 推理
-        if device.type != 'cpu':
-            model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
-        start_time = time.time()
-        t0 = time.time()
-        count = 0
+            # Run inference
+            if device.type != 'cpu':
+                model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
+            count = 0
+            jump_count = 0
+            start_time = time.time()
+            dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
 
-        # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
-
-        while True: ##### 采用循环来 检查是否 停止推理
-            print('marker while loop')
-            print(' while loop self.is_continue', self.is_continue)
-            print(' while loop self.jump_out', self.jump_out)
-            # print(' while loop camera.cap', type(self.vid_cap))
-
-            if self.jump_out:
-                self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                print('vid_cap.release -1', type(self.vid_cap))
-                self.send_percent.emit(0)
-                self.send_msg.emit('Stop')
-                if hasattr(self, 'out'):
-                    self.out.release()
-                print('jump_out push-1', self.jump_out)
-                break
-
-            # change model & device  20230810
-            if self.current_weight != self.weights:
-                # Load model
-                model = attempt_load(self.weights, map_location = device)  # load FP32 model
-                stride = int(model.stride.max())  # model stride
-                imgsz = check_img_size(imgsz, s=stride)  # check image size
-                names = model.module.names if hasattr(model, 'module') else model.names  # get class names
-                if half:
-                    model.half()  # to FP16
-                # Run inference
-                if device.type != 'cpu':
-                    model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
-                self.current_weight = self.weights
-
-            # load  streams
-
-            if self.is_continue:
-                # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
-                for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
+            while True:
+                if self.jump_out:
+                    self.vid_cap.release()
+                    self.send_percent.emit(0)
+                    self.send_msg.emit('Stop')
+                    if hasattr(self, 'out'):
+                        self.out.release()
+                    break
+                # change model & device  20230810
+                if self.current_weight != self.weights:
+                    # Load model
+                    model = attempt_load(self.weights, map_location = device)  # load FP32 model
+                    num_params = 0
+                    for param in model.parameters():
+                        num_params += param.numel()
+                    stride = int(model.stride.max())  # model stride
+                    imgsz = check_img_size(imgsz, s=stride)  # check image size
+                    names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+                    if half:
+                        model.half()  # to FP16
+                    # Run inference
+                    if device.type != 'cpu':
+                        model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
+                    self.current_weight = self.weights
+                # load  streams
+                if self.is_continue:
+                    ### 使用loadwebcam时  # dataset = ： img_path, img, img0, self.cap
+                    path, img, im0s, self.vid_cap = next(dataset)
                     print(type(path), type(img), type(im0s), type(self.vid_cap))
-                    ### show row image
-                    # cv2.imshow('ch0', im0s[0])
-                    # cv2.imshow('ch1', im0s[1])
-                    #### img recode
-                    img = torch.from_numpy(img).to(device)
-                    img = img.half() if half else img.float()  # uint8 to fp16/32
-                    img /= 255.0  # 0 - 255 to 0.0 - 1.0
-                    if img.ndimension() == 3:
-                        img = img.unsqueeze(0)
-                    statistic_dic = {name: 0 for name in names}
 
-                    count += 1  #### FSP counter
+
+                    # # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
+                    # for path, img, im0s, self.vid_cap in dataset:
+                    #     print(type(path), type(img), type(im0s), type(self.vid_cap))
+                    # for stream in dataset:
+                    #     # dataset = stream
+                    #     print('stream type', type(stream),len(stream),stream)
+                    #     path, img, im0s, self.vid_cap = next(stream)
+                    #
+                    #     img = torch.from_numpy(img).to(device)
+                    #     img = img.half() if half else img.float()  # uint8 to fp16/32
+                    #     img /= 255.0  # 0 - 255 to 0.0 - 1.0
+                    #     if img.ndimension() == 3:
+                    #         img = img.unsqueeze(0)
+
+
+
+
+                    ######### 缩进标记1
+                    count += 1
                     if  count % 30 == 0 and count >= 30:
                         fps = int(30/(time.time()-start_time))
                         self.send_fps.emit('fps：'+str(fps))
@@ -187,95 +181,43 @@ class DetThread(QThread): ###继承 QThread
                     else:
                         percent = self.percent_length
 
-                    # Inference
-                    t1 = time_sync()
-                    # pred = model(img, augment=augment)[0] #### 预测  使用loadWebcam是 加载的model
-                    pred = model(img,
-                                 augment=augment,
-                                 visualize=increment_path(save_dir / Path(path).stem,
-                                                          mkdir=True) if visualize else False)[0]
+                    statistic_dic = {name: 0 for name in names}
+                    img = torch.from_numpy(img).to(device)
+                    img = img.half() if half else img.float()  # uint8 to fp16/32
+                    img /= 255.0  # 0 - 255 to 0.0 - 1.0
+                    if img.ndimension() == 3:
+                        img = img.unsqueeze(0)
+
+                    pred = model(img, augment=augment)[0] #### 预测
 
                     # Apply NMS
                     pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, classes, agnostic_nms, max_det=max_det)
-                    t2 = time_sync()
 
-                    # Apply Classifier
-                    if classify:
-                        pred = apply_classifier(pred, modelc, img, im0s)
 
                     # Process detections
                     for i, det in enumerate(pred):  # detections per image
-                        if webcam:  # batch_size >= 1     get the frame
-                            p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
-                            label_chanel = str(i)
-                            print(type(label_chanel),'img chanel=', label_chanel)
-                        else: ### image
-                            p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
-                        p = Path(p)  # to Path
-                        # save_path = str(save_dir / p.name)  # img.jpg
-                        # txt_path = str(save_dir / 'labels' / p.stem) + (dtxt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  #
-                        txt_path = 'result'
-                        s += '%gx%g ' % img.shape[2:]  # print string
-                        gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-                        imc = im0.copy() if save_crop else im0  # for save_crop
+                        im0 = im0s.copy()
+                        annotator = Annotator(im0, line_width=line_thickness, example=str(names))  #from utils.plots import Annotator, colors, save_one_box
                         if len(det):
                             # Rescale boxes from img_size to im0 size
                             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
-                            # Print results
-                            for c in det[:, -1].unique():
-                                n = (det[:, -1] == c).sum()  # detections per class
-                                s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
                             # Write results
                             for *xyxy, conf, cls in reversed(det):
-                                if save_txt:  # Write to file
-                                    xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(
-                                        -1).tolist()  # normalized xywh
-                                    line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                                    with open(txt_path + '.txt', 'a') as f:
-                                        f.write(('%g ' * len(line)).rstrip() % line + '\n')
+                                c = int(cls)  # integer class
+                                statistic_dic[names[c]] += 1
+                                label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+                                annotator.box_label(xyxy, label, color=colors(c, True))
 
-                                if save_img or save_crop or view_img:  # Add bbox to image
-                                    c = int(cls)  # integer class
-                                    statistic_dic[names[c]] += 1
-                                    label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-                                    plot_one_box(xyxy, im0, label=label, color=colors(c, True),
-                                                 line_thickness=line_thickness)
-                                    if save_crop:
-                                        print('save_one_box')
-                            # print('detection is running')
-
-                        FSP = int(1 / (t2 - t1))
-                        # print(f'{s}Done. ({t2 - t1:.3f}s FSP={FSP})')
-
-                        # Stream results   emit frame
-                        if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
-                        # if view_img:
-                            cv2.putText(im0, str(f'FSP={FSP}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
-                            res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                            ## chanel-0  ##### show images
-                            if label_chanel == '0':
-                                self.send_img_ch0.emit(im0)  ### 发送图像
-                                print('seng img : ch0')
-                            ## chanel-1
-                            if label_chanel == '1':
-                                self.send_img_ch1.emit(im0)  ### 发送图像
-                                print('seng img : ch1')
-                            # chanel-2
-                            if label_chanel == '2':
-                                self.send_img_ch2.emit(im0)  ### 发送图像
-                                print('seng img : ch2')
-                            ## chanel-3
-                            if label_chanel == '3':
-                                self.send_img_ch3.emit(im0)  #### 发送图像
-                                print('seng img : ch3')
-                            ### ## 发送声明
-                            self.send_statistic.emit(statistic_dic)
-                            # print('emit statistic_dic', statistic_dic)
                     if self.rate_check:
                         time.sleep(1/self.rate)
-                    # im0 = annotator.result()
-                    # Write results
+                    im0 = annotator.result()
+                    ###################################################################################################发送图像
+                    self.send_img.emit(im0)  ### 发送处理后图像
+                    self.send_raw.emit(im0s if isinstance(im0s, np.ndarray) else im0s[0])  #### 发送原始图像
+
+
+                    self.send_statistic.emit(statistic_dic)  ## 发送声明
                     if self.save_fold:
                         os.makedirs(self.save_fold, exist_ok=True)
                         if self.vid_cap is None:
@@ -283,7 +225,7 @@ class DetThread(QThread): ###继承 QThread
                                                      time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                    time.localtime()) + '.jpg')
                             cv2.imwrite(save_path, im0)
-                        else: ### self.vid_cap is cv2capture
+                        else:
                             if count == 1:
                                 ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
                                 if ori_fps == 0:
@@ -295,38 +237,17 @@ class DetThread(QThread): ###继承 QThread
                                 self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
                                                            (width, height))
                             self.out.write(im0)
-
-                    if self.jump_out:
-                        print('jump_out push-2', self.jump_out)
-                        self.is_continue = False
-                        self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                        print('self.vid_cap.release-2', type(self.vid_cap))
+                    if percent == self.percent_length:
+                        print(count)
                         self.send_percent.emit(0)
-                        self.send_msg.emit('Stop')
+                        self.send_msg.emit('finished')
                         if hasattr(self, 'out'):
                             self.out.release()
-                            print('self.out.release')
                         break
+                ###### 缩进标记  ########################################3
 
-                if percent == self.percent_length:
-                    print(count)
-                    self.send_percent.emit(0)
-                    self.send_msg.emit('finished')
-                    if hasattr(self, 'out'):
-                        self.out.release()
-                    break
-            else:
-                print('is_continue break', self.is_continue)
-        #### 生成结果文件夹
-        # if save_txt or save_img:
-        #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        #     print(f"Results saved to {save_dir}{s}")
-
-        if update:
-            strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
-
-        # except Exception as e:
-        #     self.send_msg.emit('%s' % e)
+        except Exception as e:
+            self.send_msg.emit('%s' % e)
 
 
 
@@ -372,16 +293,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread = DetThread()
         self.model_type = self.comboBox.currentText()  ### get model from combobox
         self.device_type = self.comboBox_2.currentText()  ###  get device type from combobox
-        self.source_type = self.comboBox_3.currentText()  ###  get device type from combobox
         self.det_thread.weights = "./pt/%s" % self.model_type  # difined
         self.det_thread.device = self.device_type # difined  device
-        self.det_thread.source = self.source_type
+        self.det_thread.source = '0'
         self.det_thread.percent_length = self.progressBar.maximum()
         #### the connect funtion transform to  def run_or_continue(self):
-        self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch0))
-        self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
-        self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
-        self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
+        # self.det_thread.send_raw.connect(lambda x: self.show_image(x, self.raw_video)) #### img_src = x   label = self.raw_video
+        # self.det_thread.send_img.connect(lambda x: self.show_image(x, self.out_video))  ####img_src = x   label = self.raw_video
+        # self.det_thread.send_img.connect(lambda x: self.show_image(x, self.out_video_2))
+        # self.det_thread.send_img.connect(lambda x: self.show_image(x, self.out_video_3))
 
         self.det_thread.send_statistic.connect(self.show_statistic)
         self.det_thread.send_msg.connect(lambda x: self.show_msg(x))
@@ -393,13 +313,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.rtspButton.clicked.connect(self.chose_rtsp)
 
         self.runButton.clicked.connect(self.run_or_continue)
-        # self.runButton_2.clicked.connect(self.run_or_continue_2)
+        self.runButton_2.clicked.connect(self.run_or_continue_2)
 
         self.stopButton.clicked.connect(self.stop)
 
         self.comboBox.currentTextChanged.connect(self.change_model)
         self.comboBox_2.currentTextChanged.connect(self.change_device)
-        self.comboBox_3.currentTextChanged.connect(self.change_source)
         self.confSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'confSpinBox'))
         self.confSlider.valueChanged.connect(lambda x: self.change_val(x, 'confSlider'))
         self.iouSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'iouSpinBox'))
@@ -413,34 +332,45 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def run_or_continue(self):
         # self.det_thread.source = 'streams.txt'
-        # self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch0))
-        # self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
-        # self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
-        # self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
+        self.det_thread.send_img.connect(lambda x: self.show_image(x, self.out_video))  ####img_src = x   label = self.raw_video
         self.det_thread.jump_out = False
-        print('runbutton is check', self.runButton.isChecked())
         if self.runButton.isChecked():
             self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
             if not self.det_thread.isRunning():
                 self.det_thread.start()
-            device = os.path.basename(self.det_thread.device)  ### only for display
-            source = os.path.basename(self.det_thread.source)  ### only for display
-            source = str(source) if source.isnumeric() else source  ### only for display
+            device = os.path.basename(self.det_thread.device)
+            source = os.path.basename(self.det_thread.source)
+            source = str(source) if source.isnumeric() else source
             self.statistic_msg('Detecting >> model：{}，device: {}, source：{}'.
                                format(os.path.basename(self.det_thread.weights),device,
                                       source))
-            print('self.det_thread.is_continue', self.det_thread.is_continue)
         else:
             self.det_thread.is_continue = False
             self.statistic_msg('Pause')
-            print('self.det_thread.is_continue', self.det_thread.is_continue)
+
+    def run_or_continue_2(self):
+        # self.det_thread.source = '1'
+        self.det_thread.send_img.connect(lambda x: self.show_image(x, self.out_video_2))  ####img_src = x   label = self.raw_video
+        self.det_thread.jump_out = False
+        if self.runButton_2.isChecked():
+            self.saveCheckBox.setEnabled(False)
+            self.det_thread.is_continue = True
+            if not self.det_thread.isRunning():
+                self.det_thread.start()
+            source = os.path.basename(self.det_thread.source)
+            source = 'camera' if source.isnumeric() else source
+            self.statistic_msg('Detecting >> model：{}，file：{}'.
+                               format(os.path.basename(self.det_thread.weights),
+                                      source))
+        else:
+            self.det_thread.is_continue = False
+            self.statistic_msg('Pause')
 
     def stop(self):
-        if not self.det_thread.jump_out:
-            self.det_thread.jump_out = True
+        self.det_thread.jump_out = True
         self.saveCheckBox.setEnabled(True)
-        # self.det_thread.stop()  #### bug-1 加入 停止线程会卡死  未解决
+
 
     def search_pt(self):
         pt_list = os.listdir('./pt')
@@ -497,13 +427,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def chose_cam(self):
         try:
-            self.stop()  #### stop running thread
+            self.stop()
             MessageBox(
                 self.closeButton, title='Tips', text='Loading camera', time=2000, auto=True).exec_()
             # get the number of local cameras
             _, cams = Camera().get_cam_num()
-            print('enum_camera:',cams)
-            self.statistic_msg('enum camera：{}'.format(cams))
             popMenu = QMenu()
             popMenu.setFixedWidth(self.cameraButton.width())
             popMenu.setStyleSheet('''
@@ -526,6 +454,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             for cam in cams:
                 exec("action_%s = QAction('%s')" % (cam, cam))
                 exec("popMenu.addAction(action_%s)" % cam)
+
             x = self.groupBox_5.mapToGlobal(self.cameraButton.pos()).x()
             y = self.groupBox_5.mapToGlobal(self.cameraButton.pos()).y()
             y = y + self.cameraButton.frameGeometry().height()
@@ -602,12 +531,13 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def show_msg(self, msg):
         self.runButton.setChecked(Qt.Unchecked)
+        self.runButton_2.setChecked(Qt.Unchecked)
         self.statistic_msg(msg)
         if msg == "Finished":
             self.saveCheckBox.setEnabled(True)
 
     def change_model(self, x):
-        self.model_type = self.comboBox.currentText()  #comboBox
+        self.model_type = self.comboBox.currentText()  #comboBox_2
         self.det_thread.weights = "./pt/%s" % self.model_type
         self.statistic_msg('Change model to %s' % x)
 
@@ -616,10 +546,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.device = self.device_type
         self.statistic_msg('Change device to %s' % x)
 
-    def change_source(self, x):
-        self.source_type = self.comboBox_3.currentText()
-        self.det_thread.source = self.source_type
-        self.statistic_msg('Change source to %s' % x)
 
     def open_file(self):
         config_file = 'config/fold.json'
@@ -719,7 +645,13 @@ def cvshow_image(img):  ### input img_src  output to pyqt label
         cv2.imshow('Image', img)
     except Exception as e:
         print(repr(e))
-
+    # # 等待键盘输入
+    # key = cv2.waitKey(1) & 0xFF
+    # # 如果按下ESC键，退出循环
+    # if key == 27:
+    #     break
+    # # 关闭窗口
+    # cv2.destroyAllWindows()
 
 if __name__ == "__main__":
 
@@ -727,23 +659,20 @@ if __name__ == "__main__":
     myWin = MainWindow() #### 实例化
     myWin.show()
     print('prameters load completed')
+    #
+    det_thread = DetThread() #### 实例化
+    # if not myWin.isRunning():
+    #     myWin.run_or_continue()
 
+    det_thread.weights = "pt/yolov5s.pt"
+    det_thread.device = '0'
+    det_thread.source = '0'
+    det_thread.start()   ###
+    ## 输出到 UI  ↓
+    ## det_thread.send_img.connect(lambda x: myWin.show_image(x, myWin.out_video))
 
-    #### 调试用代码
-    # det_thread = DetThread() #### 实例化
-    # det_thread.weights = "pt/yolov5s.pt"
-    # det_thread.device = '0'
-    # det_thread.source = 'streams.txt'
-    # det_thread.is_continue = True
-    # det_thread.start()   ###
-    # # ##### connect UI  调试输出到 UI  ↓
-    # det_thread.send_img_ch0.connect(lambda x: myWin.show_image(x, myWin.video_label_ch0))
-    # det_thread.send_img_ch1.connect(lambda x: myWin.show_image(x, myWin.video_label_ch1))
-    # det_thread.send_img_ch2.connect(lambda x: myWin.show_image(x, myWin.video_label_ch2))
-    # det_thread.send_img_ch3.connect(lambda x: myWin.show_image(x, myWin.video_label_ch3))
-
-    # 单独输出 调试模式 ↓
-    # det_thread.send_img_ch0.connect(lambda x: cvshow_image(x))
+    ### 单独输出 调试模式 ↓
+    det_thread.send_img.connect(lambda x: cvshow_image(x))
 
     # myWin.showMaximized()
     sys.exit(app.exec_())

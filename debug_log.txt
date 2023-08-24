@@ -1,0 +1,15 @@
+TIPS 搜索 bug-x 定位到指定位置   backupfile文件夹 存放有每次修改后的文件
+
+
+
+[bug List]
+bug-1  加入 停止线程会卡死  未解决     def stop(self):
+bug-2  加载多个摄像头 启动STOP停止时，再此启动 run 会出现 摄像头 no grap 警告
+        CvCapture_MSMF::grabFrame videoio(MSMF): can't grab frame
+        未解决  class DetThread(QThread): ###继承 QThread
+
+
+[Debug log]
+20230823 by Kwan： DetThread.run 程序  调用loadWebcam  改为调用 loadStreams   实现多信号处理;  CAM信号输入 =  streams.txt
+20230824 by Kwan: 修改 class DetThread(QThread): →  启动  暂停  停止  按键功能控制  修改UI文件
+
