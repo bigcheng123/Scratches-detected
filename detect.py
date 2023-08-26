@@ -107,11 +107,7 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
         if img.ndimension() == 3:
             img = img.unsqueeze(0)
 
-        # Inference
-        t1 = time_sync()
-        pred = model(img,
-                     augment=augment,
-                     visualize=increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False)[0]
+
 
         # Apply NMS
         pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
@@ -204,7 +200,7 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='pt/yolov5s.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='streams.txt', help='file/dir/URL/glob, 0 for webcam')
+    parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
