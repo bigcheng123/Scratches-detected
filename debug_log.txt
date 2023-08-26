@@ -19,3 +19,26 @@ git diff master origin / master
 $ git add .
 $ git commit -m "add file"
 $ git push origin master
+
+更新远程仓库代码  到 本低代码
+# 取回远程仓库的变化，并与本地分支合并
+git pull origin master:brantest
+将远程主机origin的master分支拉取过来，与本地的brantest分支合并。
+
+简化后  远程的 origin master分支 与 本地masterf分支合并
+$ git pull origin master
+
+
+# 提交时显示所有diff信息
+$ git commit -v
+
+# 列出所有本地分支和远程分支
+$ git branch -a
+
+# 显示有变更的文件
+$ git status
+
+# 显示暂存区和工作区的差异
+$ git diff
+
+测试李gitee账号 能否推送  2023-8-26 16：42
