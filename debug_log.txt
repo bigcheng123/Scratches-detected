@@ -14,3 +14,8 @@ bug-2  加载多个摄像头 启动STOP停止时，再此启动 run 会出现 �
 [git command]
 如何查看diff本地分支和远程分支之间的？
 git diff master origin / master
+
+本地代码 同步到 远程仓库
+$ git add .
+$ git commit -m "add file"
+$ git push origin master
