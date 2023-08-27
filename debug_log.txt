@@ -8,8 +8,11 @@ bug-2  加载多个摄像头 启动STOP停止时，再此启动 run 会出现 �
 
 
 [Debug log]
-20230823 by Kwan： DetThread.run 程序  调用loadWebcam  改为调用 loadStreams   实现多信号处理;  CAM信号输入 =  streams.txt
+20230823 by Kwan： DetThread.run 程序  调用loadWebcam → 改为调用 loadStreams   实现多信号处理;  CAM信号输入 =  streams.txt
 20230824 by Kwan: 修改 class DetThread(QThread): →  启动  暂停  停止  按键功能控制  修改UI文件
+20230828 by kwan tabwidget 中 tap 内部控件无法 跟随窗口缩放大小 解决方法参考https://blog.csdn.net/sallyyellow/article/details/127498109
+
+
 
 [git command]
 如何查看diff本地分支和远程分支之间的？
@@ -19,6 +22,8 @@ git diff master origin / master
 $ git add .
 $ git commit -m "add file"
 $ git push origin master
+
+
 
 更新远程仓库代码  到 本低代码
 # 取回远程仓库的变化，并与本地分支合并

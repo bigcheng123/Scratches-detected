@@ -382,6 +382,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
+        #### tab-2
+        self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch4))
 
         self.det_thread.send_statistic.connect(self.show_statistic)
         self.det_thread.send_msg.connect(lambda x: self.show_msg(x))
