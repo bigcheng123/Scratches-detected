@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QAction
-from main_win.win import Ui_mainWindow
+from ui_files.win import Ui_mainWindow
+from ui_files.dialog.rtsp_win import Window
+
 from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QIcon
 from pathlib import Path
@@ -22,7 +24,6 @@ from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
 from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
-from dialog.rtsp_win import Window
 
 
 class DetThread(QThread): ###继承 QThread
@@ -57,7 +58,7 @@ class DetThread(QThread): ###继承 QThread
             max_det=1000,  # maximum detections per image
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-            view_img = False ,  # show results
+            view_img = False,  # show results
             save_txt=False,  # save results to *.txt
             save_conf=False,  # save confidences in --save-txt labels
             save_crop=False,  # save cropped prediction boxes
@@ -164,7 +165,7 @@ class DetThread(QThread): ###继承 QThread
             if self.is_continue:
                 # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
                 for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
-                    print(type(path), type(img), type(im0s), type(self.vid_cap))
+                    # print(type(path), type(img), type(im0s), type(self.vid_cap))
                     ### show row image
                     # cv2.imshow('ch0', im0s[0])
                     # cv2.imshow('ch1', im0s[1])
@@ -174,8 +175,8 @@ class DetThread(QThread): ###继承 QThread
                     img /= 255.0  # 0 - 255 to 0.0 - 1.0
                     if img.ndimension() == 3:
                         img = img.unsqueeze(0)
-                    statistic_dic = {name: 0 for name in names}
-
+                    statistic_dic = {name: 0 for name in names} ### made the diction
+                    # print('statisstic_dic-1',statistic_dic)
                     count += 1  #### FSP counter
                     if  count % 30 == 0 and count >= 30:
                         fps = int(30/(time.time()-start_time))
@@ -208,7 +209,7 @@ class DetThread(QThread): ###继承 QThread
                         if webcam:  # batch_size >= 1     get the frame
                             p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
                             label_chanel = str(i)
-                            print(type(label_chanel),'img chanel=', label_chanel)
+                            # print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
                             p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
                         p = Path(p)  # to Path
@@ -238,6 +239,7 @@ class DetThread(QThread): ###继承 QThread
                                 if save_img or save_crop or view_img:  # Add bbox to image
                                     c = int(cls)  # integer class
                                     statistic_dic[names[c]] += 1
+                                    # print('statisstic_dic-2',statistic_dic)
                                     label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                     plot_one_box(xyxy, im0, label=label, color=colors(c, True),
                                                  line_thickness=line_thickness)
@@ -256,7 +258,7 @@ class DetThread(QThread): ###继承 QThread
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
                                 self.send_img_ch0.emit(im0)  ### 发送图像
-                                print('seng img : ch0')
+                                # print('seng img : ch0')
                             ## chanel-1
                             if label_chanel == '1':
                                 self.send_img_ch1.emit(im0)  ### 发送图像
@@ -269,7 +271,7 @@ class DetThread(QThread): ###继承 QThread
                             if label_chanel == '3':
                                 self.send_img_ch3.emit(im0)  #### 发送图像
                                 print('seng img : ch3')
-                            ### ## 发送声明
+                            ### ## send the detected result
                             self.send_statistic.emit(statistic_dic)
                             # print('emit statistic_dic', statistic_dic)
                     if self.rate_check:
@@ -689,12 +691,13 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         except Exception as e:
             print(repr(e))
 
-    def show_statistic(self, statistic_dic):
+    def show_statistic(self, statistic_dic):  ### predicttion  output
         try:
             self.resultWidget.clear()
             statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
-            statistic_dic = [i for i in statistic_dic if i[1] > 0]
-            results = [' '+str(i[0]) + '：' + str(i[1]) for i in statistic_dic]
+            statistic_dic = [i for i in statistic_dic if i[1] > 0] ## append to List  while the value greater than 0
+            results = [' '+str(i[0]) + '：' + str(i[1]) for i in statistic_dic]  ### reform the list
+            print('output result:', type(results), results)
             self.resultWidget.addItems(results)
 
         except Exception as e:
@@ -715,7 +718,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         MessageBox(
             self.closeButton, title='Tips', text='Closing the program', time=2000, auto=True).exec_()
         sys.exit(0)
-####  测试用   ↓ ##################################################
+####  for  testing  ↓ ##################################################
 def cvshow_image(img):  ### input img_src  output to pyqt label
     try:
         cv2.imshow('Image', img)

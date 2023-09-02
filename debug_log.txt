@@ -18,14 +18,15 @@ bug-2  加载多个摄像头 启动STOP停止时，再此启动 run 会出现 �
 如何查看diff本地分支和远程分支之间的？
 git diff master origin / master
 
-本地代码 同步到 远程仓库
+本地代码  同步到 远程仓库 master → origin master
 $ git add .
 $ git commit -m "add file"
 $ git push origin master
+更新本地某个文件  command ↓
+git checkout master -- debug_log.txt
 
 
-
-更新远程仓库代码  到 本低代码
+更新远程仓库代码  到 本低代码 origin master → master
 # 取回远程仓库的变化，并与本地分支合并
 git pull origin master:brantest
 将远程主机origin的master分支拉取过来，与本地的brantest分支合并。
