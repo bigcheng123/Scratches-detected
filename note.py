@@ -28,13 +28,6 @@ res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 cv2.imshow(str(p), res)  ##### show images
 
 
-
-
-
-
-
-
-
 pred = apply_classifier(pred, modelc, img, im0s)
 
 for path, img, im0s, vid_cap in dataset:

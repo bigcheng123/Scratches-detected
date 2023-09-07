@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QAction
-from ui_files.win import Ui_mainWindow
+from ui_files.main_win import Ui_mainWindow
 from ui_files.dialog.rtsp_win import Window
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal
@@ -13,6 +13,7 @@ import torch.backends.cudnn as cudnn
 import os
 import time
 import cv2
+from modbus_rtu import *
 
 from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
@@ -397,7 +398,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.rtspButton.clicked.connect(self.chose_rtsp)
 
         self.runButton.clicked.connect(self.run_or_continue)
-        # self.runButton_2.clicked.connect(self.run_or_continue_2)
+        self.runButton_modbus.clicked.connect(self.modbus_on_off)
 
         self.stopButton.clicked.connect(self.stop)
 
@@ -439,6 +440,35 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.det_thread.is_continue = False
             self.statistic_msg('Pause')
             print('self.det_thread.is_continue', self.det_thread.is_continue)
+
+    def modbus_on_off(self):
+        global modbus_flag
+        modbus_flag = False
+        # if not modbus_flag:
+        ser, ret = openport('COM3', 9600, 5)  # 打开端口
+        reset_coil = writedata(ser, '01 0F 00 00 00 04 01 00 3E 96')  # all COIL open
+        reset_coil = writedata(ser, '01 0F 00 00 00 04 01 FF 7E D6')  # all COIL shut
+        print('openport')
+        if self.runButton_modbus.isChecked():
+            # ser, ret = openport('COM3', 9600, 5)  # 打开端口
+            while True:
+                if ser:
+                    print('modbus conneted')
+                    feedback_data_IN1 = writedata(ser, '01 02 00 00 00 01 B9 CA')#### 检查IN1 触发 返回01020100a188
+                    if feedback_data_IN1:
+                        modbus_flag = True
+                        DAM4040_IN1 = feedback_data_IN1[0:8]  ##读取字符
+                        self.statistic_msg(DAM4040_IN1)
+                        print(DAM4040_IN1)
+
+                        feedback_data = writedata(ser, '01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备
+                    else:
+                        no_feedback = writedata(ser, '01 05 00 02 FF 00 2D FA')  ###3号继电器打开   控制器无返回数据
+        else:
+            modbus_flag = False
+            print('modbus shut off')
+            ser.close()
+
 
     def stop(self):
         if not self.det_thread.jump_out:
@@ -692,13 +722,39 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print(repr(e))
 
     def show_statistic(self, statistic_dic):  ### predicttion  output
+        import re
         try:
             self.resultWidget.clear()
             statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
             statistic_dic = [i for i in statistic_dic if i[1] > 0] ## append to List  while the value greater than 0
             results = [' '+str(i[0]) + '：' + str(i[1]) for i in statistic_dic]  ### reform the list
-            print('output result:', type(results), results)
+            # print('output result:', type(results), results)
             self.resultWidget.addItems(results)
+            if len(results) :
+                print((len(results)))
+                for i , n in enumerate(results):
+                    # str = re.sub("[\u4e00-\u9fa5\0-9\,\。]", "", i)
+                    # print('class name = ', n)
+                    if i == 1:
+                        self.checkBox_2.setChecked(True)
+                    if i == 2:
+                        self.checkBox_3.setChecked(True)
+                    if i == 3:
+                        self.checkBox_4.setChecked(True)
+                    if i == 4:
+                        self.checkBox_5.setChecked(True)
+                    if i == 5:
+                        self.checkBox_6.setChecked(True)
+
+                    # self.checkBox_2.setText(str(i))
+            else:
+                self.checkBox_2.setChecked(False)
+                self.checkBox_3.setChecked(False)
+                self.checkBox_4.setChecked(False)
+                self.checkBox_5.setChecked(False)
+                self.checkBox_6.setChecked(False)
+                # self.checkBox_2.setText("")
+                print("result = []")
 
         except Exception as e:
             print(repr(e))
@@ -718,6 +774,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         MessageBox(
             self.closeButton, title='Tips', text='Closing the program', time=2000, auto=True).exec_()
         sys.exit(0)
+
+
+
 ####  for  testing  ↓ ##################################################
 def cvshow_image(img):  ### input img_src  output to pyqt label
     try:
