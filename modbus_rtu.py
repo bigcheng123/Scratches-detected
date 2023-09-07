@@ -117,7 +117,7 @@ def str2bool(feedback_data):
 
 if __name__ == '__main__':
     # read_in1()
-    ser,ret = openport(port='COM4',baudrate=9600,timeout=5) #打开端口port,baudrate,timeout
+    ser,ret = openport(port='COM5',baudrate=9600,timeout=5) #打开端口port,baudrate,timeout
     n=100
     str_result=''
     while  n:
