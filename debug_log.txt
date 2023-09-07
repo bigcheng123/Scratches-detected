@@ -26,7 +26,7 @@ $ git push origin master
 git checkout master -- debug_log.txt
 
 
-更新远程仓库代码  到 本低代码 origin master → master
+更新远程仓库代码  到 本地代码 origin master → master
 # 取回远程仓库的变化，并与本地分支合并
 git pull origin master:brantest
 将远程主机origin的master分支拉取过来，与本地的brantest分支合并。
@@ -46,5 +46,9 @@ $ git status
 
 # 显示暂存区和工作区的差异
 $ git diff
+# 显示本地代码 和 远程仓库 的差异
+git diff <local_branch> <remote_branch>
+
+
 
 测试李gitee账号 能否推送  2023-8-26 16：42
