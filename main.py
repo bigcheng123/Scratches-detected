@@ -13,7 +13,8 @@ import torch.backends.cudnn as cudnn
 import os
 import time
 import cv2
-from modbus_rtu import *
+import modbus_rtu
+import _thread
 
 from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
@@ -25,6 +26,9 @@ from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
 from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
+
+## 设置全局变量
+modbus_flag = False
 
 
 class DetThread(QThread): ###继承 QThread
@@ -376,6 +380,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.model_type = self.comboBox.currentText()  ### get model from combobox
         self.device_type = self.comboBox_2.currentText()  ###  get device type from combobox
         self.source_type = self.comboBox_3.currentText()  ###  get device type from combobox
+        self.port_type = self.comboBox_port.currentText() ###  get port type from combobox
         self.det_thread.weights = "./pt/%s" % self.model_type  # difined
         self.det_thread.device = self.device_type # difined  device
         self.det_thread.source = self.source_type
@@ -405,6 +410,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox.currentTextChanged.connect(self.change_model)
         self.comboBox_2.currentTextChanged.connect(self.change_device)
         self.comboBox_3.currentTextChanged.connect(self.change_source)
+        self.comboBox_port.currentTextChanged.connect(self.change_port)
+
         self.confSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'confSpinBox'))
         self.confSlider.valueChanged.connect(lambda x: self.change_val(x, 'confSlider'))
         self.iouSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'iouSpinBox'))
@@ -415,6 +422,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.checkBox.clicked.connect(self.checkrate)
         self.saveCheckBox.clicked.connect(self.is_save)
         self.load_setting()
+        print('openg port')
+        self.ser, self.ret = modbus_rtu.openport('COM5', 9600, 5)  # 打开端口
+
 
     def run_or_continue(self):
         # self.det_thread.source = 'streams.txt'
@@ -441,33 +451,147 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.statistic_msg('Pause')
             print('self.det_thread.is_continue', self.det_thread.is_continue)
 
+    def thread_mudbus_run(self):
+        global modbus_flag
+        modbus_flag = True
+        #### hexcode  ######
+        IN0_READ = '01 02 00 00 00 01 B9 CA'
+        IN1_READ = '01 02 00 01 00 01 E8 0A'
+        IN2_READ = '01 02 00 02 00 01 18 0A'
+        IN3_READ = '01 02 00 03 00 01 49 CA'
+        DO0_ON = '01 05 00 00 FF 00 8C 3A'
+        DO0_OFF = '01 05 00 00 00 00 CD CA'
+        DO1_ON = '01 05 00 01 FF 00 DD FA'
+        DO1_OFF = '01 05 00 01 00 00 9C 0A'
+        DO2_ON = '01 05 00 02 FF 00 2D FA'
+        DO2_OFF = '01 05 00 02 00 00 6C 0A'
+        DO3_ON = '01 05 00 03 FF 00 7C 3A'
+        DO3_OFF = '01 05 00 03 00 00 3D CA'
+
+        DO_ALL_ON = '01 0F 00 00 00 04 01 FF 7E D6'
+        DO_ALL_OFF = '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
+
+        self.port_type = self.comboBox_port.currentText()
+        if not self.ret:
+            print('port dont open ')
+            self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+        else: ### openport sucessfully
+            feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+            print('thread_mudbus_run modbus_flag = True')
+            feedback_list = []
+            while self.runButton_modbus.isChecked() and modbus_flag:
+
+                feedback_data_IN0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
+                if feedback_data_IN0:#### 有返回数据
+                    text_IN0 = feedback_data_IN0[0:8]  ## 读取8位字符
+                    if text_IN0 == '01020101':
+                        self.checkBox_10.setChecked(True)
+                    else:
+                        self.checkBox_10.setChecked(False)
+                    print('text_IN0', text_IN0)
+                    feedback_list.append(text_IN0)
+                    feedback_data = modbus_rtu.writedata(self.ser, DO0_ON)  ###1号继电器打开  运行准备 DO1 =1
+                else: #### 无返回数据
+                    no_feedback = modbus_rtu.writedata(self.ser, DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                    print('no_feedback data')
+
+                feedback_data_IN1 = modbus_rtu.writedata(self.ser,IN1_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                if feedback_data_IN1:  #### 有返回数据
+                    text_IN1 = feedback_data_IN1[0:8]  ## 读取8位字符
+                    if text_IN1 == '01020101':
+                        self.checkBox_11.setChecked(True)
+                    else:
+                        self.checkBox_11.setChecked(False)
+                    print('text_IN1', text_IN1)
+                    feedback_list.append(text_IN1)
+                else:  #### 无返回数据
+                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                    print('no_feedback data')
+
+                feedback_data_IN2 = modbus_rtu.writedata(self.ser,IN2_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                if feedback_data_IN2:  #### 有返回数据
+                    text_IN2 = feedback_data_IN2[0:8]  ## 读取8位字符
+                    if text_IN2 == '01020101':
+                        self.checkBox_12.setChecked(True)
+                    else:
+                        self.checkBox_12.setChecked(False)
+                    print('text_IN2', text_IN2)
+                    feedback_list.append(text_IN2)
+                else:  #### 无返回数据
+                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                    print('no_feedback data')
+
+                feedback_data_IN3 = modbus_rtu.writedata(self.ser,IN3_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                if feedback_data_IN3:  #### 有返回数据
+                    text_IN3 = feedback_data_IN3[0:8]  ## 读取8位字符
+                    if text_IN3 == '01020101':
+                        self.checkBox_13.setChecked(True)
+                    else:
+                        self.checkBox_13.setChecked(False)
+                    print('text_IN3', text_IN3)
+                    feedback_list.append(text_IN3)
+
+                else:  #### 无返回数据
+                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                    print('no_feedback data')
+
+
+                if len(feedback_list) == 20:
+                    feedback_list.clear()
+                else:
+                    self.statistic_msg(str(feedback_list))
+
+
+                #### 同步UI 信号
+                intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
+                output_box_list =[self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
+
+                for i , n in enumerate(output_box_list):
+                    if n == True:
+                        print('scratch detected')
+                        feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
+                    else:
+                        print('scratch has not detected')
+                        feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
+
+
+            else:
+                modbus_flag = False
+                print('modbus shut off')
+                shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+
+                self.ser.close()
+
+
     def modbus_on_off(self):
         global modbus_flag
-        modbus_flag = False
         # if not modbus_flag:
-        ser, ret = openport('COM3', 9600, 5)  # 打开端口
-        reset_coil = writedata(ser, '01 0F 00 00 00 04 01 00 3E 96')  # all COIL open
-        reset_coil = writedata(ser, '01 0F 00 00 00 04 01 FF 7E D6')  # all COIL shut
-        print('openport')
         if self.runButton_modbus.isChecked():
-            # ser, ret = openport('COM3', 9600, 5)  # 打开端口
-            while True:
-                if ser:
-                    print('modbus conneted')
-                    feedback_data_IN1 = writedata(ser, '01 02 00 00 00 01 B9 CA')#### 检查IN1 触发 返回01020100a188
-                    if feedback_data_IN1:
-                        modbus_flag = True
-                        DAM4040_IN1 = feedback_data_IN1[0:8]  ##读取字符
-                        self.statistic_msg(DAM4040_IN1)
-                        print(DAM4040_IN1)
-
-                        feedback_data = writedata(ser, '01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备
-                    else:
-                        no_feedback = writedata(ser, '01 05 00 02 FF 00 2D FA')  ###3号继电器打开   控制器无返回数据
+            print('runButton_modbus.isChecked')
+            modbus_flag = True
+            print('set  modbus_flag = True')
+            if not self.ret:
+                print('port did not open')
+                try:
+                    self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                    if self.ret:
+                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+                except Exception as e:
+                    print('openport erro', e)
+                    self.statistic_msg(str(e))
+            else:
+                self.ser.close()
+                try:
+                    self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                    if self.ret:
+                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+                except Exception as e:
+                    print('openport erro', e)
+                    self.statistic_msg(str(e))
         else:
+            print('runButton_modbus.is unChecked')
             modbus_flag = False
-            print('modbus shut off')
-            ser.close()
+            print('shut down modbus_flag = False')
 
 
     def stop(self):
@@ -655,6 +779,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.source = self.source_type
         self.statistic_msg('Change source to %s' % x)
 
+    def change_port(self, x):
+        self.port_type = self.comboBox_port.currentText()
+        # self.det_thread.source = self.source_type
+        self.statistic_msg('Change port to %s' % x)
+
+
     def open_file(self):
         config_file = 'config/fold.json'
         # config = json.load(open(config_file, 'r', encoding='utf-8'))
@@ -735,16 +865,24 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 for i , n in enumerate(results):
                     # str = re.sub("[\u4e00-\u9fa5\0-9\,\。]", "", i)
                     # print('class name = ', n)
-                    if i == 1:
+                    if i == 0:
                         self.checkBox_2.setChecked(True)
-                    if i == 2:
+                    # else:
+                    #     self.checkBox_2.setChecked(False)
+                    if i == 1:
                         self.checkBox_3.setChecked(True)
-                    if i == 3:
+                    # else:
+                    #     self.checkBox_3.setChecked(False)
+                    if i == 2:
                         self.checkBox_4.setChecked(True)
-                    if i == 4:
+                    # else:
+                    #     self.checkBox_4.setChecked(False)
+                    if i == 3:
                         self.checkBox_5.setChecked(True)
-                    if i == 5:
-                        self.checkBox_6.setChecked(True)
+                    # else:
+                    #     self.checkBox_5.setChecked(False)
+                    # if i == 5:
+                    #     self.checkBox_6.setChecked(True)
 
                     # self.checkBox_2.setText(str(i))
             else:
@@ -791,6 +929,10 @@ if __name__ == "__main__":
     myWin = MainWindow() #### 实例化
     myWin.show()
     print('prameters load completed')
+
+
+    print('thread_mudbus_run start')
+    _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
 
 
     #### 调试用代码

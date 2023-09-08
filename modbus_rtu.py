@@ -68,7 +68,7 @@ def writedata(ser,hexcode):
     # time.sleep(random.random()*0.5) ##每次writeport要 分隔开  防止同时进行 写操作 间隔越大 
     send_data = bytes.fromhex(hexcode)    ### HEX码 转换 bytes 字节码     发送数据转换为b'\xff\x01\x00U\x00\x00V'
     ser.write(send_data)   # 发送命令
-    time.sleep(0.2)        # 延时，否则len_return_data将返回0，此处易忽视！！！
+    time.sleep(0.05)        # 延时，否则len_return_data将返回0，此处易忽视！！！ 延迟低于 0.01无法接收数据
     len_return_data = ser.inWaiting()  # 获取缓冲数据（接收数据）长度
     # if len_return_data:
     return_data = ser.read(len_return_data)  # 读取缓冲数据
@@ -82,7 +82,7 @@ def writedata(ser,hexcode):
 #     print('writedata error',e)       
 # else:
 #     pass
-    return(str_return_data)
+    return(str_return_data)  ##返回数据
     # lock.release()
 # else:
     #     print("open failed")
@@ -118,7 +118,7 @@ def str2bool(feedback_data):
 if __name__ == '__main__':
     # read_in1()
     ser,ret = openport(port='COM5',baudrate=9600,timeout=5) #打开端口port,baudrate,timeout
-    n=100
+    n=10
     str_result=''
     while  n:
         # t = threading.Thread(target= writedata,args=(ser,'01 02 00 00 00 01 B9 CA'))
@@ -181,10 +181,16 @@ if __name__ == '__main__':
         # feedback_data = writedata(ser,'01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备 
         # feedback_data = writedata(ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
 
+        if cv2.waitKey(1) == ord('q'):
+            print('quit')
+            break
         n-=1
+        print(n)
+    # colse_all_coil = writedata(ser,'01 0F 00 00 00 04 01 00 3E 96')
+    open_all_coil = writedata(ser, '01 0F 00 00 00 04 01 FF 7E D6')
 
     ser.close()
-
+    print(('sel.close'))
 
 
 
