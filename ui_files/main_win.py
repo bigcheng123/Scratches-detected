@@ -445,9 +445,9 @@ class Ui_mainWindow(object):
 "")
         self.label_5.setObjectName("label_5")
         self.horizontalLayout_2.addWidget(self.label_5)
-        self.comboBox_2 = QtWidgets.QComboBox(self.groupBox_8)
-        self.comboBox_2.setMinimumSize(QtCore.QSize(50, 28))
-        self.comboBox_2.setStyleSheet("QComboBox QAbstractItemView {\n"
+        self.comboBox_device = QtWidgets.QComboBox(self.groupBox_8)
+        self.comboBox_device.setMinimumSize(QtCore.QSize(50, 28))
+        self.comboBox_device.setStyleSheet("QComboBox QAbstractItemView {\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-size: 16px;\n"
 "background:rgba(200, 200, 200,150);\n"
@@ -471,12 +471,12 @@ class Ui_mainWindow(object):
 "border-image: url(:/icon/ui_files/icon/options.png);\n"
 "}\n"
 "")
-        self.comboBox_2.setObjectName("comboBox_2")
-        self.comboBox_2.addItem("")
-        self.comboBox_2.addItem("")
-        self.comboBox_2.addItem("")
-        self.comboBox_2.addItem("")
-        self.horizontalLayout_2.addWidget(self.comboBox_2)
+        self.comboBox_device.setObjectName("comboBox_device")
+        self.comboBox_device.addItem("")
+        self.comboBox_device.addItem("")
+        self.comboBox_device.addItem("")
+        self.comboBox_device.addItem("")
+        self.horizontalLayout_2.addWidget(self.comboBox_device)
         self.verticalLayout_8.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setContentsMargins(11, -1, 0, -1)
@@ -792,7 +792,7 @@ class Ui_mainWindow(object):
         self.label_6.setObjectName("label_6")
         self.horizontalLayout_15.addWidget(self.label_6)
         self.comboBox_port = QtWidgets.QComboBox(self.groupBox_8)
-        self.comboBox_port.setMinimumSize(QtCore.QSize(0, 28))
+        self.comboBox_port.setMinimumSize(QtCore.QSize(60, 28))
         self.comboBox_port.setStyleSheet("QComboBox QAbstractItemView {\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-size: 12px;\n"
@@ -1769,10 +1769,10 @@ class Ui_mainWindow(object):
         self.comboBox.setItemText(2, _translate("mainWindow", "yolov5l.pt"))
         self.comboBox.setItemText(3, _translate("mainWindow", "yolov5x.pt"))
         self.label_5.setText(_translate("mainWindow", "Device"))
-        self.comboBox_2.setItemText(0, _translate("mainWindow", "0"))
-        self.comboBox_2.setItemText(1, _translate("mainWindow", "1"))
-        self.comboBox_2.setItemText(2, _translate("mainWindow", "2"))
-        self.comboBox_2.setItemText(3, _translate("mainWindow", "cpu"))
+        self.comboBox_device.setItemText(0, _translate("mainWindow", "0"))
+        self.comboBox_device.setItemText(1, _translate("mainWindow", "1"))
+        self.comboBox_device.setItemText(2, _translate("mainWindow", "2"))
+        self.comboBox_device.setItemText(3, _translate("mainWindow", "cpu"))
         self.fileButton.setToolTip(_translate("mainWindow", "file"))
         self.fileButton.setText(_translate("mainWindow", "File"))
         self.cameraButton.setToolTip(_translate("mainWindow", "camera"))

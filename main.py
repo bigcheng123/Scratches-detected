@@ -16,6 +16,8 @@ import cv2
 import modbus_rtu
 import _thread
 
+from shutil import copy
+
 from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
 from utils.CustomMessageBox import MessageBox
@@ -369,16 +371,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox.clear()
         self.comboBox.addItems(self.pt_list)
 
-
         self.qtimer_search = QTimer(self)
         self.qtimer_search.timeout.connect(lambda: self.search_pt())
         self.qtimer_search.start(2000)
 
-
         # yolov5 thread
         self.det_thread = DetThread()
         self.model_type = self.comboBox.currentText()  ### get model from combobox
-        self.device_type = self.comboBox_2.currentText()  ###  get device type from combobox
+        self.device_type = self.comboBox_device.currentText()  ###  get device type from combobox
         self.source_type = self.comboBox_3.currentText()  ###  get device type from combobox
         self.port_type = self.comboBox_port.currentText() ###  get port type from combobox
         self.det_thread.weights = "./pt/%s" % self.model_type  # difined
@@ -408,7 +408,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.stopButton.clicked.connect(self.stop)
 
         self.comboBox.currentTextChanged.connect(self.change_model)
-        self.comboBox_2.currentTextChanged.connect(self.change_device)
+        self.comboBox_device.currentTextChanged.connect(self.change_device)
         self.comboBox_3.currentTextChanged.connect(self.change_source)
         self.comboBox_port.currentTextChanged.connect(self.change_port)
 
@@ -421,9 +421,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.checkBox.clicked.connect(self.checkrate)
         self.saveCheckBox.clicked.connect(self.is_save)
-        self.load_setting()
-        print('openg port')
-        self.ser, self.ret = modbus_rtu.openport('COM5', 9600, 5)  # 打开端口
+        self.load_setting()  #### loading config
 
 
     def run_or_continue(self):
@@ -471,14 +469,26 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         DO_ALL_ON = '01 0F 00 00 00 04 01 FF 7E D6'
         DO_ALL_OFF = '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
 
+        # self.ret = None
         self.port_type = self.comboBox_port.currentText()
-        if not self.ret:
-            print('port dont open ')
+
+        try:
             self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
-        else: ### openport sucessfully
+
+        except Exception as e:
+            print('openport erro', e)
+            self.statistic_msg(str(e))
+
+        # if not self.ret:
+        #     print('port dont open ')
+        #     self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+
+        if self.ret: ### openport sucessfully
             feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+            self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
+
             while self.runButton_modbus.isChecked() and modbus_flag:
 
                 feedback_data_IN0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
@@ -530,17 +540,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         self.checkBox_13.setChecked(False)
                     print('text_IN3', text_IN3)
                     feedback_list.append(text_IN3)
-
                 else:  #### 无返回数据
                     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
-
 
                 if len(feedback_list) == 20:
                     feedback_list.clear()
                 else:
                     self.statistic_msg(str(feedback_list))
-
 
                 #### 同步UI 信号
                 intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
@@ -553,7 +560,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     else:
                         print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
-
 
             else:
                 modbus_flag = False
@@ -570,6 +576,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print('runButton_modbus.isChecked')
             modbus_flag = True
             print('set  modbus_flag = True')
+            try:
+                self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+            except Exception as e:
+                print('openport erro', e)
+                self.statistic_msg(str(e))
+
             if not self.ret:
                 print('port did not open')
                 try:
@@ -697,38 +709,54 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def load_setting(self):
         config_file = 'config/setting.json'
+        print('config:', config_file)
         if not os.path.exists(config_file):
             iou = 0.26
             conf = 0.33
             rate = 10
             check = 0
             savecheck = 0
+            device = 0
+            port = "COM3"
             new_config = {"iou": iou,
                           "conf": conf,
                           "rate": rate,
                           "check": check,
-                          "savecheck": savecheck
+                          "savecheck": savecheck,
+                          "device": device,
+                          "port": port
                           }
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
                 f.write(new_json)
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
-            if len(config) != 5:
+            if len(config) != 7:
                 iou = 0.26
                 conf = 0.33
                 rate = 10
                 check = 0
                 savecheck = 0
+                device = 0
+                port = "COM3"
             else:
                 iou = config['iou']
                 conf = config['conf']
                 rate = config['rate']
                 check = config['check']
                 savecheck = config['savecheck']
+                device = config['device']
+                port = config['port']
+                print(port)
         self.confSpinBox.setValue(conf)
         self.iouSpinBox.setValue(iou)
         self.rateSpinBox.setValue(rate)
+
+        # self.comboBox_device.currentText(str(device[1]))
+        # self.comboBox_port.currentText(port[1])
+
+
+
         self.checkBox.setCheckState(check)
         self.det_thread.rate_check = check
         self.saveCheckBox.setCheckState(savecheck)
@@ -770,7 +798,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.statistic_msg('Change model to %s' % x)
 
     def change_device(self, x):
-        self.device_type = self.comboBox_2.currentText()
+        self.device_type = self.comboBox_device.currentText()
         self.det_thread.device = self.device_type
         self.statistic_msg('Change device to %s' % x)
 
@@ -913,6 +941,30 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.closeButton, title='Tips', text='Closing the program', time=2000, auto=True).exec_()
         sys.exit(0)
 
+    def load_config(self):   ####  初始化 modbus connection
+      global winsound_freq, winsound_time, winsound_freq_2, winsound_time_2
+      try:
+          ### 提取备份数据 当出现断电关机数据丢失时， 将Cahce中 备份文件拷贝出来
+          cache_path = os.path.dirname(os.path.realpath(__file__)) + r'\config'
+          to_path = os.path.dirname(os.path.realpath(__file__))  ### root path
+
+          for root, dirs, files in os.walk(
+                  cache_path):  # root 表示当前正在访问的文件夹路径# dirs 表示该文件夹下的子目录名list # files 表示该文件夹下的文件list
+              # print('files',files) ####['edgevalue.db.bak', 'edgevalue.db.dat', 'edgevalue.db.dir']
+              for i in files:
+                  from_path = os.path.join(root, i)  # 合并成一个完整路径
+                  copy(from_path, to_path)  ### 第一个参数 是复制对象， 第二个是 复制到文件夹
+                  print('from_path', from_path)
+                  print('to_path', to_path)
+              print('shutil copy completed')
+
+          self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+
+      except Exception as e:
+          print('openport erro', e)
+          self.statistic_msg(str(e))
+
+
 
 
 ####  for  testing  ↓ ##################################################
@@ -930,7 +982,7 @@ if __name__ == "__main__":
     myWin.show()
     print('prameters load completed')
 
-
+    myWin.load_config()
     print('thread_mudbus_run start')
     _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
 
