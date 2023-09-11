@@ -473,17 +473,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         # self.ret = None
         self.port_type = self.comboBox_port.currentText()
-
-        try:
-            self.ser, self.ret, _ = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
-
-        except Exception as e:
-            self.ret = False
-            print('openport erro', e)
-            self.statistic_msg(str(e))
-            self.runButton_modbus.setChecked(False)
-        else:
-            self.runButton_modbus.setChecked(True)
+        print(type(self.port_type), self.port_type)
+        # try:
+        #     self.ser, self.ret, _ = modbus_rtu.openport(port='COM5', baudrate=9600, timeout=5)  # 打开端口
+        #     print('self.ret',self.ret)
+        # except Exception as e:
+        #     self.ret = False
+        #     print('open port error', e)
+        #     self.statistic_msg(str(e))
+        #     self.runButton_modbus.setChecked(False)
 
         if self.ret: ### openport sucessfully
             feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
@@ -601,7 +599,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.runButton_modbus.setChecked(True)
                 _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
 
-        else:
+        else: #### shut down modbus
             print('runButton_modbus.is unChecked')
             modbus_flag = False
             self.runButton_modbus.setChecked(False)
@@ -965,7 +963,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                   # print('to_path', to_path)
               print('files in config has been coppied sucessfully')
 
-          self.ser, self.ret , error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+          # self.ser, self.ret , error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
 
       except Exception as e:
           print('openport erro', e)
@@ -988,10 +986,11 @@ if __name__ == "__main__":
     myWin = MainWindow() #### 实例化
     myWin.show()
     print('prameters load completed')
-
-    myWin.load_config()
-    print('thread_mudbus_run start')
-    _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+    myWin.runButton_modbus.setChecked(True)
+    myWin.modbus_on_off()### start modbus
+    # time.sleep(1)
+    # print('thread_mudbus_run start')
+    # _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
 
 
     #### 调试用代码
