@@ -475,15 +475,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.port_type = self.comboBox_port.currentText()
 
         try:
-            self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+            self.ser, self.ret, _ = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
 
         except Exception as e:
+            self.ret = False
             print('openport erro', e)
             self.statistic_msg(str(e))
-
-        # if not self.ret:
-        #     print('port dont open ')
-        #     self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+            self.runButton_modbus.setChecked(False)
+        else:
+            self.runButton_modbus.setChecked(True)
 
         if self.ret: ### openport sucessfully
             feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
@@ -533,7 +533,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
 
-                feedback_data_IN3 = modbus_rtu.writedata(self.ser,IN3_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                feedback_data_IN3 = modbus_rtu.writedata(self.ser,IN3_READ)  ####
                 if feedback_data_IN3:  #### 有返回数据
                     text_IN3 = feedback_data_IN3[0:8]  ## 读取8位字符
                     if text_IN3 == '01020101':
@@ -579,32 +579,32 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             modbus_flag = True
             print('set  modbus_flag = True')
             try:
-                self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
             except Exception as e:
-                print('openport erro', e)
+                print('openport erro -1', e)
                 self.statistic_msg(str(e))
 
             if not self.ret:
+                self.runButton_modbus.setChecked(False)
+                MessageBox(
+                    self.closeButton, title='Error', text='Connection Error: '+ str(error), time=2000,
+                    auto=True).exec_()
                 print('port did not open')
                 try:
-                    self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                    self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
                     if self.ret:
                         _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
                 except Exception as e:
-                    print('openport erro', e)
+                    print('openport erro-2', e)
                     self.statistic_msg(str(e))
-            else:
-                self.ser.close()
-                try:
-                    self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
-                    if self.ret:
-                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
-                except Exception as e:
-                    print('openport erro', e)
-                    self.statistic_msg(str(e))
+            else: ### self.ret is  True
+                self.runButton_modbus.setChecked(True)
+                _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+
         else:
             print('runButton_modbus.is unChecked')
             modbus_flag = False
+            self.runButton_modbus.setChecked(False)
             print('shut down modbus_flag = False')
 
 
@@ -896,7 +896,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 f.write(new_json)
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
-            print('config:',type(config), config)
+            print('load config:',type(config), config)
             if len(config) != 8 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
@@ -945,7 +945,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             f.write(config_json)
             print('confi_json write')
         MessageBox(
-            self.closeButton, title='Tips', text='Closing the program', time=2000, auto=True).exec_()
+            self.closeButton, title='Tips', text='Program is exiting.', time=2000, auto=True).exec_()
         sys.exit(0)
 
     def load_config(self):   ####  初始化 modbus connection
@@ -965,7 +965,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                   # print('to_path', to_path)
               print('files in config has been coppied sucessfully')
 
-          self.ser, self.ret = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+          self.ser, self.ret , error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
 
       except Exception as e:
           print('openport erro', e)

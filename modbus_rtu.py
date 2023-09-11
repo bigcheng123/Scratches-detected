@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
-# Author: WUJiang
-# 运行环境为Windows7&Python3.7
+# Author:
+# Windows7&Python3.7
 
 import serial  ###pip install pyserial
 import time
@@ -30,12 +30,15 @@ def openport(port,baudrate,timeout):  ### 降低PORT口的 数据缓存设定 �
         if not ser.is_open:
             ser.open()
             # threading.Thread(target=ReadData, args=(ser,)).start()
-    except Exception as e:
-        print("---异常---：", e)
-        pass
+    except Exception as error:
+        print("---OPEN PORT ERROR---：", error)
+        ser = None
+        ret = False
+        return ser, ret, error
     else:
         ret = True
-        return ser,ret
+        error = "PORT SUCCESSFULLY"
+        return ser, ret, error
 
 #关闭串口
 def DColsePort(ser):
