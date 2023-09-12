@@ -1221,7 +1221,7 @@ class Ui_mainWindow(object):
 "background-color: rgb(255, 255, 255);\n"
 "border-radius:4px;\n"
 "font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
+"font-size: 40px;\n"
 "color: rgb(0, 0, 0);\n"
 "}\n"
 "")
@@ -1756,7 +1756,7 @@ class Ui_mainWindow(object):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(mainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
 
     def retranslateUi(self, mainWindow):

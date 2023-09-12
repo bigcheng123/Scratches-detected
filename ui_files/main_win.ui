@@ -2119,7 +2119,7 @@ color: rgb(0, 0, 0);
 background-color: rgb(255, 255, 255);
 border-radius:4px;
 font-family: &quot;Microsoft YaHei&quot;;
-font-size: 16px;
+font-size: 40px;
 color: rgb(0, 0, 0);
 }
 </string>
@@ -2412,7 +2412,7 @@ font-size: 14px;</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab">
                  <property name="enabled">
