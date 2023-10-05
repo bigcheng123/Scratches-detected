@@ -2119,7 +2119,7 @@ color: rgb(0, 0, 0);
 background-color: rgb(255, 255, 255);
 border-radius:4px;
 font-family: &quot;Microsoft YaHei&quot;;
-font-size: 16px;
+font-size: 60px;
 color: rgb(0, 0, 0);
 }
 </string>
@@ -3080,7 +3080,7 @@ border-radius:0px;}</string>
      <x>0</x>
      <y>0</y>
      <width>1301</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

@@ -61,7 +61,7 @@ class DetThread(QThread): ###继承 QThread
 
     @torch.no_grad()
     def run(self,
-            imgsz=640,  # inference size (pixels)
+            imgsz=1440,  # inference size (pixels)
             max_det=1000,  # maximum detections per image
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
