@@ -9,13 +9,13 @@
 
 # Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
 path: E:/code/yolo/scratch-detect/data  # dataset root dir
-train: images/count  # train images (relative to 'path') 128 images
-val: images/count  # val images (relative to 'path') 128 images
+train: images/rubber-new  # train images (relative to 'path') 128 images
+val: images/rubber-new  # val images (relative to 'path') 128 images
 test:  # test images (optional)
 
 # Classes
-nc: 1  # number of classes
-names: ['17-083']  # class names
+nc: 4  # number of classes
+names: ['impress','scar','hole','ink']  # class names
 
 
 # Download script/URL (optional)
