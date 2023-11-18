@@ -61,8 +61,8 @@ class DetThread(QThread): ###继承 QThread
 
     @torch.no_grad()
     def run(self,
-            imgsz=1440,  # inference size (pixels)
-            max_det=1000,  # maximum detections per image
+            imgsz=320, #1440 # inference size (pixels)//推理大小
+            max_det=50,  # maximum detections per image//每个图像的最大检测次数
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
             view_img = False,  # show results
@@ -78,7 +78,7 @@ class DetThread(QThread): ###继承 QThread
             project='runs/detect',  # save results to project/name
             name='exp',  # save results to project/name
             exist_ok=False,  # existing project/name ok, do not increment
-            line_thickness=3,  # bounding box thickness (pixels)
+            line_thickness=3,  # bounding box thickness (pixels)//边界框厚度
             hide_labels=False,  # hide labels
             hide_conf=False,  # hide confidences
             half=False,  # use FP16 half-precision inference
@@ -392,6 +392,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
         #### tab-2
         self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch4))
+        #### tab-3
+        self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch5))
+        #### tab-4
+        self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch6))
+        #### tab-5
+        self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch7))
 
         self.det_thread.send_statistic.connect(self.show_statistic)
         self.det_thread.send_msg.connect(lambda x: self.show_msg(x))
@@ -669,7 +675,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         try:
             self.stop()  #### stop running thread
             MessageBox(
-                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
+                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=200, auto=True).exec_()# self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
             # get the number of local cameras
             _, cams = Camera().get_cam_num()
             print('enum_camera:', cams)
