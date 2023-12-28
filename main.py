@@ -38,6 +38,8 @@ class DetThread(QThread): ###继承 QThread
     send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_img_ch2 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_img_ch3 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img_ch4 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img_ch5 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_statistic = pyqtSignal(dict)  ###
     # emit：detecting/pause/stop/finished/error msg
     send_msg = pyqtSignal(str)
