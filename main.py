@@ -38,6 +38,8 @@ class DetThread(QThread): ###继承 QThread
     send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_img_ch2 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_img_ch3 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img_ch4 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img_ch5 = pyqtSignal(np.ndarray)  ### CH1 output image
     send_statistic = pyqtSignal(dict)  ###
     # emit：detecting/pause/stop/finished/error msg
     send_msg = pyqtSignal(str)
@@ -96,7 +98,7 @@ class DetThread(QThread): ###继承 QThread
         # try:
         set_logging()
         device = select_device(self.device)  ### from utils.torch_utils import select_device
-        half &= device.type != 'cpu'  # half precision only supported on CUDA
+        half &= device.type != '0'  #'cpu'# half precision only supported on CUDA
 
         # Load model
         model = attempt_load(self.weights, map_location=device)  # load FP32 model  from models.experimental import attempt_load
@@ -129,7 +131,7 @@ class DetThread(QThread): ###继承 QThread
 
 
         # Run inference 推理
-        if device.type != 'cpu':
+        if device.type != '0':#'cpu'
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
         start_time = time.time()
         t0 = time.time()
@@ -163,7 +165,7 @@ class DetThread(QThread): ###继承 QThread
                 if half:
                     model.half()  # to FP16
                 # Run inference
-                if device.type != 'cpu':
+                if device.type != '0':#'cpu'
                     model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
                 self.current_weight = self.weights
 
@@ -278,6 +280,14 @@ class DetThread(QThread): ###继承 QThread
                             if label_chanel == '3':
                                 self.send_img_ch3.emit(im0)  #### 发送图像
                                 print('seng img : ch3')
+                            ## chanel-4
+                            if label_chanel == '4':
+                                 self.send_img_ch4.emit(im0)  #### 发送图像
+                                 print('seng img : ch4')
+                                ## chanel-3
+                            if label_chanel == '5':
+                                 self.send_img_ch5.emit(im0)  #### 发送图像
+                                 print('seng img : ch5')
                             ### ## send the detected result
                             self.send_statistic.emit(statistic_dic)
                             # print('emit statistic_dic', statistic_dic)
@@ -398,6 +408,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch6))
         #### tab-5
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch7))
+        #### tab-6
+        self.det_thread.send_img_ch4.connect(lambda x: self.show_image(x, self.video_label_ch8))
+        #### tab-7
+        self.det_thread.send_img_ch5.connect(lambda x: self.show_image(x, self.video_label_ch9))
 
         self.det_thread.send_statistic.connect(self.show_statistic)
         self.det_thread.send_msg.connect(lambda x: self.show_msg(x))
