@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1298</width>
+    <width>1365</width>
     <height>684</height>
    </rect>
   </property>
@@ -21,18 +21,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_9">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
     <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox_18">
       <property name="styleSheet">
@@ -1107,6 +1095,16 @@ border-image: url(:/icon/ui_files/icon/options.png);
                        <string>3</string>
                       </property>
                      </item>
+                     <item>
+                      <property name="text">
+                       <string>4</string>
+                      </property>
+                     </item>
+                     <item>
+                      <property name="text">
+                       <string>5</string>
+                      </property>
+                     </item>
                     </widget>
                    </item>
                    <item>
@@ -1220,6 +1218,14 @@ background-color: rgba(48,148,243,80);}</string>
                   <width>0</width>
                   <height>28</height>
                  </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei</family>
+                  <pointsize>-1</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">
@@ -2409,7 +2415,7 @@ font-size: 14px;</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>5</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab">
                  <property name="enabled">
@@ -2419,8 +2425,8 @@ font-size: 14px;</string>
                   <string>Multipel</string>
                  </attribute>
                  <layout class="QGridLayout" name="gridLayout_3">
-                  <item row="1" column="1">
-                   <widget class="Label_click_Mouse" name="video_label_ch3">
+                  <item row="0" column="2">
+                   <widget class="Label_click_Mouse" name="video_label_ch2">
                     <property name="enabled">
                      <bool>true</bool>
                     </property>
@@ -2434,6 +2440,12 @@ font-size: 14px;</string>
                      <size>
                       <width>200</width>
                       <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>16777215</height>
                      </size>
                     </property>
                     <property name="font">
@@ -2453,7 +2465,7 @@ font-size: 14px;</string>
 </string>
                     </property>
                     <property name="text">
-                     <string>CAM 3</string>
+                     <string>CAM 2</string>
                     </property>
                     <property name="scaledContents">
                      <bool>false</bool>
@@ -2554,7 +2566,7 @@ border-width: 2px;
                    </widget>
                   </item>
                   <item row="1" column="0">
-                   <widget class="Label_click_Mouse" name="video_label_ch2">
+                   <widget class="Label_click_Mouse" name="video_label_ch3">
                     <property name="enabled">
                      <bool>true</bool>
                     </property>
@@ -2568,12 +2580,6 @@ border-width: 2px;
                      <size>
                       <width>200</width>
                       <height>0</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>16777215</height>
                      </size>
                     </property>
                     <property name="font">
@@ -2593,7 +2599,99 @@ border-width: 2px;
 </string>
                     </property>
                     <property name="text">
-                     <string>CAM 2</string>
+                     <string>CAM 3</string>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>false</bool>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="Label_click_Mouse" name="video_label_ch11">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>200</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>36</pointsize>
+                     </font>
+                    </property>
+                    <property name="cursor">
+                     <cursorShape>ArrowCursor</cursorShape>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>true</bool>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">color: rgb(218, 218, 218);
+border-color: rgb(255, 0, 0);
+border-width: 2px;
+</string>
+                    </property>
+                    <property name="text">
+                     <string>CAM 4</string>
+                    </property>
+                    <property name="scaledContents">
+                     <bool>false</bool>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="Label_click_Mouse" name="video_label_ch12">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>200</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>微软雅黑</family>
+                      <pointsize>36</pointsize>
+                     </font>
+                    </property>
+                    <property name="cursor">
+                     <cursorShape>ArrowCursor</cursorShape>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>true</bool>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">color: rgb(218, 218, 218);
+border-color: rgb(255, 0, 0);
+border-width: 2px;
+</string>
+                    </property>
+                    <property name="text">
+                     <string>CAM 5</string>
                     </property>
                     <property name="scaledContents">
                      <bool>false</bool>
@@ -2604,10 +2702,6 @@ border-width: 2px;
                    </widget>
                   </item>
                  </layout>
-                 <zorder>video_label_ch1</zorder>
-                 <zorder>video_label_ch2</zorder>
-                 <zorder>video_label_ch3</zorder>
-                 <zorder>video_label_ch0</zorder>
                 </widget>
                 <widget class="QWidget" name="tab_2">
                  <attribute name="title">
@@ -3182,7 +3276,7 @@ border-radius:0px;}</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1298</width>
+     <width>1365</width>
      <height>23</height>
     </rect>
    </property>

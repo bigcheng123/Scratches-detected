@@ -139,8 +139,12 @@ cython_debug/
 
 
 # 忽略特定目录下的所有文件和子目录（例如一个名为"temp"的目录）
-/runs/*
-/datasets/*
-/backupfile/
-/data/*
-/data/
+!runs/*
+!datasets/*
+!backupfile/
+!data/*
+data/
+!imgs/*
+### !folderName/ 表示忽略 folderName里面的文件  而保留folderName文件夹
+!auto_save/
+install_torch/

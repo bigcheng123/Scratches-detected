@@ -36,10 +36,10 @@ modbus_flag = False
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
     send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch2 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch3 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch4 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch5 = pyqtSignal(np.ndarray)  ### CH1 output image
+    send_img_ch2 = pyqtSignal(np.ndarray)  ### CH2 output image
+    send_img_ch3 = pyqtSignal(np.ndarray)  ### CH3 output image
+    send_img_ch4 = pyqtSignal(np.ndarray)  ### CH4 output image
+    send_img_ch5 = pyqtSignal(np.ndarray)  ### CH5 output image
     send_statistic = pyqtSignal(dict)  ###
     # emit：detecting/pause/stop/finished/error msg
     send_msg = pyqtSignal(str)
@@ -59,7 +59,7 @@ class DetThread(QThread): ###继承 QThread
         self.percent_length = 1000              # progress bar
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
-        self.save_fold = None  ####'./result'
+        self.save_fold = None  ####'./auto_save/mp4'
 
     @torch.no_grad()
     def run(self,
@@ -67,7 +67,7 @@ class DetThread(QThread): ###继承 QThread
             max_det=50,  # maximum detections per image//每个图像的最大检测次数
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-            view_img = False,  # show results
+            view_img=False,  # show results
             save_txt=False,  # save results to *.txt
             save_conf=False,  # save confidences in --save-txt labels
             save_crop=False,  # save cropped prediction boxes
@@ -262,7 +262,7 @@ class DetThread(QThread): ###继承 QThread
                         # Stream results   emit frame
                         if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
                         # if view_img:
-                            cv2.putText(im0, str(f'FSP={FSP}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            cv2.putText(im0, str(f'FSP = {FSP}  CAM = {i}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
                             res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
@@ -271,23 +271,23 @@ class DetThread(QThread): ###继承 QThread
                             ## chanel-1
                             if label_chanel == '1':
                                 self.send_img_ch1.emit(im0)  ### 发送图像
-                                print('seng img : ch1')
+                                # print('seng img : ch1')
                             # chanel-2
                             if label_chanel == '2':
                                 self.send_img_ch2.emit(im0)  ### 发送图像
-                                print('seng img : ch2')
+                                # print('seng img : ch2')
                             ## chanel-3
                             if label_chanel == '3':
                                 self.send_img_ch3.emit(im0)  #### 发送图像
-                                print('seng img : ch3')
+                                # print('seng img : ch3')
                             ## chanel-4
                             if label_chanel == '4':
                                  self.send_img_ch4.emit(im0)  #### 发送图像
-                                 print('seng img : ch4')
-                                ## chanel-3
+                                 # print('seng img : ch4')
+                            ## chanel-5
                             if label_chanel == '5':
                                  self.send_img_ch5.emit(im0)  #### 发送图像
-                                 print('seng img : ch5')
+                                 # print('seng img : ch5')
                             ### ## send the detected result
                             self.send_statistic.emit(statistic_dic)
                             # print('emit statistic_dic', statistic_dic)
@@ -295,14 +295,15 @@ class DetThread(QThread): ###继承 QThread
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
                     # Write results
-                    if self.save_fold:
+                    if self.save_fold: #### when autosave is  true
                         os.makedirs(self.save_fold, exist_ok=True)
-                        if self.vid_cap is None:
+                        if self.vid_cap is None: ####save as .jpg
                             save_path = os.path.join(self.save_fold,
                                                      time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                    time.localtime()) + '.jpg')
                             cv2.imwrite(save_path, im0)
-                        else: ### self.vid_cap is cv2capture
+                            print(str(f'save as .jpg  CAM = {i}'))#& str(save_path))
+                        else: ### self.vid_cap is cv2capture save as .mp4
                             if count == 1:
                                 ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
                                 if ori_fps == 0:
@@ -314,7 +315,7 @@ class DetThread(QThread): ###继承 QThread
                                 self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
                                                            (width, height))
                             self.out.write(im0)
-
+                            print( str(f'save as .mp4  CAM = {i}')) # & str(save_path))
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
                         self.is_continue = False
@@ -400,6 +401,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
+        self.det_thread.send_img_ch4.connect(lambda x: self.show_image(x, self.video_label_ch11))
+        self.det_thread.send_img_ch5.connect(lambda x: self.show_image(x, self.video_label_ch12))
         #### tab-2
         self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch4))
         #### tab-3
@@ -644,11 +647,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def is_save(self):
         if self.saveCheckBox.isChecked():
-            self.det_thread.save_fold = './runs'  ### save result as .mp4
+            self.det_thread.save_fold = './auto_save/mp4'  ### save result as .mp4
         else:
             self.det_thread.save_fold = None
 
-    def checkrate(self):
+    def checkrate(self):  #####latency checkbox
         if self.checkBox.isChecked():
             self.det_thread.rate_check = True
         else:
@@ -940,7 +943,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.checkBox.setCheckState(check)
         self.det_thread.rate_check = check
         self.saveCheckBox.setCheckState(savecheck)
-        self.is_save()
+        self.is_save() ###auto save  checkbox
 
         self.comboBox_device.setCurrentIndex(device) # 设置当前索引号 "device": 0
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
