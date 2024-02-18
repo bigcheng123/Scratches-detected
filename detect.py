@@ -97,8 +97,8 @@ def run(weights='pt/yolov5s.pt',  # model.pt path(s)
     # grab frame
     for path, img, im0s, vid_cap in dataset:
 
-        cv2.imshow('im0s-0', im0s[0])  ##### show raw images
-        cv2.imshow('im0s-1', im0s[1])  ##### show raw images
+        # cv2.imshow('im0s-0', im0s[0])  ##### show raw images
+        # cv2.imshow('im0s-1', im0s[1])  ##### show raw images
         print(type(path), type(img), type(im0s), type(vid_cap))
         #### img recode
         img = torch.from_numpy(img).to(device)

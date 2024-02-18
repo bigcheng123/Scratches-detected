@@ -1,6 +1,8 @@
 from utils.general import apply_classifier
 from utils.datasets import LoadStreams, LoadImages
 
+################# 此文件为测试用草稿纸 ############################
+
 function datasets():
     class LoadStreams(source, img_size=imgsz, stride=stride)
         def __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True):
@@ -31,4 +33,3 @@ cv2.imshow(str(p), res)  ##### show images
 pred = apply_classifier(pred, modelc, img, im0s)
 
 for path, img, im0s, vid_cap in dataset:
-

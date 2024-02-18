@@ -63,7 +63,7 @@ class DetThread(QThread): ###继承 QThread
 
     @torch.no_grad()
     def run(self,
-            imgsz=320, #1440 # inference size (pixels)//推理大小
+            imgsz=640, #1440 # inference size (pixels)//推理大小
             max_det=50,  # maximum detections per image//每个图像的最大检测次数
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -256,13 +256,13 @@ class DetThread(QThread): ###继承 QThread
                                         print('save_one_box')
                             # print('detection is running')
 
-                        FSP = int(1 / (t2 - t1))
+                        fsp = int(1 / (t2 - t1))
                         # print(f'{s}Done. ({t2 - t1:.3f}s FSP={FSP})')
 
                         # Stream results   emit frame
                         if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
                         # if view_img:
-                            cv2.putText(im0, str(f'FSP = {FSP}  CAM = {i}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            cv2.putText(im0, str(f'FSP = {fsp}  CAM = {i}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
                             res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
@@ -514,55 +514,55 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
             while self.runButton_modbus.isChecked() and modbus_flag:
 
-                feedback_data_IN0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
-                if feedback_data_IN0:#### 有返回数据
-                    text_IN0 = feedback_data_IN0[0:8]  ## 读取8位字符
-                    if text_IN0 == '01020101':
+                feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
+                if feedback_data_in0:#### 有返回数据
+                    text_in0 = feedback_data_in0[0:8]  ## 读取8位字符
+                    if text_in0 == '01020101':
                         self.checkBox_10.setChecked(True)
                     else:
                         self.checkBox_10.setChecked(False)
-                    print('text_IN0', text_IN0)
-                    feedback_list.append(text_IN0)
+                    print('text_IN0', text_in0)
+                    feedback_list.append(text_in0)
                     feedback_data = modbus_rtu.writedata(self.ser, DO0_ON)  ###1号继电器打开  运行准备 DO1 =1
                 else: #### 无返回数据
                     no_feedback = modbus_rtu.writedata(self.ser, DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
 
-                feedback_data_IN1 = modbus_rtu.writedata(self.ser, IN1_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
-                if feedback_data_IN1:  #### 有返回数据
-                    text_IN1 = feedback_data_IN1[0:8]  ## 读取8位字符
-                    if text_IN1 == '01020101':
+                feedback_data_in1 = modbus_rtu.writedata(self.ser, IN1_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                if feedback_data_in1:  #### 有返回数据
+                    text_in1 = feedback_data_in1[0:8]  ## 读取8位字符
+                    if text_in1 == '01020101':
                         self.checkBox_11.setChecked(True)
                     else:
                         self.checkBox_11.setChecked(False)
-                    print('text_IN1', text_IN1)
-                    feedback_list.append(text_IN1)
+                    print('text_IN1', text_in1)
+                    feedback_list.append(text_in1)
                 else:  #### 无返回数据
                     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
 
-                feedback_data_IN2 = modbus_rtu.writedata(self.ser,IN2_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
-                if feedback_data_IN2:  #### 有返回数据
-                    text_IN2 = feedback_data_IN2[0:8]  ## 读取8位字符
-                    if text_IN2 == '01020101':
+                feedback_data_in2 = modbus_rtu.writedata(self.ser,IN2_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                if feedback_data_in2:  #### 有返回数据
+                    text_in2 = feedback_data_in2[0:8]  ## 读取8位字符
+                    if text_in2 == '01020101':
                         self.checkBox_12.setChecked(True)
                     else:
                         self.checkBox_12.setChecked(False)
-                    print('text_IN2', text_IN2)
-                    feedback_list.append(text_IN2)
+                    print('text_IN2', text_in2)
+                    feedback_list.append(text_in2)
                 else:  #### 无返回数据
                     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
 
-                feedback_data_IN3 = modbus_rtu.writedata(self.ser,IN3_READ)  ####
-                if feedback_data_IN3:  #### 有返回数据
-                    text_IN3 = feedback_data_IN3[0:8]  ## 读取8位字符
-                    if text_IN3 == '01020101':
+                feedback_data_in3 = modbus_rtu.writedata(self.ser,IN3_READ)  ####
+                if feedback_data_in3:  #### 有返回数据
+                    text_in3 = feedback_data_in3[0:8]  ## 读取8位字符
+                    if text_in3 == '01020101':
                         self.checkBox_13.setChecked(True)
                     else:
                         self.checkBox_13.setChecked(False)
-                    print('text_IN3', text_IN3)
-                    feedback_list.append(text_IN3)
+                    print('text_IN3', text_in3)
+                    feedback_list.append(text_in3)
                 else:  #### 无返回数据
                     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
                     print('no_feedback data')
@@ -577,7 +577,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 output_box_list =[self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i , n in enumerate(output_box_list):
-                    if n == True:
+                    if n:
                         print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
                     else:
@@ -1034,5 +1034,3 @@ if __name__ == "__main__":
 
     # myWin.showMaximized()
     sys.exit(app.exec_())
-
-
