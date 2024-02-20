@@ -137,8 +137,14 @@ class DetThread(QThread): ###继承 QThread
         t0 = time.time()
         count = 0
 
-        # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
+        # load  the camera's index 载入 摄像头号码
+        streams_list = []
+        with open('streams.txt', 'r') as file:
+            for line in file:
+                streams_list.append(line.strip())
+        print('streams:', streams_list)
 
+        # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
         while True: ##### 采用循环来 检查是否 停止推理
             print('marker while loop')
             print(' while loop self.is_continue', self.is_continue)
@@ -169,8 +175,8 @@ class DetThread(QThread): ###继承 QThread
                     model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
                 self.current_weight = self.weights
 
-            # load  streams
 
+            # load  streams
             if self.is_continue:
                 # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
                 for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
@@ -209,15 +215,23 @@ class DetThread(QThread): ###继承 QThread
                     pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, classes, agnostic_nms, max_det=max_det)
                     t2 = time_sync()
 
-                    # Apply Classifier
+                    # Apply Classifier  ### 引用分类器
                     if classify:
                         pred = apply_classifier(pred, modelc, img, im0s)
+                    # print(' pred = apply_classifier', type(pred), len(pred))
+
 
                     # Process detections
                     for i, det in enumerate(pred):  # detections per image
                         if webcam:  # batch_size >= 1     get the frame
                             p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
-                            label_chanel = str(i)
+                            # label输出 方法1  ↓ ###label_chanel 依据 list det的 元素
+                            # label_chanel = str(i)
+                            # label输出 方法2  ↓  依据 streams.txt camera号码
+                            if len(pred)==len(streams_list):
+                                    label_chanel = str(streams_list[i])
+                            else:
+                                break
                             # print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
                             p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
@@ -397,6 +411,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.source = self.source_type
         self.det_thread.percent_length = self.progressBar.maximum()
         #### the connect funtion transform to  def run_or_continue(self):
+        #### tab1-mutil
         self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch0))
         self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
