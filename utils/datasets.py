@@ -298,25 +298,35 @@ class LoadStreams:
         self.sources = [clean_str(x) for x in sources]  # clean source names for later
         self.auto = auto
         for i, s in enumerate(sources):  # index, source
-            # Start thread to read frames from video stream
-            st = f'{i + 1}/{n}: {s}... '
-            if 'youtube.com/' in s or 'youtu.be/' in s:  # if source is YouTube video
-                check_requirements(('pafy', 'youtube_dl==2020.12.2'))
-                import pafy
-                s = pafy.new(s).getbest(preftype="mp4").url  # YouTube URL
-            s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
-            self.cap = cv2.VideoCapture(s) ### get  the streams
-            assert self.cap.isOpened(), f'{st}Failed to open {s}'
-            w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1000))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
-            self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
-            self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
+            try:  # 20240220 by alex
+                # Start thread to read frames from video stream
+                st = f'{i + 1}/{n}: {s}... '
+                if 'youtube.com/' in s or 'youtu.be/' in s:  # if source is YouTube video
+                    check_requirements(('pafy', 'youtube_dl==2020.12.2'))
+                    import pafy
+                    s = pafy.new(s).getbest(preftype="mp4").url  # YouTube URL
+                s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
+                self.cap = cv2.VideoCapture(s) ### get  the streams
+                assert self.cap.isOpened(), f'{st}Failed to open {s}'
+                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
+                h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1000))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
+                fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
+                self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
+                self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
+                _, self.imgs[i] = self.cap.read()  # guarantee first frame
+                self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
+                LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
 
-            _, self.imgs[i] = self.cap.read()  # guarantee first frame
-            self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
-            LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
-            self.threads[i].start()
+
+            except:# 20240220 by alex
+                print(f'无法启动摄像头线程{i}')
+                break
+
+            else:# 20240220 by alex
+
+
+                self.threads[i].start()
+                print(f'open cam {i} succesfully')
         LOGGER.info('')  # newline
 
         # check for common shapes

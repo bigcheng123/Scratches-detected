@@ -121,7 +121,7 @@ class DetThread(QThread): ###继承 QThread
             dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
             print('dataset type', type(dataset), dataset)
             bs = len(dataset)  # batch_size
-            print('len(bs)=', bs)
+            print('len(dataset)=', bs)
             # #### streams = LoadStreams
 
         else:  ### load the images
@@ -228,9 +228,10 @@ class DetThread(QThread): ###继承 QThread
                             # label输出 方法1  ↓ ###label_chanel 依据 list det的 元素
                             # label_chanel = str(i)
                             # label输出 方法2  ↓  依据 streams.txt camera号码
-                            if len(pred)==len(streams_list):
+                            if len(pred) <= len(streams_list):
                                     label_chanel = str(streams_list[i])
                             else:
+                                print(f'streams : {len(pred)} camera quantity : {len(streams_list)}')
                                 break
                             # print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
@@ -288,7 +289,7 @@ class DetThread(QThread): ###继承 QThread
                                 # print('seng img : ch1')
                             # chanel-2
                             if label_chanel == '2':
-                                self.send_img_ch2.emit(im0)  ### 发送图像
+                                self.send_img_ch2.emit(im0)  ### 发送图像fi
                                 # print('seng img : ch2')
                             ## chanel-3
                             if label_chanel == '3':
@@ -408,7 +409,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.port_type = self.comboBox_port.currentText() ###  get port type from combobox
         self.det_thread.weights = "./pt/%s" % self.model_type  # difined
         self.det_thread.device = self.device_type # difined  device
-        self.det_thread.source = self.source_type
+        self.det_thread.source = self.source_type # get origin source index
         self.det_thread.percent_length = self.progressBar.maximum()
         #### the connect funtion transform to  def run_or_continue(self):
         #### tab1-mutil
@@ -477,8 +478,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             if not self.det_thread.isRunning():
                 self.det_thread.start()
             device = os.path.basename(self.det_thread.device)  ### only for display
-            source = os.path.basename(self.det_thread.source)  ### only for display
-            source = str(source) if source.isnumeric() else source  ### only for display
+            source = os.path.basename(self.det_thread.source)  ### 引用 det_thread类的 self.source
+            source = str(source) if source.isnumeric() else source  ### source为 int时 转换为 str
             self.statistic_msg('Detecting >> model：{}，device: {}, source：{}'.
                                format(os.path.basename(self.det_thread.weights),device,
                                       source))
@@ -492,7 +493,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def thread_mudbus_run(self):
         global modbus_flag
         modbus_flag = True
-        #### hexcode  ######
+        # hexcode   comunicate with PC and modbus device
         IN0_READ = '01 02 00 00 00 01 B9 CA'
         IN1_READ = '01 02 00 01 00 01 E8 0A'
         IN2_READ = '01 02 00 02 00 01 18 0A'
@@ -629,15 +630,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 try:
                     self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
                     if self.ret:
-                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
                 except Exception as e:
                     print('openport erro-2', e)
                     self.statistic_msg(str(e))
-            else: ### self.ret is  True
+            else: # self.ret is  True
                 self.runButton_modbus.setChecked(True)
-                _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
+                _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
 
-        else: #### shut down modbus
+        else: # shut down modbus
             print('runButton_modbus.is unChecked')
             modbus_flag = False
             self.runButton_modbus.setChecked(False)
@@ -648,7 +649,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         if not self.det_thread.jump_out:
             self.det_thread.jump_out = True
         self.saveCheckBox.setEnabled(True)
-        # self.det_thread.stop()  #### bug-1 加入 停止线程会卡死  未解决
+        # self.det_thread.stop()  #### bug-1 加入此语句 停止线程会卡死  未解决
 
     def search_pt(self):
         pt_list = os.listdir('./pt')
@@ -703,11 +704,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         except Exception as e:
             self.statistic_msg('%s' % e)
 
-    def chose_cam(self):
+    def chose_cam(self): #UI bottun 'cameraButton'
         try:
-            self.stop()  #### stop running thread
+            self.stop()  # stop running thread
+            print('chose_cam run')
             MessageBox(
-                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=200, auto=True).exec_()# self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
+                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()# self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
             # get the number of local cameras
             _, cams = Camera().get_cam_num()
             print('enum_camera:', cams)
@@ -740,7 +742,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             pos = QPoint(x, y)
             action = popMenu.exec_(pos)
             if action:
-                self.det_thread.source = action.text()  ##### choose source
+                self.det_thread.source = action.text()  # choose source
                 self.statistic_msg('Loading camera：{}'.format(action.text()))
         except Exception as e:
             self.statistic_msg('%s' % e)
@@ -785,7 +787,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.device = self.device_type
         self.statistic_msg('Change device to %s' % x)
 
-    def change_source(self, x):
+    def change_source(self, x): # while the comboBox_source has changed
         self.source_type = self.comboBox_source.currentText()
         self.det_thread.source = self.source_type
         self.statistic_msg('Change source to %s' % x)
