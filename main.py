@@ -29,9 +29,9 @@ from utils.plots import Annotator, colors, save_one_box,plot_one_box
 from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
 
-## 设置全局变量
+## set global variable 设置全局变量
 modbus_flag = False
-
+results =[]
 
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
@@ -233,7 +233,7 @@ class DetThread(QThread): ###继承 QThread
                             else:
                                 print(f'streams : {len(pred)} camera quantity : {len(streams_list)}')
                                 break
-                            # print(type(label_chanel),'img chanel=', label_chanel)
+                            print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
                             p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
                         p = Path(p)  # to Path
@@ -251,7 +251,7 @@ class DetThread(QThread): ###继承 QThread
                             for c in det[:, -1].unique():
                                 n = (det[:, -1] == c).sum()  # detections per class
                                 s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-                            # Write results
+                            #  plot_one_box
                             for *xyxy, conf, cls in reversed(det):
                                 if save_txt:  # Write to file
                                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(
@@ -277,7 +277,7 @@ class DetThread(QThread): ###继承 QThread
                         # Stream results   emit frame
                         if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
                         # if view_img:
-                            cv2.putText(im0, str(f'FSP = {fsp}  CAM = {i}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            cv2.putText(im0, str(f'FSP = {fsp}  CAM = {label_chanel}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
                             res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
@@ -310,15 +310,18 @@ class DetThread(QThread): ###继承 QThread
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
                     # Write results
+                    global results
                     if self.save_fold: #### when autosave is  true
                         os.makedirs(self.save_fold, exist_ok=True)
-                        if self.vid_cap is None: ####save as .jpg
+                        if len(results):
+                        # if self.vid_cap is None: ####save as .jpg
                             save_path = os.path.join(self.save_fold,
                                                      time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                    time.localtime()) + '.jpg')
                             cv2.imwrite(save_path, im0)
-                            print(str(f'save as .jpg  CAM = {i}'))#& str(save_path))
-                        else: ### self.vid_cap is cv2capture save as .mp4
+                            print(str(f'save as .jpg  CAM = {label_chanel},save_path={save_path}'))#& str(save_path))
+                        if self.vid_cap is None:  ####save as .jpg
+                        # else: ### self.vid_cap is cv2capture save as .mp4
                             if count == 1:
                                 ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
                                 if ori_fps == 0:
@@ -330,7 +333,7 @@ class DetThread(QThread): ###继承 QThread
                                 self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
                                                            (width, height))
                             self.out.write(im0)
-                            print( str(f'save as .mp4  CAM = {i}')) # & str(save_path))
+                            print( str(f'save as .mp4  CAM = {label_chanel}')) # & str(save_path))
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
                         self.is_continue = False
@@ -865,7 +868,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print(repr(e))
 
     def show_statistic(self, statistic_dic):  ### predicttion  output
-        import re
+        global results
         try:
             self.resultWidget.clear()
             statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)

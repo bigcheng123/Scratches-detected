@@ -37,7 +37,7 @@ if __name__ == "__main__":
         print("Available cameras:")
         for camera in cameras:
             print(f"Camera {camera}")
-            threading.Thread(target=open_camera, args=(camera,)).start()
+            # threading.Thread(target=open_camera, args=(camera,)).start() #开启摄像头
     else:
         print("No cameras found.")
     cv2.waitKey(0)
