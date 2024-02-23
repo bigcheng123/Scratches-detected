@@ -138,13 +138,30 @@ dmypy.json
 cython_debug/
 
 
-# 忽略特定目录下的所有文件和子目录（例如一个名为"temp"的目录）
+### 类别一  文件和目录同时忽略 （表示 文件夹 以及 里面的内容都不会被上传到远程仓库）
+folderName
+install_torch
+
+
+
+### 类别二 仅忽略 folderName 文件，不忽略 folderName 目录 (!) 表示保留folderName文件会被上传，但是 里面的内容不会被上传，要2行语句同时使用？
+folderName
+!folderName/
+auto_save
+!auto_save/
+
+
+
+### 忽略特定目录下的所有文件和子目录（例如一个名为"temp"的目录）
 !runs/*
 !datasets/*
 !backupfile/
-!data/*
 data/
+!data/*
 !imgs/*
+
 ### !folderName/ 表示忽略 folderName里面的文件  而保留folderName文件夹
-!auto_save/
-install_torch/
+
+
+
+
