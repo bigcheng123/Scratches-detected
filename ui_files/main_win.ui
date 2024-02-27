@@ -85,40 +85,6 @@ border-radius:0px;}</string>
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="minimumSize">
-             <size>
-              <width>300</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">font-size: 20px;
-font-family: &quot;Microsoft YaHei&quot;;
-font-weight: bold;
-border-radius:4px;
-background-color: rgb(0, 170, 127);
-color: rgb(255, 255, 255);</string>
-            </property>
-            <property name="text">
-             <string>OK</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
            <widget class="QPushButton" name="fileButton_2">
             <property name="minimumSize">
              <size>
@@ -205,6 +171,12 @@ background-color: rgba(48,148,243,80);}</string>
           </item>
           <item>
            <widget class="QLabel" name="label_4">
+            <property name="minimumSize">
+             <size>
+              <width>267</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">QLabel
 {
@@ -219,6 +191,27 @@ color: rgb(218, 218, 218);
             </property>
             <property name="text">
              <string>Scratch Dectect</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">font-size: 20px;
+font-family: &quot;Microsoft YaHei&quot;;
+font-weight: bold;
+border-radius:4px;
+background-color: rgb(0, 170, 127);
+color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="text">
+             <string>OK</string>
             </property>
            </widget>
           </item>
