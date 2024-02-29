@@ -61,6 +61,7 @@ class DetThread(QThread): ###继承 QThread
         self.rate = 100
         self.save_fold = None  ####'./auto_save/mp4'
 
+
     @torch.no_grad()
     def run(self,
             imgsz=640, #1440 # inference size (pixels)//推理大小
@@ -355,6 +356,7 @@ class DetThread(QThread): ###继承 QThread
                     break
             else:
                 print('is_continue break', self.is_continue)
+
         #### 生成结果文件夹
         # if save_txt or save_img:
         #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
@@ -497,21 +499,21 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         global modbus_flag
         modbus_flag = True
         # hexcode   comunicate with PC and modbus device
-        IN0_READ = '01 02 00 00 00 01 B9 CA'
-        IN1_READ = '01 02 00 01 00 01 E8 0A'
-        IN2_READ = '01 02 00 02 00 01 18 0A'
-        IN3_READ = '01 02 00 03 00 01 49 CA'
-        DO0_ON = '01 05 00 00 FF 00 8C 3A'
-        DO0_OFF = '01 05 00 00 00 00 CD CA'
-        DO1_ON = '01 05 00 01 FF 00 DD FA'
-        DO1_OFF = '01 05 00 01 00 00 9C 0A'
-        DO2_ON = '01 05 00 02 FF 00 2D FA'
-        DO2_OFF = '01 05 00 02 00 00 6C 0A'
-        DO3_ON = '01 05 00 03 FF 00 7C 3A'
-        DO3_OFF = '01 05 00 03 00 00 3D CA'
+        # IN0_READ = '01 02 00 00 00 01 B9 CA'
+        # IN1_READ = '01 02 00 01 00 01 E8 0A'
+        # IN2_READ = '01 02 00 02 00 01 18 0A'
+        # IN3_READ = '01 02 00 03 00 01 49 CA'
+        DO0_ON = '01 05 33 0A FF 00 A3 7C'#地址330A-Y12接通亮黄灯 原代码：'01 05 00 00 FF 00 8C 3A'
+        DO0_OFF = '01 05 33 0A 00 00 E2 8C'#地址330A-Y12断开灭黄灯 原代码：'01 05 00 00 00 00 CD CA'
+        # DO1_ON = '01 05 00 01 FF 00 DD FA'
+        # DO1_OFF = '01 05 00 01 00 00 9C 0A'
+        DO2_ON = '01 05 33 0C FF 00 43 7D'#地址330C-Y14接通亮绿灯 原代码：'01 05 00 02 FF 00 2D FA'
+        DO2_OFF = '01 05 33 0C 00 00 02 8D'#地址330C-Y14断开灭绿灯 原代码：'01 05 00 02 00 00 6C 0A'
+        DO3_ON = '01 05 33 0B FF 00 F2 BC'#地址330B-Y13接通亮红灯 原代码：'01 05 00 03 FF 00 7C 3A'
+        DO3_OFF = '01 05 33 0B 00 00 B3 4C'#地址330B-Y13断开灭红灯 原代码：'01 05 00 03 00 00 3D CA'
 
         DO_ALL_ON = '01 0F 00 00 00 04 01 FF 7E D6'
-        DO_ALL_OFF = '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
+        DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'#'01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
 
         # self.ret = None
         self.port_type = self.comboBox_port.currentText()
@@ -532,76 +534,81 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             feedback_list = []
 
             while self.runButton_modbus.isChecked() and modbus_flag:
-
-                feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
-                if feedback_data_in0:#### 有返回数据
-                    text_in0 = feedback_data_in0[0:8]  ## 读取8位字符
-                    if text_in0 == '01020101':
-                        self.checkBox_10.setChecked(True)
-                    else:
-                        self.checkBox_10.setChecked(False)
-                    print('text_IN0', text_in0)
-                    feedback_list.append(text_in0)
-                    feedback_data = modbus_rtu.writedata(self.ser, DO0_ON)  ###1号继电器打开  运行准备 DO1 =1
-                else: #### 无返回数据
-                    no_feedback = modbus_rtu.writedata(self.ser, DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
-                    print('no_feedback data')
-
-                feedback_data_in1 = modbus_rtu.writedata(self.ser, IN1_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
-                if feedback_data_in1:  #### 有返回数据
-                    text_in1 = feedback_data_in1[0:8]  ## 读取8位字符
-                    if text_in1 == '01020101':
-                        self.checkBox_11.setChecked(True)
-                    else:
-                        self.checkBox_11.setChecked(False)
-                    print('text_IN1', text_in1)
-                    feedback_list.append(text_in1)
-                else:  #### 无返回数据
-                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
-                    print('no_feedback data')
-
-                feedback_data_in2 = modbus_rtu.writedata(self.ser,IN2_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
-                if feedback_data_in2:  #### 有返回数据
-                    text_in2 = feedback_data_in2[0:8]  ## 读取8位字符
-                    if text_in2 == '01020101':
-                        self.checkBox_12.setChecked(True)
-                    else:
-                        self.checkBox_12.setChecked(False)
-                    print('text_IN2', text_in2)
-                    feedback_list.append(text_in2)
-                else:  #### 无返回数据
-                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
-                    print('no_feedback data')
-
-                feedback_data_in3 = modbus_rtu.writedata(self.ser,IN3_READ)  ####
-                if feedback_data_in3:  #### 有返回数据
-                    text_in3 = feedback_data_in3[0:8]  ## 读取8位字符
-                    if text_in3 == '01020101':
-                        self.checkBox_13.setChecked(True)
-                    else:
-                        self.checkBox_13.setChecked(False)
-                    print('text_IN3', text_in3)
-                    feedback_list.append(text_in3)
-                else:  #### 无返回数据
-                    no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
-                    print('no_feedback data')
-
-                if len(feedback_list) == 20:
-                    feedback_list.clear()
-                else:
-                    self.statistic_msg(str(feedback_list))
+                start=time.time()
+                # 240228屏蔽537-595:速度提升0.26s
+                # feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
+                # if feedback_data_in0:#### 有返回数据
+                #     text_in0 = feedback_data_in0[0:8]  ## 读取8位字符
+                #     if text_in0 == '01020101':
+                #         self.checkBox_10.setChecked(True)
+                #     else:
+                #         self.checkBox_10.setChecked(False)
+                #     print('text_IN0', text_in0)
+                #     feedback_list.append(text_in0)
+                #     # feedback_data = modbus_rtu.writedata(self.ser, DO0_ON) ###1号继电器打开  运行准备 DO1 =1
+                #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
+                # else: #### 无返回数据
+                #     no_feedback = modbus_rtu.writedata(self.ser, DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                #     print('no_feedback data')
+                #
+                # feedback_data_in1 = modbus_rtu.writedata(self.ser, IN1_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                # if feedback_data_in1:  #### 有返回数据
+                #     text_in1 = feedback_data_in1[0:8]  ## 读取8位字符
+                #     if text_in1 == '01020101':
+                #         self.checkBox_11.setChecked(True)
+                #     else:
+                #         self.checkBox_11.setChecked(False)
+                #     print('text_IN1', text_in1)
+                #     feedback_list.append(text_in1)
+                # else:  #### 无返回数据
+                #     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                #     print('no_feedback data')
+                #
+                # feedback_data_in2 = modbus_rtu.writedata(self.ser,IN2_READ)  #### 检查IN2 触发 返回01 02 01 00 a188
+                # if feedback_data_in2:  #### 有返回数据
+                #     text_in2 = feedback_data_in2[0:8]  ## 读取8位字符
+                #     if text_in2 == '01020101':
+                #         self.checkBox_12.setChecked(True)
+                #     else:
+                #         self.checkBox_12.setChecked(False)
+                #     print('text_IN2', text_in2)
+                #     feedback_list.append(text_in2)
+                # else:  #### 无返回数据
+                #     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                #     print('no_feedback data')
+                #
+                # feedback_data_in3 = modbus_rtu.writedata(self.ser,IN3_READ)  ####
+                # if feedback_data_in3:  #### 有返回数据
+                #     text_in3 = feedback_data_in3[0:8]  ## 读取8位字符
+                #     if text_in3 == '01020101':
+                #         self.checkBox_13.setChecked(True)
+                #     else:
+                #         self.checkBox_13.setChecked(False)
+                #     print('text_IN3', text_in3)
+                #     feedback_list.append(text_in3)
+                # else:  #### 无返回数据
+                #     no_feedback = modbus_rtu.writedata(self.ser,DO2_ON)  ###3号继电器打开   控制器无返回数据 D03 =1
+                #     print('no_feedback data')
+                #
+                # if len(feedback_list) == 20:
+                #     feedback_list.clear()
+                # else:
+                #     self.statistic_msg(str(feedback_list))
 
                 #### 同步UI 信号
-                intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
+                # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
                 output_box_list =[self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i , n in enumerate(output_box_list):
                     if n:
                         print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
+                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  ###PLC控制，灭绿灯-240228
+
                     else:
                         print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
+                        feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
 
             else:
                 modbus_flag = False
@@ -609,6 +616,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
 
                 self.ser.close()
+
 
 
     def modbus_on_off(self):
@@ -907,7 +915,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.checkBox_4.setChecked(False)
                 self.checkBox_5.setChecked(False)
                 self.checkBox_6.setChecked(False)
-                # self.checkBox_2.setText("")
+                self.checkBox_2.setText("")
                 print("result = []")
 
         except Exception as e:

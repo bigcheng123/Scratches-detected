@@ -308,7 +308,7 @@ class LoadStreams:
                 s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
                 self.cap = cv2.VideoCapture(s) ### get  the streams
                 assert self.cap.isOpened(), f'{st}Failed to open {s}'
-                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2240))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
+                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
                 h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
                 fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
                 self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback

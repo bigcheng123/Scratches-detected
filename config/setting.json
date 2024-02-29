@@ -1,10 +1,10 @@
 {
-  "iou": 1.0,
-  "conf": 0.07,
-  "rate": 6,
+  "iou": 0.5,
+  "conf": 0.13,
+  "rate": 2,
   "check": 0,
-  "savecheck": 2,
+  "savecheck": 0,
   "device": 0,
-  "port": 7,
+  "port": 3,
   "source": 0
 }
