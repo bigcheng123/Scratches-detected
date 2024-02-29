@@ -123,16 +123,20 @@ class Ui_mainWindow(object):
 "")
         self.label_4.setObjectName("label_4")
         self.horizontalLayout.addWidget(self.label_4)
-        self.pushButton_2 = QtWidgets.QPushButton(self.groupBox)
-        self.pushButton_2.setMinimumSize(QtCore.QSize(300, 40))
-        self.pushButton_2.setStyleSheet("font-size: 20px;\n"
+        self.pushButton_okng = QtWidgets.QPushButton(self.groupBox)
+        self.pushButton_okng.setMinimumSize(QtCore.QSize(340, 40))
+        self.pushButton_okng.setToolTipDuration(0)
+        self.pushButton_okng.setStyleSheet("QPushButton {\n"
+"font-size: 20px;\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-weight: bold;\n"
 "border-radius:4px;\n"
 "background-color: rgb(0, 170, 127);\n"
-"color: rgb(255, 255, 255);")
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.horizontalLayout.addWidget(self.pushButton_2)
+"color: rgb(255, 255, 255);\n"
+"}\n"
+"")
+        self.pushButton_okng.setObjectName("pushButton_okng")
+        self.horizontalLayout.addWidget(self.pushButton_okng)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.timeEdit = QtWidgets.QTimeEdit(self.groupBox)
@@ -173,7 +177,10 @@ class Ui_mainWindow(object):
 "border-style: solid;\n"
 "border-width: 0px;\n"
 "border-radius: 0px;\n"
-"background-color: rgba(223, 223, 223, 150);}")
+"background-color: rgba(223, 223, 223, 150);}\n"
+"#QPushButton::checked {\n"
+"#background-color: rgb(0, 170, 127);}\n"
+"")
         self.runButton_modbus.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/icon/ui_files/icon/duankailianjie.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -1875,7 +1882,7 @@ class Ui_mainWindow(object):
         mainWindow.setWindowTitle(_translate("mainWindow", "Scratch Dectected"))
         self.fileButton_2.setToolTip(_translate("mainWindow", "file"))
         self.label_4.setText(_translate("mainWindow", "Scratch Dectect"))
-        self.pushButton_2.setText(_translate("mainWindow", "OK"))
+        self.pushButton_okng.setText(_translate("mainWindow", "OK"))
         self.label_modbus.setText(_translate("mainWindow", "modbus"))
         self.fileButton_3.setToolTip(_translate("mainWindow", "file"))
         self.fileButton_3.setText(_translate("mainWindow", "Settings..."))

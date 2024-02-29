@@ -604,12 +604,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  ###PLC控制，灭绿灯-240228
-
                     else:
                         print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
-
             else:
                 modbus_flag = False
                 print('modbus shut off')
@@ -634,6 +632,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
             if not self.ret:
                 self.runButton_modbus.setChecked(False)
+                self.runButton_modbus.setStyleSheet('background-color:rgb(220,0,0)') ### background = red
                 MessageBox(
                     self.closeButton, title='Error', text='Connection Error: '+ str(error), time=2000,
                     auto=True).exec_()
@@ -885,7 +884,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # print('output result:', type(results), results)
             self.resultWidget.addItems(results)
             if len(results) :
-                print((len(results)))
+                self.pushButton_okng.setText(f"NG :class= {len(results)}")
+                self.pushButton_okng.setStyleSheet('''QPushButton{
+                        font-size: 20px;
+                        font-family: "Microsoft YaHei";
+                        font-weight: bold;
+                        border-radius: 4px;
+                        background-color: rgb(240,20,30);
+                        color: rgb(255, 255, 255);
+                        }''')
                 for i , n in enumerate(results):
                     # str = re.sub("[\u4e00-\u9fa5\0-9\,\。]", "", i)
                     # print('class name = ', n)
@@ -910,6 +917,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                     # self.checkBox_2.setText(str(i))
             else:
+                self.pushButton_okng.setText(f"OK")
+                self.pushButton_okng.setStyleSheet('''QPushButton{
+                        font-size: 20px;
+                        font-family: "Microsoft YaHei";
+                        font-weight: bold;
+                        border-radius: 4px;
+                        background-color: rgb(0,220,127);
+                        color: rgb(255, 255, 255);
+                        }''')
                 self.checkBox_2.setChecked(False)
                 self.checkBox_3.setChecked(False)
                 self.checkBox_4.setChecked(False)
