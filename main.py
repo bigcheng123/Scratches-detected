@@ -22,7 +22,7 @@ from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
 from utils.CustomMessageBox import MessageBox
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, non_max_suppression, \
-    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
+    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path,clean_str
 # from utils.plots import colors, plot_one_box, plot_one_box_PIL
 from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
@@ -48,6 +48,7 @@ class DetThread(QThread): ###继承 QThread
 
     def __init__(self):
         super(DetThread, self).__init__()
+        self.vid_cap = None #240229
         self.weights = './yolov5s.pt'
         self.current_weight = './yolov5s.pt'
         self.source = '0'
@@ -60,7 +61,6 @@ class DetThread(QThread): ###继承 QThread
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
         self.save_fold = None  ####'./auto_save/mp4'
-
 
     @torch.no_grad()
     def run(self,
@@ -84,7 +84,7 @@ class DetThread(QThread): ###继承 QThread
             line_thickness=3,  # bounding box thickness (pixels)//边界框厚度
             hide_labels=False,  # hide labels
             hide_conf=False,  # hide confidences
-            half=False,  # use FP16 half-precision inference
+            half=True,  # use FP16 half-precision inference
             ):
 
         save_img = not nosave and not self.source.endswith('.txt')  # save inference images
@@ -117,6 +117,7 @@ class DetThread(QThread): ###继承 QThread
 
         # Dataloader
         if webcam: ###self.source.isnumeric() or self.source.endswith('.txt') or
+            print('if webcam is running')
             view_img = check_imshow()
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
@@ -126,6 +127,7 @@ class DetThread(QThread): ###继承 QThread
             # #### streams = LoadStreams
 
         else:  ### load the images
+            print('if webcam false')
             dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
             bs = 1  # batch_size
         vid_path, vid_writer = [None] * bs, [None] * bs
@@ -153,17 +155,62 @@ class DetThread(QThread): ###继承 QThread
             # print(' while loop camera.cap', type(self.vid_cap))
 
             if self.jump_out:
+                # cap1 = cv2.VideoCapture(0)
+                # cap2 = cv2.VideoCapture(1)
+                # cap3 = cv2.VideoCapture(2)
+                # cap4 = cv2.VideoCapture(3)
+                # cap5 = cv2.VideoCapture(4)
+                # cap6 = cv2.VideoCapture(5)
+                # cap1.release()
+                # print('capr', cap1.release())
+                # cap2.release()
+                # print('cap2r', cap2.release())
+                # cap3.release()
+                # print('cap3r', cap3.release())
+                # cap4.release()
+                # print('cap4r', cap4.release())
+                # cap5.release()
+                # print('cap5r', cap5.release())
+                # cap6.release()
+                # print('cap6r', cap6.release())
+                # break
+                # if self.vid_cap == None:
+                #     a = -2
+                # else:
+                #     a = 5
+                # while a > -1:
+                #     print('1-vid_cap', self.vid_cap)
+                #     self.vid_cap.release()
+                #     print('1-in loop', a, self.vid_cap.release(), self.vid_cap)
+                #     a = a-1
+                #     self.vid_cap = cv2.VideoCapture(a)
+                #     print('1-fix cap', self.vid_cap)
+                #     if a == -1:
+                #         self.vid_cap = None
+                #         self.is_continue = False
+                #         self.jump_out = False
+                #         self.send_percent.emit(a)
+                #         self.send_msg.emit('Stop')
+                #         if hasattr(self, 'out'):
+                #             self.out.release()
+                #         print('jump_out push-1', self.jump_out)
+                #         break
+                #         print('1-reset cap', self.vid_cap)
+                # break
+
+
                 self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
                 print('vid_cap.release -1', type(self.vid_cap))
                 self.send_percent.emit(0)
                 self.send_msg.emit('Stop')
                 if hasattr(self, 'out'):
                     self.out.release()
-                print('jump_out push-1', self.jump_out)
+                print('jump_out push-11', self.jump_out)
                 break
 
             # change model & device  20230810
             if self.current_weight != self.weights:
+                print('current is running')
                 # Load model
                 model = attempt_load(self.weights, map_location = device)  # load FP32 model
                 stride = int(model.stride.max())  # model stride
@@ -179,6 +226,7 @@ class DetThread(QThread): ###继承 QThread
 
             # load  streams
             if self.is_continue:
+                print('is continue is running')
                 # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
                 for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
                     # print(type(path), type(img), type(im0s), type(self.vid_cap))
@@ -234,7 +282,7 @@ class DetThread(QThread): ###继承 QThread
                             else:
                                 print(f'streams : {len(pred)} camera quantity : {len(streams_list)}')
                                 break
-                            print(type(label_chanel),'img chanel=', label_chanel)
+                            # print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
                             p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
                         p = Path(p)  # to Path
@@ -335,11 +383,60 @@ class DetThread(QThread): ###继承 QThread
                                                            (width, height))
                             self.out.write(im0)
                             print( str(f'save as .mp4  CAM = {label_chanel}')) # & str(save_path))
+
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
                         self.is_continue = False
+                        # cap1 = cv2.VideoCapture(0)
+                        # cap2 = cv2.VideoCapture(1)
+                        # cap3 = cv2.VideoCapture(2)
+                        # cap4 = cv2.VideoCapture(3)
+                        # cap5 = cv2.VideoCapture(4)
+                        # cap6 = cv2.VideoCapture(5)
+                        # cap1.release()
+                        # print('capr', cap1.release())
+                        # cap2.release()
+                        # print('cap2r', cap2.release())
+                        # cap3.release()
+                        # print('cap3r', cap3.release())
+                        # cap4.release()
+                        # print('cap4r', cap4.release())
+                        # cap5.release()
+                        # print('cap5r', cap5.release())
+                        # cap6.release()
+                        # print('cap6r', cap6.release())
+                        # # print('cap.is_open', self.cap.isOpened())
+                        # self.send_percent.emit(0)
+                        # self.send_msg.emit('Stop')
+                        # if hasattr(self, 'out'):
+                        #     self.out.release()
+                        #     print('self.out.release')
+                        # break
+                        # break
+                        # c = 5
+                        # while c > -1:
+                        #     print('2-vid_cap', self.vid_cap)
+                        #     self.vid_cap.release()
+                        #     print('2-in loop', c, self.vid_cap.release(), self.vid_cap)
+                        #
+                        #     c = c - 1
+                        #     self.vid_cap = cv2.VideoCapture(c)
+                        #     print('2-fix cap', self.vid_cap)
+                        #     if c == -1:
+                        #         self.vid_cap = None
+                        #         # self.jump_out = False
+                        #         # self.is_continue = False
+                        #         self.send_percent.emit(c)
+                        #         self.send_msg.emit('Stop')
+                        #         if hasattr(self, 'out'):
+                        #             self.out.release()
+                        #             print('self.out.release')
+                        #         break
+                        #         print('2-reset cap', self.vid_cap)
+                        # break
+
                         self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                        print('self.vid_cap.release-2', type(self.vid_cap))
+                        print('self.vid_cap.release-22', type(self.vid_cap))
                         self.send_percent.emit(0)
                         self.send_msg.emit('Stop')
                         if hasattr(self, 'out'):
@@ -601,11 +698,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                 for i , n in enumerate(output_box_list):
                     if n:
-                        print('scratch detected')
+                        # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  ###PLC控制，灭绿灯-240228
                     else:
-                        print('scratch has not detected')
+                        # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
             else:
@@ -932,7 +1029,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.checkBox_5.setChecked(False)
                 self.checkBox_6.setChecked(False)
                 self.checkBox_2.setText("")
-                print("result = []")
+                # print("result = []")
 
         except Exception as e:
             print(repr(e))
