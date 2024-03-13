@@ -22,7 +22,7 @@ from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
 from utils.CustomMessageBox import MessageBox
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, non_max_suppression, \
-    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
+    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path,clean_str
 # from utils.plots import colors, plot_one_box, plot_one_box_PIL
 from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
@@ -48,6 +48,7 @@ class DetThread(QThread): ###继承 QThread
 
     def __init__(self):
         super(DetThread, self).__init__()
+        self.vid_cap = None #240229
         self.weights = './yolov5s.pt'
         self.current_weight = './yolov5s.pt'
         self.source = '0'
@@ -59,8 +60,7 @@ class DetThread(QThread): ###继承 QThread
         self.percent_length = 1000              # progress bar
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
-        self.save_fold = None  ####'./auto_save/mp4'
-
+        self.save_fold = None  ####'./auto_save/jpg'
 
     @torch.no_grad()
     def run(self,
@@ -84,7 +84,7 @@ class DetThread(QThread): ###继承 QThread
             line_thickness=3,  # bounding box thickness (pixels)//边界框厚度
             hide_labels=False,  # hide labels
             hide_conf=False,  # hide confidences
-            half=False,  # use FP16 half-precision inference
+            half=True,  # use FP16 half-precision inference
             ):
 
         save_img = not nosave and not self.source.endswith('.txt')  # save inference images
@@ -110,13 +110,15 @@ class DetThread(QThread): ###继承 QThread
             model.half()  # to FP16
 
         # Second-stage classifier
-        classify = False
+        classify = False  ### bug-3  dont set True
         if classify:
+            print(f'classifly: {classify}')
             modelc = load_classifier(name='resnet50', n=2)  # initialize
             modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
 
         # Dataloader
         if webcam: ###self.source.isnumeric() or self.source.endswith('.txt') or
+            print('if webcam is running')
             view_img = check_imshow()
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
@@ -126,12 +128,13 @@ class DetThread(QThread): ###继承 QThread
             # #### streams = LoadStreams
 
         else:  ### load the images
+            print('if webcam false')
             dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
             bs = 1  # batch_size
         vid_path, vid_writer = [None] * bs, [None] * bs
 
 
-        # Run inference 推理
+        # Run inference 推理参数设定
         if device.type != '0':#'cpu'
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
         start_time = time.time()
@@ -153,17 +156,62 @@ class DetThread(QThread): ###继承 QThread
             # print(' while loop camera.cap', type(self.vid_cap))
 
             if self.jump_out:
+                # cap1 = cv2.VideoCapture(0)
+                # cap2 = cv2.VideoCapture(1)
+                # cap3 = cv2.VideoCapture(2)
+                # cap4 = cv2.VideoCapture(3)
+                # cap5 = cv2.VideoCapture(4)
+                # cap6 = cv2.VideoCapture(5)
+                # cap1.release()
+                # print('capr', cap1.release())
+                # cap2.release()
+                # print('cap2r', cap2.release())
+                # cap3.release()
+                # print('cap3r', cap3.release())
+                # cap4.release()
+                # print('cap4r', cap4.release())
+                # cap5.release()
+                # print('cap5r', cap5.release())
+                # cap6.release()
+                # print('cap6r', cap6.release())
+                # break
+                # if self.vid_cap == None:
+                #     a = -2
+                # else:
+                #     a = 5
+                # while a > -1:
+                #     print('1-vid_cap', self.vid_cap)
+                #     self.vid_cap.release()
+                #     print('1-in loop', a, self.vid_cap.release(), self.vid_cap)
+                #     a = a-1
+                #     self.vid_cap = cv2.VideoCapture(a)
+                #     print('1-fix cap', self.vid_cap)
+                #     if a == -1:
+                #         self.vid_cap = None
+                #         self.is_continue = False
+                #         self.jump_out = False
+                #         self.send_percent.emit(a)
+                #         self.send_msg.emit('Stop')
+                #         if hasattr(self, 'out'):
+                #             self.out.release()
+                #         print('jump_out push-1', self.jump_out)
+                #         break
+                #         print('1-reset cap', self.vid_cap)
+                # break
+
+
                 self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
                 print('vid_cap.release -1', type(self.vid_cap))
                 self.send_percent.emit(0)
                 self.send_msg.emit('Stop')
                 if hasattr(self, 'out'):
                     self.out.release()
-                print('jump_out push-1', self.jump_out)
+                print('jump_out push-11', self.jump_out)
                 break
 
             # change model & device  20230810
             if self.current_weight != self.weights:
+                print('current is running')
                 # Load model
                 model = attempt_load(self.weights, map_location = device)  # load FP32 model
                 stride = int(model.stride.max())  # model stride
@@ -179,6 +227,7 @@ class DetThread(QThread): ###继承 QThread
 
             # load  streams
             if self.is_continue:
+                print('DetThread.run.is_continue : true')
                 # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
                 for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
                     # print(type(path), type(img), type(im0s), type(self.vid_cap))
@@ -197,7 +246,7 @@ class DetThread(QThread): ###继承 QThread
                     if  count % 30 == 0 and count >= 30:
                         fps = int(30/(time.time()-start_time))
                         self.send_fps.emit('fps：'+str(fps))
-                        start_time = time.time()
+                        start_time = time.time() # updata start-time
                     if self.vid_cap:
                         percent = int(count/self.vid_cap.get(cv2.CAP_PROP_FRAME_COUNT)*self.percent_length)
                         self.send_percent.emit(percent)
@@ -214,15 +263,15 @@ class DetThread(QThread): ###继承 QThread
 
                     # Apply NMS
                     pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, classes, agnostic_nms, max_det=max_det)
-                    t2 = time_sync()
-
-                    # Apply Classifier  ### 引用分类器
-                    if classify:
+                    # t2 = time_sync()
+                    # print(f'predicted time :{t2}')
+                    # Apply Classifier
+                    if classify: #classify = False
                         pred = apply_classifier(pred, modelc, img, im0s)
-                    # print(' pred = apply_classifier', type(pred), len(pred))
+                        # print(f'type pred = ', type(pred), len(pred))
 
 
-                    # Process detections
+                    # emit frame  & Process detections
                     for i, det in enumerate(pred):  # detections per image
                         if webcam:  # batch_size >= 1     get the frame
                             p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
@@ -234,13 +283,13 @@ class DetThread(QThread): ###继承 QThread
                             else:
                                 print(f'streams : {len(pred)} camera quantity : {len(streams_list)}')
                                 break
-                            print(type(label_chanel),'img chanel=', label_chanel)
+                            # print(type(label_chanel),'img chanel=', label_chanel)
                         else: ### image
                             p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
                         p = Path(p)  # to Path
                         # save_path = str(save_dir / p.name)  # img.jpg
                         # txt_path = str(save_dir / 'labels' / p.stem) + (dtxt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  #
-                        txt_path = 'result'
+                        txt_path = 'auto_save'
                         s += '%gx%g ' % img.shape[2:]  # print string
                         gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
                         imc = im0.copy() if save_crop else im0  # for save_crop
@@ -252,33 +301,51 @@ class DetThread(QThread): ###继承 QThread
                             for c in det[:, -1].unique():
                                 n = (det[:, -1] == c).sum()  # detections per class
                                 s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-                            #  plot_one_box
+                            # save_txt
                             for *xyxy, conf, cls in reversed(det):
-                                if save_txt:  # Write to file
+                                if save_txt:  # save_txt=False,  # save results to *.txt
                                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(
                                         -1).tolist()  # normalized xywh
                                     line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
                                     with open(txt_path + '.txt', 'a') as f:
                                         f.write(('%g ' * len(line)).rstrip() % line + '\n')
-
+                                # plot_one_box
                                 if save_img or save_crop or view_img:  # Add bbox to image
+                                    # save_img = not nosave and not self.source.endswith('.txt')  # save inference images
+                                    # save_crop=False,  # save cropped prediction boxes
+                                    # view_img =check_inshow() # Check if environment supports image displays
+                                    print(f'Line 317 save_img {save_img},save_crop {save_crop},view_img {view_img}')
                                     c = int(cls)  # integer class
                                     statistic_dic[names[c]] += 1
                                     # print('statisstic_dic-2',statistic_dic)
                                     label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                     plot_one_box(xyxy, im0, label=label, color=colors(c, True),
                                                  line_thickness=line_thickness)
+                                    #### save NG image at here
+
+                                    # auto_save  Write results  save NG image in floder jpg
+                                    global results
+                                    if self.save_fold:  #### when checkbox: autosave is  setcheck
+                                        os.makedirs(self.save_fold, exist_ok=True)
+                                        if len(det):
+                                            # if self.vid_cap is None: ####save as .jpg
+                                            save_path = os.path.join(self.save_fold,
+                                                                     time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                                   time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
+                                            cv2.imwrite(save_path, im0)  # im0 = im0s.copy()
+                                            print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
+
                                     if save_crop:
                                         print('save_one_box')
                             # print('detection is running')
-
-                        fsp = int(1 / (t2 - t1))
-                        # print(f'{s}Done. ({t2 - t1:.3f}s FSP={FSP})')
+                        t2 = time_sync()
+                        detect_cycle = int(1 / (t2 - t1))
+                        print(f'{s}Done. ({t2 - t1:.3f}s detect_cycle={detect_cycle})')
 
                         # Stream results   emit frame
-                        if self.is_continue: ###### 发送图片必须在  for i, det in enumerate(pred): 循环内
+                        if self.is_continue: ###### send image in loop @  for i, det in enumerate(pred):
                         # if view_img:
-                            cv2.putText(im0, str(f'FSP = {fsp}  CAM = {label_chanel}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            cv2.putText(im0, str(f'FSP = {detect_cycle}  CAM = {label_chanel}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
                             res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
@@ -305,41 +372,98 @@ class DetThread(QThread): ###继承 QThread
                                  self.send_img_ch5.emit(im0)  #### 发送图像
                                  # print('seng img : ch5')
                             ### ## send the detected result
-                            self.send_statistic.emit(statistic_dic)
+                            self.send_statistic.emit(statistic_dic)  #发送 检测结果 statistic_dic
                             # print('emit statistic_dic', statistic_dic)
+                        '''
+                        # auto_save  Write results  save NG image in floder jpg
+                        global results
+                        if self.save_fold:  #### when checkbox: autosave is  setcheck
+                            os.makedirs(self.save_fold, exist_ok=True)
+                            if len(results):
+                                # if self.vid_cap is None: ####save as .jpg
+                                save_path = os.path.join(self.save_fold,
+                                                         time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                       time.localtime()) + '.jpg')
+                                cv2.imwrite(save_path, im0)  # im0 = im0s.copy()
+                                print(
+                                    str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
+                        '''
+
+                        if self.save_fold:  #### when checkbox: autosave is  setcheck
+                            # save as mp4
+                            if self.vid_cap is None:  ####save as .mp4
+                                # else: ### self.vid_cap is cv2capture save as .mp4
+                                if count == 1:
+                                    ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
+                                    if ori_fps == 0:
+                                        ori_fps = 25
+                                    # width = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                                    # height = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                                    width, height = im0.shape[1], im0.shape[0]
+                                    save_path = os.path.join(self.save_fold, time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                                           time.localtime()) + '.mp4')
+                                    self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
+                                                               (width, height))
+                                self.out.write(im0)
+                                print(str(f'save as .mp4  CAM = {label_chanel}'))  # & str(save_path))
+
                     if self.rate_check:
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
-                    # Write results
-                    global results
-                    if self.save_fold: #### when autosave is  true
-                        os.makedirs(self.save_fold, exist_ok=True)
-                        if len(results):
-                        # if self.vid_cap is None: ####save as .jpg
-                            save_path = os.path.join(self.save_fold,
-                                                     time.strftime('%Y_%m_%d_%H_%M_%S',
-                                                                   time.localtime()) + '.jpg')
-                            cv2.imwrite(save_path, im0)
-                            print(str(f'save as .jpg  CAM = {label_chanel},save_path={save_path}'))#& str(save_path))
-                        if self.vid_cap is None:  ####save as .jpg
-                        # else: ### self.vid_cap is cv2capture save as .mp4
-                            if count == 1:
-                                ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
-                                if ori_fps == 0:
-                                    ori_fps = 25
-                                # width = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                                # height = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                                width, height = im0.shape[1], im0.shape[0]
-                                save_path = os.path.join(self.save_fold, time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime()) + '.mp4')
-                                self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
-                                                           (width, height))
-                            self.out.write(im0)
-                            print( str(f'save as .mp4  CAM = {label_chanel}')) # & str(save_path))
+
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
                         self.is_continue = False
+                        # cap1 = cv2.VideoCapture(0)
+                        # cap2 = cv2.VideoCapture(1)
+                        # cap3 = cv2.VideoCapture(2)
+                        # cap4 = cv2.VideoCapture(3)
+                        # cap5 = cv2.VideoCapture(4)
+                        # cap6 = cv2.VideoCapture(5)
+                        # cap1.release()
+                        # print('capr', cap1.release())
+                        # cap2.release()
+                        # print('cap2r', cap2.release())
+                        # cap3.release()
+                        # print('cap3r', cap3.release())
+                        # cap4.release()
+                        # print('cap4r', cap4.release())
+                        # cap5.release()
+                        # print('cap5r', cap5.release())
+                        # cap6.release()
+                        # print('cap6r', cap6.release())
+                        # # print('cap.is_open', self.cap.isOpened())
+                        # self.send_percent.emit(0)
+                        # self.send_msg.emit('Stop')
+                        # if hasattr(self, 'out'):
+                        #     self.out.release()
+                        #     print('self.out.release')
+                        # break
+                        # break
+                        # c = 5
+                        # while c > -1:
+                        #     print('2-vid_cap', self.vid_cap)
+                        #     self.vid_cap.release()
+                        #     print('2-in loop', c, self.vid_cap.release(), self.vid_cap)
+                        #
+                        #     c = c - 1
+                        #     self.vid_cap = cv2.VideoCapture(c)
+                        #     print('2-fix cap', self.vid_cap)
+                        #     if c == -1:
+                        #         self.vid_cap = None
+                        #         # self.jump_out = False
+                        #         # self.is_continue = False
+                        #         self.send_percent.emit(c)
+                        #         self.send_msg.emit('Stop')
+                        #         if hasattr(self, 'out'):
+                        #             self.out.release()
+                        #             print('self.out.release')
+                        #         break
+                        #         print('2-reset cap', self.vid_cap)
+                        # break
+
                         self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
-                        print('self.vid_cap.release-2', type(self.vid_cap))
+                        print('self.vid_cap.release-22', type(self.vid_cap))
                         self.send_percent.emit(0)
                         self.send_msg.emit('Stop')
                         if hasattr(self, 'out'):
@@ -601,11 +725,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                 for i , n in enumerate(output_box_list):
                     if n:
-                        print('scratch detected')
+                        # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  ###PLC控制，灭绿灯-240228
                     else:
-                        print('scratch has not detected')
+                        # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
             else:
@@ -647,7 +771,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             else: # self.ret is  True
                 self.runButton_modbus.setChecked(True)
                 _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
-
+                self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
         else: # shut down modbus
             print('runButton_modbus.is unChecked')
             modbus_flag = False
@@ -673,7 +797,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def is_save(self):
         if self.saveCheckBox.isChecked():
-            self.det_thread.save_fold = './auto_save/mp4'  ### save result as .mp4
+            self.det_thread.save_fold = './auto_save/jpg'  ### save result as .mp4
         else:
             self.det_thread.save_fold = None
 
@@ -931,8 +1055,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.checkBox_4.setChecked(False)
                 self.checkBox_5.setChecked(False)
                 self.checkBox_6.setChecked(False)
-                self.checkBox_2.setText("")
-                print("result = []")
+                # self.checkBox_2.setText("")
+                # print("result = []")
 
         except Exception as e:
             print(repr(e))

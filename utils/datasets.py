@@ -307,6 +307,7 @@ class LoadStreams:
                     s = pafy.new(s).getbest(preftype="mp4").url  # YouTube URL
                 s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
                 self.cap = cv2.VideoCapture(s) ### get  the streams
+                print('in loop-cap-', s, self.cap)###240228
                 assert self.cap.isOpened(), f'{st}Failed to open {s}'
                 w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
                 h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
@@ -346,6 +347,7 @@ class LoadStreams:
                     self.imgs[i] = im
                 else:
                     LOGGER.warning('WARNING: Video stream unresponsive, please check your IP camera connection.')
+                    print('frames', i)#240228
                     self.imgs[i] = np.zeros_like(self.imgs[i])
                     cap.open(stream)  # re-open stream if signal was lost
             time.sleep(1 / self.fps[i])  # wait time
