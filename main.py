@@ -112,7 +112,6 @@ class DetThread(QThread): ###继承 QThread
         # Second-stage classifier
         classify = False  ### bug-3  dont set True
         if classify:
-            print(f'classifly: {classify}')
             modelc = load_classifier(name='resnet50', n=2)  # initialize
             modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
 
@@ -134,7 +133,7 @@ class DetThread(QThread): ###继承 QThread
         vid_path, vid_writer = [None] * bs, [None] * bs
 
 
-        # Run inference 推理参数设定
+        # Run inference 推理
         if device.type != '0':#'cpu'
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
         start_time = time.time()
@@ -227,6 +226,7 @@ class DetThread(QThread): ###继承 QThread
 
             # load  streams
             if self.is_continue:
+                print('is continue is running')
                 print('DetThread.run.is_continue : true')
                 # ### 使用 loadstreams  dataset = ： self.sources, img, img0, None
                 for path, img, im0s, self.vid_cap in dataset: ####  由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
@@ -410,6 +410,35 @@ class DetThread(QThread): ###继承 QThread
                     if self.rate_check:
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
+
+                    if self.rate_check:
+                        time.sleep(1/self.rate)
+                    # im0 = annotator.result()
+                    # Write results
+                    global results
+                    if self.save_fold: #### when autosave is  true
+                        os.makedirs(self.save_fold, exist_ok=True)
+                        if len(results):
+                        # if self.vid_cap is None: ####save as .jpg
+                            save_path = os.path.join(self.save_fold,
+                                                     time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                   time.localtime()) + '.jpg')
+                            cv2.imwrite(save_path, im0)
+                            print(str(f'save as .jpg  CAM = {label_chanel},save_path={save_path}'))#& str(save_path))
+                        if self.vid_cap is None:  ####save as .jpg
+                        # else: ### self.vid_cap is cv2capture save as .mp4
+                            if count == 1:
+                                ori_fps = int(self.vid_cap.get(cv2.CAP_PROP_FPS))
+                                if ori_fps == 0:
+                                    ori_fps = 25
+                                # width = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                                # height = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                                width, height = im0.shape[1], im0.shape[0]
+                                save_path = os.path.join(self.save_fold, time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime()) + '.mp4')
+                                self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
+                                                           (width, height))
+                            self.out.write(im0)
+                            print( str(f'save as .mp4  CAM = {label_chanel}')) # & str(save_path))
 
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
