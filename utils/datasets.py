@@ -2,7 +2,7 @@
 """
 Dataloaders and dataset utils
 """
-
+import logging
 import glob
 import hashlib
 import json
@@ -280,11 +280,17 @@ class LoadWebcam:  # for inference
         return 0
 
 
-class LoadStreams:
+streams_update_flag = True
+
+
+class LoadStreams:  ##### main.py 中 dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
     # YOLOv5 streamloader, i.e. `python detect.py --source 'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP streams`
+    global streams_update_flag
+
     def __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True):
+        # self.streams_update_flag = True
         self.mode = 'stream'
-        self.img_size = img_size  #(2160,2600) # img_size
+        self.img_size = img_size  # (2160,2600) # current img_size
         self.stride = stride
         self.cap = None
         if os.path.isfile(sources):
@@ -306,26 +312,28 @@ class LoadStreams:
                     import pafy
                     s = pafy.new(s).getbest(preftype="mp4").url  # YouTube URL
                 s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
-                self.cap = cv2.VideoCapture(s) ### get  the streams
-                print('in loop-cap-', s, self.cap)###240228
+                self.cap = cv2.VideoCapture(s)  ### get  the streams
+                print('in loop-cap-', s, self.cap)  ###240228
                 assert self.cap.isOpened(), f'{st}Failed to open {s}'
-                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
-                h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
+                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,
+                                     960))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
+                h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT,
+                                     960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 960
                 fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
-                self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
+                self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float(
+                    'inf')  # infinite stream fallback
                 self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
                 _, self.imgs[i] = self.cap.read()  # guarantee first frame
-                self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
+                self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)  ### 每一路视频流 使用独立的线程更新
                 LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
 
-
-            except:# 20240220 by alex
+            except:  # 20240220 by alex
                 print(f'无法启动摄像头线程{i}')
                 break
 
-            else:# 20240220 by alex
+            else:  # 20240220 by alex
                 self.threads[i].start()
-                print(f'open cam {i} succesfully')
+                print(f'start thread{i} // open cam {i} succesfully')
         LOGGER.info('')  # newline
 
         # check for common shapes
@@ -342,25 +350,57 @@ class LoadStreams:
             # _, self.imgs[index] = cap.read()
             cap.grab()
             if n % read == 0:
-                success, im = cap.retrieve()
+                success, im = cap.retrieve()  # read current frame
                 if success:
                     self.imgs[i] = im
+                    print('read current frames', i)
                 else:
                     LOGGER.warning('WARNING: Video stream unresponsive, please check your IP camera connection.')
-                    print('frames', i)#240228
+                    print('frames', i)  # 240228
                     self.imgs[i] = np.zeros_like(self.imgs[i])
                     cap.open(stream)  # re-open stream if signal was lost
             time.sleep(1 / self.fps[i])  # wait time
+
+    def release_camera(self, thread_list):
+        print('funtion release camera------------------------------')
+        # thread_list = self.threads
+        for thread in thread_list:
+            if thread.is_alive():
+                thread.stop()
+                thread.join()  # Wait for thread to terminate
+                print('thread.stop()')
+            # Release camera resources
+            self.cap.release()  ### 20240317
+            raise StopIteration  # 抛出 StopIteration 异常。
+        # self.threads[i].stop()
 
     def __iter__(self):
         self.count = -1
         return self
 
     def __next__(self):
+        global streams_update_flag
         self.count += 1
-        if not all(x.is_alive() for x in self.threads) or cv2.waitKey(1) == ord('q'):  # q to quit
-            cv2.destroyAllWindows()
-            raise StopIteration
+        print(f'__next__{self.count}')
+        if not all(x.is_alive() for x in self.threads) or cv2.waitKey(1) == ord(
+                'q'):# or not streams_update_flag:  # q to quit
+            print('streams_update_flag', streams_update_flag)
+            if self.cap.isOpened():
+                self.cap.release()  ###
+                print('cap.release--------------------------------')
+
+            # Stop all threads
+            for thread in self.threads:
+                if thread.is_alive():
+                    print('thread type', type(thread))
+                    # self.release_camera(self.threads)
+                    # thread.stop() # AttributeError: 'Thread' object has no attribute 'stop'
+                    # thread.join()  # Wait for thread to terminate
+                    print('thread.is_alive thread.stop()')
+            # Release camera resources
+
+            # cv2.destroyAllWindows()
+            raise StopIteration  # 抛出 StopIteration 异常。
 
         # Letterbox
         img0 = self.imgs.copy()
@@ -373,6 +413,14 @@ class LoadStreams:
         img = img[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW
         img = np.ascontiguousarray(img)
 
+        '''####### cap.release
+        if not self.streams_update_flag:  # q to quit
+            self.cap.release()
+            print('kill cap.release ', self.streams_update_flag)
+            # cv2.destroyAllWindows()
+            # raise StopIteration
+        print('streams_update_flag ', self.streams_update_flag)
+        '''
         return self.sources, img, img0, self.cap
 
     def __len__(self):
@@ -1041,7 +1089,35 @@ def dataset_stats(path='coco128.yaml', autodownload=False, verbose=False, profil
     if hub:
         print(f'Saving {stats_path.resolve()}...')
         with open(stats_path, 'w') as f:
-            json.dump(stats, f)  # save stats.json
+            json.dump(stats, f)  # save stats
     if verbose:
         print(json.dumps(stats, indent=2, sort_keys=False))
     return stats
+
+
+# for testing  # TODO: debug  bug-2 stop all threads and  release cameras
+logging.basicConfig(filename='app.log', level=logging.DEBUG)  # 将日志写入到文件
+if __name__ == "__main__":  # __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True)
+    source = f'D:/BaiduNetdiskWorkspace/code/10_DeepLearnning/03_yolo/scratch-detect/streams.txt'
+    dataset = LoadStreams(source, img_size=640, stride=32)  #### loadstreams  return self.sources, img, img0, None
+    n = 0
+    while True:
+        key = cv2.waitKey(1)
+        # logging.debug(f"Key pressed: {key}")  # 记录按键值
+
+        # print('n: ', n)
+        # if n == 2000 or key == ord('q') or key == 27:  # q to quit or ESC key
+        for path, img, im0s, vid_cap in dataset: ## loop
+            n += 1
+            if n == 1000:
+                logging.info("Excute stop threads...")
+                # print('cap.isOpened', cap.isOpened)
+                streams_update_flag = False
+                print('streams_update_flag = false ')
+                # thread_list = dataset[4]
+                vid_cap.release()
+                # LoadStreams.release_camera(thread_list)
+            if n == 2000:
+                logging.info("Exiting loop...")
+                break
+
