@@ -671,7 +671,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             feedback_list = []
 
             while self.runButton_modbus.isChecked() and modbus_flag:
-                start=time.time()
+                start = time.time()
                 # 240228屏蔽537-595:速度提升0.26s
                 # feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
                 # if feedback_data_in0:#### 有返回数据
@@ -745,6 +745,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
+                        time.sleep(0.1)
+                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)
             else:
                 modbus_flag = False
                 print('modbus shut off')
