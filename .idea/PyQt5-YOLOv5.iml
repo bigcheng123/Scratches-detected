@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/auto_save" />
     </content>
     <orderEntry type="jdk" jdkName="yolov5_pyqt5" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

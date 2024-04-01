@@ -147,7 +147,7 @@ install_torch
 folderName
 !folderName/
 auto_save
-!auto_save/
+!auto_save/*
 
 
 
@@ -164,3 +164,7 @@ data/
 
 
 
+/auto_save/
+/main-multicam.py
+/main-multicam2.py
+/multitest.py

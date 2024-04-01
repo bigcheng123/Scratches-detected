@@ -251,7 +251,7 @@ class DetThread(QThread): ###继承 QThread
                         txt_path = 'auto_save'
                         s += '%gx%g ' % img.shape[2:]  # print string
                         gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-                        imc = im0.copy() if save_crop else im0  # for save_crop
+                        imc = im0.copy() #if save_crop else im0  # for save NG frame
                         if len(det):
                             # Rescale boxes from img_size to im0 size
                             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
@@ -286,14 +286,15 @@ class DetThread(QThread): ###继承 QThread
                                     global results
                                     if self.save_fold:  #### when checkbox: autosave is  setcheck
                                         os.makedirs(self.save_fold, exist_ok=True)
-                                        if len(det):
-                                            # if self.vid_cap is None: ####save as .jpg
-                                            save_path = os.path.join(self.save_fold,
-                                                                     time.strftime('%Y_%m_%d_%H_%M_%S',
-                                                                                   time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
-                                            cv2.imwrite(save_path, im0)  # im0 = im0s.copy()
-                                            print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
-
+                                        if len(det) :
+                                            if names[c] == 'impress':  # 限定保存类型
+                                                save_path = os.path.join(self.save_fold,
+                                                                         f'{names[c]}_' + time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                                       time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
+                                                # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
+                                                cv2.imwrite(save_path, imc)  # imc = no box
+                                                print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
+                                                # print(f'class name {names[c]},type{type(names[c])}')
                                     if save_crop:
                                         print('save_one_box')
                             # print('detection is running')
@@ -374,6 +375,7 @@ class DetThread(QThread): ###继承 QThread
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
                     # Write results
+                    '''
                     global results
                     if self.save_fold: #### when autosave is  true
                         os.makedirs(self.save_fold, exist_ok=True)
@@ -398,7 +400,7 @@ class DetThread(QThread): ###继承 QThread
                                                            (width, height))
                             self.out.write(im0)
                             print( str(f'save as .mp4  CAM = {label_chanel}')) # & str(save_path))
-
+                        '''
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
                         self.is_continue = False
