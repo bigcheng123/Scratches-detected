@@ -341,7 +341,7 @@ class LoadStreams:
             # _, self.imgs[index] = cap.read()
             cap.grab()
             if n % read == 0:
-                success, im = cap.retrieve()
+                success, im = cap.retrieve()  # get current frame
                 if success:
                     self.imgs[i] = im
                 else:
