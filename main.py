@@ -61,7 +61,7 @@ class DetThread(QThread): ###继承 QThread
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
         self.save_fold = None  ####'./auto_save/jpg'
-
+        self.pred_flag = False  #pred_CheckBox
     @torch.no_grad()
     def run(self,
             imgsz=640, #1440 # inference size (pixels)//推理大小
@@ -168,7 +168,7 @@ class DetThread(QThread): ###继承 QThread
 
             # change model & device  20230810
             if self.current_weight != self.weights:
-                print('current is running')
+                print('self.current_weight != self.weights')
                 # Load model
                 model = attempt_load(self.weights, map_location = device)  # load FP32 model
                 stride = int(model.stride.max())  # model stride
@@ -184,16 +184,13 @@ class DetThread(QThread): ###继承 QThread
 
 
             # load  streams
-            pred_flag = False
+            # _pred_flag = True
 
             if self.is_continue:
-                print('is continue is running')
-                print('DetThread.run.is_continue : true')
-
                 #  loadstreams // dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
                 for path, img, im0s, self.vid_cap in dataset:  # 由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
-
-                    # print(type(path), type(img), type(im0s), type(self.vid_cap))
+                    print('child loop running')
+                    # print('self.pred_flag', self.pred_flag)
                     # #for testing : show row image
                     # cv2.imshow('ch0', im0s[0])
                     # cv2.imshow('ch1', im0s[1])
@@ -206,7 +203,7 @@ class DetThread(QThread): ###继承 QThread
                     statistic_dic = {name: 0 for name in names}  # made the diction
                     # print('statisstic_dic-1',statistic_dic)
                     count += 1  # ### FSP counter
-                    if  count % 30 == 0 and count >= 30:
+                    if count % 30 == 0 and count >= 30:
                         loopcycle = int(30/(time.time()-start_time))  #### 大循环周期
                         self.send_fps.emit('fps：'+str(loopcycle))
                         start_time = time.time() # updata start-time
@@ -216,56 +213,54 @@ class DetThread(QThread): ###继承 QThread
                     else:
                         percent = self.percent_length
 
-                    t2 = 0
+
                     # if not pred_frag  output raw frame
-                    if not pred_flag:  # # todo bug-4 建立2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = pred_flag
+                    if not self.pred_flag:  # # todo bug-4 建立2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = pred_flag
+                        t1 = time_sync()
                         for i, index in enumerate(streams_list):
-                            t1 = time.time()
+                            t2 = time_sync()
+                            ms = round((t2 - t1), 3)  # frame text: fsp
+                            fsp = int(1/ms) if ms > 0 else 'div0'
+                            # print(fsp,t1,t2)
                             label_chanel = str(streams_list[i])
-                            print(i, index, label_chanel)
-                            im0 = im0s
-                            # cv2.imshow('ch0', im0s[0])
-                            # cv2.imshow('ch1', im0s[1])
-                            # send img :
-                            # print('detect_cycle', detect_cycle)
-                            # time.sleep(0.2)
-                            # # detect_cycle = 30
-                            # timer = int(1 / (t1 - t2))
-                            # print(timer)  # todo  CV2格式图像 需要转换为  QLabel 格式才能 emit
-                            # cv2.putText(im0, str(f'FSP = {detect_cycle}  CAM = {label_chanel}'), (20, 30),
-                            #             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
-                            # res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                            # ## chanel-0  ##### show images
-                            # if label_chanel == '0':
-                            #     self.send_img_ch0.emit(im0)  ### 发送图像
-                            #     print('seng img : ch0')
-                            # ## chanel-1
-                            # if label_chanel == '1':
-                            #     self.send_img_ch1.emit(im0)  ### 发送图像
-                            #     # print('seng img : ch1')
-                            # # chanel-2
-                            # if label_chanel == '2':
-                            #     self.send_img_ch2.emit(im0)  ### 发送图像fi
-                            #     # print('seng img : ch2')
-                            # ## chanel-3
-                            # if label_chanel == '3':
-                            #     self.send_img_ch3.emit(im0)  #### 发送图像
-                            #     # print('seng img : ch3')
-                            # ## chanel-4
-                            # if label_chanel == '4':
-                            #     self.send_img_ch4.emit(im0)  #### 发送图像
-                            #     # print('seng img : ch4')
-                            # ## chanel-5
-                            # if label_chanel == '5':
-                            #     self.send_img_ch5.emit(im0)  #### 发送图像
-                            #     # print('seng img : ch5')
-                            # ### ## send the detected result
-                            # self.send_statistic.emit(statistic_dic)  # 发送 检测结果 statistic_dic
-                            # # print('emit statistic_dic', statistic_dic)
-                            t2 = time.time()
+                            # print(i, index, label_chanel)
+                            im0 = im0s[i].copy()
+                            cv2.putText(im0, str(f'FPS. {fsp}  CAM. {label_chanel}'), (40, 60),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+                            res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                            ## chanel-0  ##### show images
+                            if label_chanel == '0':
+                                self.send_img_ch0.emit(im0)  ### 发送图像
+                                # print('seng img : ch0')
+                            ## chanel-1
+                            if label_chanel == '1':
+                                self.send_img_ch1.emit(im0)  ### 发送图像
+                                # print('seng img : ch1')
+                            # chanel-2
+                            if label_chanel == '2':
+                                self.send_img_ch2.emit(im0)  ### 发送图像fi
+                                # print('seng img : ch2')
+                            ## chanel-3
+                            if label_chanel == '3':
+                                self.send_img_ch3.emit(im0)  #### 发送图像
+                                # print('seng img : ch3')
+                            ## chanel-4
+                            if label_chanel == '4':
+                                self.send_img_ch4.emit(im0)  #### 发送图像
+                                # print('seng img : ch4')
+                            ## chanel-5
+                            if label_chanel == '5':
+                                self.send_img_ch5.emit(im0)  #### 发送图像
+                                # print('seng img : ch5')
+                            ### ## send the detected result
+                            self.send_statistic.emit(statistic_dic)  # 发送 检测结果 statistic_dic
+                            # print('emit statistic_dic', statistic_dic)
+
                     # Inference prediction
-                    if pred_flag:  # TODO ： 原来的代码  预测后输出
+                    if self.pred_flag:  # TODO ： 原来的代码  预测后输出
                         # pred = model(img, augment=augment)[0] #### 预测  使用loadWebcam是 加载的model
+                        # print('pred_flag = true pred')
+                        t1 = time_sync()
                         pred = model(img,
                                      augment=augment,
                                      visualize=increment_path(save_dir / Path(path).stem,
@@ -277,7 +272,7 @@ class DetThread(QThread): ###继承 QThread
                         # Apply Classifier
                         if classify: #classify = False
                             pred = apply_classifier(pred, modelc, img, im0s)
-                            # print(f'type pred = ', type(pred), len(pred))
+                            print(f'type pred:', type(pred), len(pred))
 
                         # emit frame  & Process detections
                         for i, det in enumerate(pred):  # detections per image
@@ -291,9 +286,9 @@ class DetThread(QThread): ###继承 QThread
                                 break
                             # print(type(label_chanel),'img chanel=', label_chanel)
 
-                            if webcam:  # batch_size >= 1     get the frame
+                            if webcam:  #  streams  #webcam = self.source.isnumeric() or self.source.endswith('.txt') or self.source.lower().startswith
                                 p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
-                            else: ### image
+                            else: #  ##image
                                 p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
                             p = Path(p)  # to Path
                             # save_path = str(save_dir / p.name)  # img.jpg
@@ -320,6 +315,7 @@ class DetThread(QThread): ###继承 QThread
                                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
                                     # plot_one_box here
                                     if save_img or save_crop or view_img:  # Add bbox to image
+                                        print('plot_one_box', save_img, save_crop, view_img)
                                         # save_img = not nosave and not self.source.endswith('.txt')  # save inference images
                                         # save_crop=False,  # save cropped prediction boxes
                                         # view_img =check_inshow() # Check if environment supports image displays
@@ -348,25 +344,21 @@ class DetThread(QThread): ###继承 QThread
                                         if save_crop:
                                             print('save_one_box')
                                 # print('detection is running')
-
-
-                            # print(f'{s}Done. ({t2 - t1:.3f}s detect_cycle={detect_cycle})')
+                            t2 = time_sync()
+                            fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0 # frame text:
+                            # print(f'{s}Done. ({t2 - t1:.3f}s fsp ={fsp})')
                             # precition end #######################################################################
 
+                            # emit frame  Stream results
 
-                            #   emit frame  Stream results
-
-                            if self.is_continue: ###### send image in loop @  for i, det in enumerate(pred):
-                                t2 = time_sync()
-                                detect_cycle = int(1 / (t2 - t1))
-                            # send img :
-                                cv2.putText(im0, str(f'FSP = {detect_cycle}  CAM = {label_chanel}'), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+                            if self.is_continue: # ##### send image in loop @  for i, det in enumerate(pred):
+                                cv2.putText(im0, str(f'FSP. {fsp}  CAM. {label_chanel}'), (40, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                                 res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                                ## chanel-0  ##### show images
+                                # chanel-0  ##### show images
                                 if label_chanel == '0':
                                     self.send_img_ch0.emit(im0)  ### 发送图像
                                     # print('seng img : ch0')
-                                ## chanel-1
+                                # chanel-1
                                 if label_chanel == '1':
                                     self.send_img_ch1.emit(im0)  ### 发送图像
                                     # print('seng img : ch1')
@@ -374,21 +366,21 @@ class DetThread(QThread): ###继承 QThread
                                 if label_chanel == '2':
                                     self.send_img_ch2.emit(im0)  ### 发送图像fi
                                     # print('seng img : ch2')
-                                ## chanel-3
+                                # chanel-3
                                 if label_chanel == '3':
                                     self.send_img_ch3.emit(im0)  #### 发送图像
                                     # print('seng img : ch3')
-                                ## chanel-4
+                                # chanel-4
                                 if label_chanel == '4':
                                      self.send_img_ch4.emit(im0)  #### 发送图像
                                      # print('seng img : ch4')
-                                ## chanel-5
+                                # chanel-5
                                 if label_chanel == '5':
                                      self.send_img_ch5.emit(im0)  #### 发送图像
                                      # print('seng img : ch5')
-                                ### ## send the detected result
+                                # ##send the detected result
                                 self.send_statistic.emit(statistic_dic)  #发送 检测结果 statistic_dic
-                                # print('emit statistic_dic', statistic_dic)
+                    # #end line  if pred_flag __________________________________________________________
                     '''
                     if self.save_fold:  #### when checkbox: autosave is  setcheck
                         # save as mp4
@@ -481,7 +473,7 @@ class DetThread(QThread): ###继承 QThread
                         #         print('2-reset cap', self.vid_cap)
                         # break
 
-                        self.vid_cap.release()  #### bug-2  无法释放摄像头  未解决
+                        self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
                         print('self.vid_cap.release-22', type(self.vid_cap))
                         self.send_percent.emit(0)
                         self.send_msg.emit('Stop')
@@ -610,6 +602,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.checkBox.clicked.connect(self.checkrate)
         self.saveCheckBox.clicked.connect(self.is_save)
+        self.pred_CheckBox.clicked.connect(self.pred_run)
         self.load_setting()  #### loading config
 
 
@@ -622,6 +615,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton.setText('PAUSE')
             self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
+            self.det_thread.pred_flag = self.pred_CheckBox.isChecked()
             if not self.det_thread.isRunning():
                 self.det_thread.start()
             device = os.path.basename(self.det_thread.device)  ### only for display
@@ -833,9 +827,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def is_save(self):
         if self.saveCheckBox.isChecked():
-            self.det_thread.save_fold = './auto_save/jpg'  ### save result as .mp4
+            self.det_thread.save_fold = './auto_save/jpg/pt0403'  ### save result as .mp4
         else:
             self.det_thread.save_fold = None
+    def pred_run(self):
+        if self.pred_CheckBox.isChecked():
+            self.det_thread.pred_flag = True
+        else:
+            self.det_thread.pred_flag = False
+
 
     def checkrate(self):  #####latency checkbox
         if self.checkBox.isChecked():
@@ -1174,9 +1174,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         sys.exit(0)
 
     def load_config(self):   ####  初始化 modbus connection
-      global winsound_freq, winsound_time, winsound_freq_2, winsound_time_2
       try:
-          ### 提取备份数据 当出现断电关机数据丢失时， 将Cahce中 备份文件拷贝出来
+          # ##提取备份数据 当出现断电关机数据丢失时， 将Cahce中 备份文件拷贝出来
           cache_path = os.path.dirname(os.path.realpath(__file__)) + r'\config'
           to_path = os.path.dirname(os.path.realpath(__file__))  ### root path
 

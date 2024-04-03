@@ -1726,6 +1726,54 @@ QSlider::sub-page:horizontal{
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="pred_CheckBox">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Microsoft YaHei</family>
+                    <pointsize>-1</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">
+QCheckBox
+{font-size: 14px;
+	font-family: &quot;Microsoft YaHei&quot;;
+	font-weight: bold;
+ 		border-radius:9px;
+		background:rgba(66, 195, 255, 0);
+color: rgb(218, 218, 218);;}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}
+QCheckBox::indicator:unchecked {
+    url(:/icon/ui_files/icon/button-off.png);
+}
+
+QCheckBox::indicator:checked {
+    
+    url(:/icon/ui_files/icon/button-on.png);
+}
+</string>
+                  </property>
+                  <property name="text">
+                   <string>pred_flag</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
@@ -2158,7 +2206,7 @@ color: rgb(0, 0, 0);
 background-color: rgb(255, 255, 255);
 border-radius:4px;
 font-family: &quot;Microsoft YaHei&quot;;
-font-size: 60px;
+font-size: 40px;
 color: rgb(0, 0, 0);
 }
 </string>
