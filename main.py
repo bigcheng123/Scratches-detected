@@ -189,7 +189,7 @@ class DetThread(QThread): ###继承 QThread
             if self.is_continue:
                 #  loadstreams // dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
                 for path, img, im0s, self.vid_cap in dataset:  # 由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
-                    print('child loop running')
+                    # print('child loop running')
                     # print('self.pred_flag', self.pred_flag)
                     # #for testing : show row image
                     # cv2.imshow('ch0', im0s[0])
@@ -213,9 +213,8 @@ class DetThread(QThread): ###继承 QThread
                     else:
                         percent = self.percent_length
 
-
-                    # if not pred_frag  output raw frame
-                    if not self.pred_flag:  # # todo bug-4 建立2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = pred_flag
+                    # # todo  建立 pred 预测开关， 2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = self.pred_flag
+                    if not self.pred_flag and self.is_continue: # if not pred_frag  output raw frame
                         t1 = time_sync()
                         for i, index in enumerate(streams_list):
                             t2 = time_sync()
@@ -257,7 +256,8 @@ class DetThread(QThread): ###继承 QThread
                             # print('emit statistic_dic', statistic_dic)
 
                     # Inference prediction
-                    if self.pred_flag:  # TODO ： 原来的代码  预测后输出
+                    # TODO ： 原来的代码  输出 推理后的 图像  im0 = with box  imc= without box
+                    if self.pred_flag and self.is_continue:
                         # pred = model(img, augment=augment)[0] #### 预测  使用loadWebcam是 加载的model
                         # print('pred_flag = true pred')
                         t1 = time_sync()
@@ -326,21 +326,27 @@ class DetThread(QThread): ###继承 QThread
                                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                         plot_one_box(xyxy, im0, label=label, color=colors(c, True),
                                                      line_thickness=line_thickness)
+                                        print(f'label: {label}', type(label))
                                         #### save NG image at here
 
                                         # auto_save  Write results  save NG image in floder jpg
                                         global results
                                         if self.save_fold:  #### when checkbox: autosave is  setcheck
                                             os.makedirs(self.save_fold, exist_ok=True)
-                                            if len(det) :
+                                            if len(det):
                                                 if names[c] == 'impress':  # 限定保存类型
                                                     save_path = os.path.join(self.save_fold,
                                                                              f'{names[c]}_' + time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                                            time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
+                                                    # todo 选择SAVE图像类型 box
+                                                    add_box = myWin.box_CheckBox.isChecked()
                                                     # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
-                                                    cv2.imwrite(save_path, imc)  # imc = no box
+                                                    # cv2.imwrite(save_path, imc)  # imc = no box
+                                                    im = imc if not add_box else im0
+                                                    cv2.imwrite(save_path, im)
+                                                    print('box_CheckBox', myWin.box_CheckBox.isChecked())
                                                     print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
-                                                    # print(f'class name {names[c]},type{type(names[c])}')
+                                                    print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
                                         if save_crop:
                                             print('save_one_box')
                                 # print('detection is running')
@@ -351,35 +357,35 @@ class DetThread(QThread): ###继承 QThread
 
                             # emit frame  Stream results
 
-                            if self.is_continue: # ##### send image in loop @  for i, det in enumerate(pred):
-                                cv2.putText(im0, str(f'FSP. {fsp}  CAM. {label_chanel}'), (40, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-                                res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                                # chanel-0  ##### show images
-                                if label_chanel == '0':
-                                    self.send_img_ch0.emit(im0)  ### 发送图像
-                                    # print('seng img : ch0')
-                                # chanel-1
-                                if label_chanel == '1':
-                                    self.send_img_ch1.emit(im0)  ### 发送图像
-                                    # print('seng img : ch1')
-                                # chanel-2
-                                if label_chanel == '2':
-                                    self.send_img_ch2.emit(im0)  ### 发送图像fi
-                                    # print('seng img : ch2')
-                                # chanel-3
-                                if label_chanel == '3':
-                                    self.send_img_ch3.emit(im0)  #### 发送图像
-                                    # print('seng img : ch3')
-                                # chanel-4
-                                if label_chanel == '4':
-                                     self.send_img_ch4.emit(im0)  #### 发送图像
-                                     # print('seng img : ch4')
-                                # chanel-5
-                                if label_chanel == '5':
-                                     self.send_img_ch5.emit(im0)  #### 发送图像
-                                     # print('seng img : ch5')
-                                # ##send the detected result
-                                self.send_statistic.emit(statistic_dic)  #发送 检测结果 statistic_dic
+                            # if self.is_continue: # ##### send image in loop @  for i, det in enumerate(pred):
+                            cv2.putText(im0, str(f'FSP. {fsp}  CAM. {label_chanel}'), (40, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+                            res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                            # chanel-0  ##### show images
+                            if label_chanel == '0':
+                                self.send_img_ch0.emit(im0)  ### 发送图像
+                                # print('seng img : ch0')
+                            # chanel-1
+                            if label_chanel == '1':
+                                self.send_img_ch1.emit(im0)  ### 发送图像
+                                # print('seng img : ch1')
+                            # chanel-2
+                            if label_chanel == '2':
+                                self.send_img_ch2.emit(im0)  ### 发送图像fi
+                                # print('seng img : ch2')
+                            # chanel-3
+                            if label_chanel == '3':
+                                self.send_img_ch3.emit(im0)  #### 发送图像
+                                # print('seng img : ch3')
+                            # chanel-4
+                            if label_chanel == '4':
+                                 self.send_img_ch4.emit(im0)  #### 发送图像
+                                 # print('seng img : ch4')
+                            # chanel-5
+                            if label_chanel == '5':
+                                 self.send_img_ch5.emit(im0)  #### 发送图像
+                                 # print('seng img : ch5')
+                            # ##send the detected result
+                            self.send_statistic.emit(statistic_dic)  #发送 检测结果 statistic_dic
                     # #end line  if pred_flag __________________________________________________________
                     '''
                     if self.save_fold:  #### when checkbox: autosave is  setcheck
@@ -532,12 +538,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.qtimer.timeout.connect(lambda: self.statistic_label.clear())
 
         # search models automatically
-        self.comboBox.clear()
+        self.comboBox_model.clear()  ### clear model
         self.pt_list = os.listdir('./pt')
         self.pt_list = [file for file in self.pt_list if file.endswith('.pt')]
         self.pt_list.sort(key=lambda x: os.path.getsize('./pt/'+x))
-        self.comboBox.clear()
-        self.comboBox.addItems(self.pt_list)
+        self.comboBox_model.clear()
+        self.comboBox_model.addItems(self.pt_list)
 
         self.qtimer_search = QTimer(self)
         self.qtimer_search.timeout.connect(lambda: self.search_pt())
@@ -545,7 +551,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         # yolov5 thread
         self.det_thread = DetThread()
-        self.model_type = self.comboBox.currentText()  ### get model from combobox
+        self.model_type = self.comboBox_model.currentText()  ### get model from combobox
         self.device_type = self.comboBox_device.currentText()  ###  get device type from combobox
         self.source_type = self.comboBox_source.currentText()  ###  get device type from combobox
         self.port_type = self.comboBox_port.currentText() ###  get port type from combobox
@@ -588,7 +594,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.testButton.clicked.connect(self.testfuntion)
         self.stopButton.clicked.connect(self.stop)
 
-        self.comboBox.currentTextChanged.connect(self.change_model)
+        self.comboBox_model.currentTextChanged.connect(self.change_model)
         self.comboBox_device.currentTextChanged.connect(self.change_device)
         self.comboBox_source.currentTextChanged.connect(self.change_source)
         self.comboBox_port.currentTextChanged.connect(self.change_port)
@@ -600,8 +606,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.rateSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'rateSpinBox'))
         self.rateSlider.valueChanged.connect(lambda x: self.change_val(x, 'rateSlider'))
 
-        self.checkBox.clicked.connect(self.checkrate)
-        self.saveCheckBox.clicked.connect(self.is_save)
+        self.checkBox_latency.clicked.connect(self.checkrate)
+        self.CheckBox_autoSave.clicked.connect(self.is_save)
         self.pred_CheckBox.clicked.connect(self.pred_run)
         self.load_setting()  #### loading config
 
@@ -613,7 +619,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         print('runbutton is check', self.runButton.isChecked())
         if self.runButton.isChecked():
             self.runButton.setText('PAUSE')
-            self.saveCheckBox.setEnabled(False)
+            # self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
             self.det_thread.pred_flag = self.pred_CheckBox.isChecked()
             if not self.det_thread.isRunning():
@@ -747,7 +753,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
-                output_box_list =[self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
+                output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i , n in enumerate(output_box_list):
                     if n:
@@ -810,7 +816,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def stop(self):
         if not self.det_thread.jump_out:
             self.det_thread.jump_out = True
-        self.saveCheckBox.setEnabled(True)
+        # self.saveCheckBox.setEnabled(True)
 
 
         # self.det_thread.stop()  #### bug-1 加入此语句 停止线程会卡死  未解决
@@ -826,7 +832,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.comboBox.addItems(self.pt_list)
 
     def is_save(self):
-        if self.saveCheckBox.isChecked():
+        if self.CheckBox_autoSave.isChecked():
             self.det_thread.save_fold = './auto_save/jpg/pt0403'  ### save result as .mp4
         else:
             self.det_thread.save_fold = None
@@ -838,7 +844,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
 
     def checkrate(self):  #####latency checkbox
-        if self.checkBox.isChecked():
+        if self.checkBox_latency.isChecked():
             self.det_thread.rate_check = True
         else:
             self.det_thread.rate_check = False
@@ -945,10 +951,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.runButton.setChecked(Qt.Unchecked)
         self.statistic_msg(msg)
         if msg == "Finished":
-            self.saveCheckBox.setEnabled(True)
+            self.CheckBox_autoSave.setEnabled(True)
 
     def change_model(self, x):
-        self.model_type = self.comboBox.currentText()  #comboBox
+        self.model_type = self.comboBox_model.currentText()  #comboBox
         self.det_thread.weights = "./pt/%s" % self.model_type
         self.statistic_msg('Change model to %s' % x)
 
@@ -1122,15 +1128,16 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             print('load config:',type(config), config)
-            if len(config) != 8 : ### 参数不足时  补充参数
+            if len(config) != 9 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
                 rate = 10
                 check = 0
                 savecheck = 0
                 device = 0
-                port = "COM3"
+                port = 0
                 source = 0
+                model = 0
             else:
                 iou = config['iou']
                 conf = config['conf']
@@ -1140,31 +1147,33 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 device = config['device'] ## index number
                 port = config['port'] ## index number
                 source = config['source']
+                model = config['model']
         ### 依据存储的json文件 更新 ui参数
         self.confSpinBox.setValue(conf)
         self.iouSpinBox.setValue(iou)
         self.rateSpinBox.setValue(rate)
-        self.checkBox.setCheckState(check)
+        self.checkBox_latency.setCheckState(check)
         self.det_thread.rate_check = check
-        self.saveCheckBox.setCheckState(savecheck)
+        self.CheckBox_autoSave.setCheckState(savecheck)
         self.is_save() ###auto save  checkbox
-
         self.comboBox_device.setCurrentIndex(device) # 设置当前索引号 "device": 0
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
+        self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
     def closeEvent(self, event):
         self.det_thread.jump_out = True
         config_path = 'config/setting.json'
         config = dict()
-        config['iou'] = self.confSpinBox.value()
-        config['conf'] = self.iouSpinBox.value()
+        config['iou'] = self.iouSpinBox.value()
+        config['conf'] = self.confSpinBox.value() #self.confSpinBox.value()
         config['rate'] = self.rateSpinBox.value()
-        config['check'] = self.checkBox.checkState()  ### Latency funtion
-        config['savecheck'] = self.saveCheckBox.checkState() ### Auto Save
+        config['check'] = self.checkBox_latency.checkState()  ### Latency funtion
+        config['savecheck'] = self.CheckBox_autoSave.checkState() ### Auto Save
         config['device'] = self.comboBox_device.currentIndex() ### 获取当前索引号
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
-        ####新增参数 请在此处添加， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
+        config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
+        ####新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write(config_json)

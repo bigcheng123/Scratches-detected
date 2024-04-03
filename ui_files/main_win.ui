@@ -734,7 +734,7 @@ color: rgb(218, 218, 218);
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="comboBox">
+               <widget class="QComboBox" name="comboBox_model">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -1248,7 +1248,7 @@ background-color: rgba(48,148,243,80);}</string>
                <number>11</number>
               </property>
               <item>
-               <widget class="QCheckBox" name="saveCheckBox">
+               <widget class="QCheckBox" name="CheckBox_autoSave">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -1593,6 +1593,54 @@ QSlider::sub-page:horizontal{
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="box_CheckBox">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>28</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <family>Microsoft YaHei</family>
+                    <pointsize>-1</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">
+QCheckBox
+{font-size: 14px;
+	font-family: &quot;Microsoft YaHei&quot;;
+	font-weight: bold;
+ 		border-radius:9px;
+		background:rgba(66, 195, 255, 0);
+color: rgb(218, 218, 218);;}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}
+QCheckBox::indicator:unchecked {
+    url(:/icon/ui_files/icon/button-off.png);
+}
+
+QCheckBox::indicator:checked {
+    
+    url(:/icon/ui_files/icon/button-on.png);
+}
+</string>
+                  </property>
+                  <property name="text">
+                   <string>Add_Box</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
@@ -1767,7 +1815,7 @@ QCheckBox::indicator:checked {
 </string>
                   </property>
                   <property name="text">
-                   <string>pred_flag</string>
+                   <string>Pred_Flag</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -1790,17 +1838,15 @@ QCheckBox::indicator:checked {
                <number>11</number>
               </property>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_14">
-                <item>
-                 <widget class="QLabel" name="label_8">
-                  <property name="maximumSize">
-                   <size>
-                    <width>80</width>
-                    <height>16777215</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QLabel
+               <widget class="QLabel" name="label_8">
+                <property name="maximumSize">
+                 <size>
+                  <width>80</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel
 {
 	font-size: 16px;
 	font-family: &quot;Microsoft YaHei&quot;;
@@ -1810,81 +1856,11 @@ QCheckBox::indicator:checked {
 color: rgb(218, 218, 218);
 }
 </string>
-                  </property>
-                  <property name="text">
-                   <string>Latency</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="checkBox">
-                  <property name="styleSheet">
-                   <string notr="true">
-QCheckBox
-{font-size: 16px;
-	font-family: &quot;Microsoft YaHei&quot;;
-	font-weight: bold;
- 		border-radius:9px;
-		background:rgba(66, 195, 255, 0);
-color: rgb(218, 218, 218);;}
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}
-QCheckBox::indicator:unchecked {
-url(:/icon/ui_files/icon/button-off.png);
-}
-
-QCheckBox::indicator:checked {
-    
-    url(:/icon/ui_files/icon/button-on.png);
-}
-</string>
-                  </property>
-                  <property name="text">
-                   <string>enable</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="fps_label">
-                  <property name="minimumSize">
-                   <size>
-                    <width>60</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>60</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">QLabel
-{
-	font-size: 14px;
-	font-family: &quot;Microsoft YaHei&quot;;
-	font-weight: bold;
- 		border-radius:9px;
-		background:rgba(66, 195, 255, 0);
-color: rgb(218, 218, 218);
-}
-</string>
-                  </property>
-                  <property name="text">
-                   <string>FSP</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+                </property>
+                <property name="text">
+                 <string>Latency</string>
+                </property>
+               </widget>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
@@ -1997,6 +1973,40 @@ QSlider::sub-page:horizontal{
                   </property>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QCheckBox" name="checkBox_latency">
+                  <property name="styleSheet">
+                   <string notr="true">
+QCheckBox
+{font-size: 16px;
+	font-family: &quot;Microsoft YaHei&quot;;
+	font-weight: bold;
+ 		border-radius:9px;
+		background:rgba(66, 195, 255, 0);
+color: rgb(218, 218, 218);;}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}
+QCheckBox::indicator:unchecked {
+url(:/icon/ui_files/icon/button-off.png);
+}
+
+QCheckBox::indicator:checked {
+    
+    url(:/icon/ui_files/icon/button-on.png);
+}
+</string>
+                  </property>
+                  <property name="text">
+                   <string>Latency</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
                </layout>
               </item>
              </layout>
@@ -2070,6 +2080,53 @@ color: rgb(218, 218, 218);
                    </property>
                    <property name="text">
                     <string>Result Statistics</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_16">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>37</width>
+                     <height>39</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="fps_label">
+                   <property name="minimumSize">
+                    <size>
+                     <width>60</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>200</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLabel
+{
+	font-size: 16px;
+	font-family: &quot;Microsoft YaHei&quot;;
+	font-weight: bold;
+ 		border-radius:9px;
+		background:rgba(66, 195, 255, 0);
+color: rgb(218, 218, 218);
+}
+</string>
+                   </property>
+                   <property name="text">
+                    <string>Loop</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
                    </property>
                   </widget>
                  </item>

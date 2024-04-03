@@ -3,3 +3,4 @@
 0/1/4运行正常-可使用GPU至35%
 2/3/5运行正常-可使用GPU至35%
 
+2024/4/3  moldel=impress-0403  iou = 90  confidence = 60

@@ -418,9 +418,9 @@ class Ui_mainWindow(object):
 "")
         self.label_3.setObjectName("label_3")
         self.horizontalLayout_2.addWidget(self.label_3)
-        self.comboBox = QtWidgets.QComboBox(self.groupBox_8)
-        self.comboBox.setMinimumSize(QtCore.QSize(0, 28))
-        self.comboBox.setStyleSheet("QComboBox QAbstractItemView {\n"
+        self.comboBox_model = QtWidgets.QComboBox(self.groupBox_8)
+        self.comboBox_model.setMinimumSize(QtCore.QSize(0, 28))
+        self.comboBox_model.setStyleSheet("QComboBox QAbstractItemView {\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-size: 16px;\n"
 "background:rgba(200, 200, 200,150);\n"
@@ -444,12 +444,12 @@ class Ui_mainWindow(object):
 "border-image: url(:/img/icon/下拉_白色.png);\n"
 "}\n"
 "")
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.horizontalLayout_2.addWidget(self.comboBox)
+        self.comboBox_model.setObjectName("comboBox_model")
+        self.comboBox_model.addItem("")
+        self.comboBox_model.addItem("")
+        self.comboBox_model.addItem("")
+        self.comboBox_model.addItem("")
+        self.horizontalLayout_2.addWidget(self.comboBox_model)
         self.label_5 = QtWidgets.QLabel(self.groupBox_8)
         self.label_5.setMinimumSize(QtCore.QSize(0, 28))
         self.label_5.setMaximumSize(QtCore.QSize(80, 16777215))
@@ -739,15 +739,15 @@ class Ui_mainWindow(object):
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_15.setContentsMargins(11, -1, 11, -1)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
-        self.saveCheckBox = QtWidgets.QCheckBox(self.groupBox_8)
-        self.saveCheckBox.setMinimumSize(QtCore.QSize(0, 28))
+        self.CheckBox_autoSave = QtWidgets.QCheckBox(self.groupBox_8)
+        self.CheckBox_autoSave.setMinimumSize(QtCore.QSize(0, 28))
         font = QtGui.QFont()
         font.setFamily("Microsoft YaHei")
         font.setPointSize(-1)
         font.setBold(True)
         font.setWeight(75)
-        self.saveCheckBox.setFont(font)
-        self.saveCheckBox.setStyleSheet("\n"
+        self.CheckBox_autoSave.setFont(font)
+        self.CheckBox_autoSave.setStyleSheet("\n"
 "QCheckBox\n"
 "{font-size: 14px;\n"
 "    font-family: \"Microsoft YaHei\";\n"
@@ -769,9 +769,9 @@ class Ui_mainWindow(object):
 "    url(:/icon/ui_files/icon/button-on.png);\n"
 "}\n"
 "")
-        self.saveCheckBox.setChecked(False)
-        self.saveCheckBox.setObjectName("saveCheckBox")
-        self.horizontalLayout_15.addWidget(self.saveCheckBox)
+        self.CheckBox_autoSave.setChecked(False)
+        self.CheckBox_autoSave.setObjectName("CheckBox_autoSave")
+        self.horizontalLayout_15.addWidget(self.CheckBox_autoSave)
         self.comboBox_5 = QtWidgets.QComboBox(self.groupBox_8)
         self.comboBox_5.setMinimumSize(QtCore.QSize(0, 28))
         self.comboBox_5.setStyleSheet("QComboBox QAbstractItemView {\n"
@@ -940,6 +940,39 @@ class Ui_mainWindow(object):
         self.iouSlider.setOrientation(QtCore.Qt.Horizontal)
         self.iouSlider.setObjectName("iouSlider")
         self.horizontalLayout_4.addWidget(self.iouSlider)
+        self.box_CheckBox = QtWidgets.QCheckBox(self.groupBox_8)
+        self.box_CheckBox.setMinimumSize(QtCore.QSize(0, 28))
+        font = QtGui.QFont()
+        font.setFamily("Microsoft YaHei")
+        font.setPointSize(-1)
+        font.setBold(True)
+        font.setWeight(75)
+        self.box_CheckBox.setFont(font)
+        self.box_CheckBox.setStyleSheet("\n"
+"QCheckBox\n"
+"{font-size: 14px;\n"
+"    font-family: \"Microsoft YaHei\";\n"
+"    font-weight: bold;\n"
+"         border-radius:9px;\n"
+"        background:rgba(66, 195, 255, 0);\n"
+"color: rgb(218, 218, 218);;}\n"
+"\n"
+"QCheckBox::indicator {\n"
+"    width: 20px;\n"
+"    height: 20px;\n"
+"}\n"
+"QCheckBox::indicator:unchecked {\n"
+"    url(:/icon/ui_files/icon/button-off.png);\n"
+"}\n"
+"\n"
+"QCheckBox::indicator:checked {\n"
+"    \n"
+"    url(:/icon/ui_files/icon/button-on.png);\n"
+"}\n"
+"")
+        self.box_CheckBox.setChecked(True)
+        self.box_CheckBox.setObjectName("box_CheckBox")
+        self.horizontalLayout_4.addWidget(self.box_CheckBox)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.verticalLayout_8.addLayout(self.verticalLayout_3)
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -1063,8 +1096,6 @@ class Ui_mainWindow(object):
         self.verticalLayout_5.setContentsMargins(11, -1, 11, -1)
         self.verticalLayout_5.setSpacing(4)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
-        self.horizontalLayout_14 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_14.setObjectName("horizontalLayout_14")
         self.label_8 = QtWidgets.QLabel(self.groupBox_8)
         self.label_8.setMaximumSize(QtCore.QSize(80, 16777215))
         self.label_8.setStyleSheet("QLabel\n"
@@ -1078,50 +1109,7 @@ class Ui_mainWindow(object):
 "}\n"
 "")
         self.label_8.setObjectName("label_8")
-        self.horizontalLayout_14.addWidget(self.label_8)
-        self.checkBox = QtWidgets.QCheckBox(self.groupBox_8)
-        self.checkBox.setStyleSheet("\n"
-"QCheckBox\n"
-"{font-size: 16px;\n"
-"    font-family: \"Microsoft YaHei\";\n"
-"    font-weight: bold;\n"
-"         border-radius:9px;\n"
-"        background:rgba(66, 195, 255, 0);\n"
-"color: rgb(218, 218, 218);;}\n"
-"\n"
-"QCheckBox::indicator {\n"
-"    width: 20px;\n"
-"    height: 20px;\n"
-"}\n"
-"QCheckBox::indicator:unchecked {\n"
-"url(:/icon/ui_files/icon/button-off.png);\n"
-"}\n"
-"\n"
-"QCheckBox::indicator:checked {\n"
-"    \n"
-"    url(:/icon/ui_files/icon/button-on.png);\n"
-"}\n"
-"")
-        self.checkBox.setChecked(True)
-        self.checkBox.setObjectName("checkBox")
-        self.horizontalLayout_14.addWidget(self.checkBox)
-        self.fps_label = QtWidgets.QLabel(self.groupBox_8)
-        self.fps_label.setMinimumSize(QtCore.QSize(60, 20))
-        self.fps_label.setMaximumSize(QtCore.QSize(60, 20))
-        self.fps_label.setStyleSheet("QLabel\n"
-"{\n"
-"    font-size: 14px;\n"
-"    font-family: \"Microsoft YaHei\";\n"
-"    font-weight: bold;\n"
-"         border-radius:9px;\n"
-"        background:rgba(66, 195, 255, 0);\n"
-"color: rgb(218, 218, 218);\n"
-"}\n"
-"")
-        self.fps_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.fps_label.setObjectName("fps_label")
-        self.horizontalLayout_14.addWidget(self.fps_label)
-        self.verticalLayout_5.addLayout(self.horizontalLayout_14)
+        self.verticalLayout_5.addWidget(self.label_8)
         self.horizontalLayout_13 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_13.setSpacing(5)
         self.horizontalLayout_13.setObjectName("horizontalLayout_13")
@@ -1191,6 +1179,32 @@ class Ui_mainWindow(object):
         self.rateSlider.setTickPosition(QtWidgets.QSlider.NoTicks)
         self.rateSlider.setObjectName("rateSlider")
         self.horizontalLayout_13.addWidget(self.rateSlider)
+        self.checkBox_latency = QtWidgets.QCheckBox(self.groupBox_8)
+        self.checkBox_latency.setStyleSheet("\n"
+"QCheckBox\n"
+"{font-size: 16px;\n"
+"    font-family: \"Microsoft YaHei\";\n"
+"    font-weight: bold;\n"
+"         border-radius:9px;\n"
+"        background:rgba(66, 195, 255, 0);\n"
+"color: rgb(218, 218, 218);;}\n"
+"\n"
+"QCheckBox::indicator {\n"
+"    width: 20px;\n"
+"    height: 20px;\n"
+"}\n"
+"QCheckBox::indicator:unchecked {\n"
+"url(:/icon/ui_files/icon/button-off.png);\n"
+"}\n"
+"\n"
+"QCheckBox::indicator:checked {\n"
+"    \n"
+"    url(:/icon/ui_files/icon/button-on.png);\n"
+"}\n"
+"")
+        self.checkBox_latency.setChecked(True)
+        self.checkBox_latency.setObjectName("checkBox_latency")
+        self.horizontalLayout_13.addWidget(self.checkBox_latency)
         self.verticalLayout_5.addLayout(self.horizontalLayout_13)
         self.verticalLayout_8.addLayout(self.verticalLayout_5)
         self.verticalLayout_7 = QtWidgets.QVBoxLayout()
@@ -1230,6 +1244,24 @@ class Ui_mainWindow(object):
         self.horizontalLayout_38.addWidget(self.label_11)
         spacerItem2 = QtWidgets.QSpacerItem(37, 39, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_38.addItem(spacerItem2)
+        self.fps_label = QtWidgets.QLabel(self.groupBox_9)
+        self.fps_label.setMinimumSize(QtCore.QSize(60, 20))
+        self.fps_label.setMaximumSize(QtCore.QSize(200, 20))
+        self.fps_label.setStyleSheet("QLabel\n"
+"{\n"
+"    font-size: 16px;\n"
+"    font-family: \"Microsoft YaHei\";\n"
+"    font-weight: bold;\n"
+"         border-radius:9px;\n"
+"        background:rgba(66, 195, 255, 0);\n"
+"color: rgb(218, 218, 218);\n"
+"}\n"
+"")
+        self.fps_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.fps_label.setObjectName("fps_label")
+        self.horizontalLayout_38.addWidget(self.fps_label)
+        spacerItem3 = QtWidgets.QSpacerItem(37, 39, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_38.addItem(spacerItem3)
         self.toolButton = QtWidgets.QToolButton(self.groupBox_9)
         self.toolButton.setMinimumSize(QtCore.QSize(0, 20))
         self.toolButton.setObjectName("toolButton")
@@ -1370,8 +1402,8 @@ class Ui_mainWindow(object):
         self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_2.setObjectName("line_2")
         self.horizontalLayout_6.addWidget(self.line_2)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_6.addItem(spacerItem3)
+        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem4)
         self.checkBox_10 = QtWidgets.QCheckBox(self.groupBox_3)
         self.checkBox_10.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
@@ -1921,10 +1953,10 @@ class Ui_mainWindow(object):
         self.fileButton_3.setText(_translate("mainWindow", "Settings..."))
         self.toolButton_2.setText(_translate("mainWindow", "..."))
         self.label_3.setText(_translate("mainWindow", "Model"))
-        self.comboBox.setItemText(0, _translate("mainWindow", "yolov5s.pt"))
-        self.comboBox.setItemText(1, _translate("mainWindow", "yolov5m.pt"))
-        self.comboBox.setItemText(2, _translate("mainWindow", "yolov5l.pt"))
-        self.comboBox.setItemText(3, _translate("mainWindow", "yolov5x.pt"))
+        self.comboBox_model.setItemText(0, _translate("mainWindow", "yolov5s.pt"))
+        self.comboBox_model.setItemText(1, _translate("mainWindow", "yolov5m.pt"))
+        self.comboBox_model.setItemText(2, _translate("mainWindow", "yolov5l.pt"))
+        self.comboBox_model.setItemText(3, _translate("mainWindow", "yolov5x.pt"))
         self.label_5.setText(_translate("mainWindow", "Device"))
         self.comboBox_device.setItemText(0, _translate("mainWindow", "0"))
         self.comboBox_device.setItemText(1, _translate("mainWindow", "1"))
@@ -1943,7 +1975,7 @@ class Ui_mainWindow(object):
         self.comboBox_source.setItemText(6, _translate("mainWindow", "5"))
         self.rtspButton.setToolTip(_translate("mainWindow", "rtsp"))
         self.rtspButton.setText(_translate("mainWindow", "RTSP"))
-        self.saveCheckBox.setText(_translate("mainWindow", "Auto Save"))
+        self.CheckBox_autoSave.setText(_translate("mainWindow", "Auto Save"))
         self.comboBox_5.setItemText(0, _translate("mainWindow", ".jpeg"))
         self.comboBox_5.setItemText(1, _translate("mainWindow", ".bmp"))
         self.comboBox_5.setItemText(2, _translate("mainWindow", ".mp4"))
@@ -1959,12 +1991,13 @@ class Ui_mainWindow(object):
         self.comboBox_port.setItemText(8, _translate("mainWindow", "COM8"))
         self.comboBox_port.setItemText(9, _translate("mainWindow", "COM9"))
         self.label_2.setText(_translate("mainWindow", "IoU"))
+        self.box_CheckBox.setText(_translate("mainWindow", "Add_Box"))
         self.label.setText(_translate("mainWindow", "Confidence"))
-        self.pred_CheckBox.setText(_translate("mainWindow", "pred_flag"))
+        self.pred_CheckBox.setText(_translate("mainWindow", "Pred_Flag"))
         self.label_8.setText(_translate("mainWindow", "Latency"))
-        self.checkBox.setText(_translate("mainWindow", "enable"))
-        self.fps_label.setText(_translate("mainWindow", "FSP"))
+        self.checkBox_latency.setText(_translate("mainWindow", "Latency"))
         self.label_11.setText(_translate("mainWindow", "Result Statistics"))
+        self.fps_label.setText(_translate("mainWindow", "Loop"))
         self.toolButton.setText(_translate("mainWindow", "..."))
         self.statistic_label.setText(_translate("mainWindow", "statistic_label"))
         self.checkBox_2.setText(_translate("mainWindow", "DO 0"))
