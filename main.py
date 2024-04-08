@@ -28,7 +28,7 @@ from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
 from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
-
+import logging
 ## set global variable 设置全局变量
 modbus_flag = False
 results =[]
@@ -85,6 +85,7 @@ class DetThread(QThread): ###继承 QThread
             hide_labels=False,  # hide labels
             hide_conf=False,  # hide confidences
             half=True,  # use FP16 half-precision inference
+            loop_flag = True
             ):
 
         save_img = not nosave and not self.source.endswith('.txt')  # save inference images
@@ -148,23 +149,11 @@ class DetThread(QThread): ###继承 QThread
         print('streams:', streams_list)
 
         # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
-        while True: ##### 采用循环来 检查是否 停止推理
+        while loop_flag: ##### 采用循环来 检查是否 停止推理
             print('marker while loop')
             print(' while loop self.is_continue', self.is_continue)
             print(' while loop self.jump_out', self.jump_out)
             # print(' while loop camera.cap', type(self.vid_cap))
-
-            if self.jump_out:
-                # LoadStreams.release_camera()
-                self.vid_cap.release()  #### TODO: bug-2  无法释放所有摄像头 ，只能释放追后一个摄像头资源
-                print('vid_cap.release -1', type(self.vid_cap))
-                LoadStreams.streams_update_flag = False
-                self.send_percent.emit(0)
-                self.send_msg.emit('Stop')
-                if hasattr(self, 'out'):
-                    self.out.release()
-                print('jump_out push-11', self.jump_out)
-                break
 
             # change model & device  20230810
             if self.current_weight != self.weights:
@@ -418,95 +407,40 @@ class DetThread(QThread): ###继承 QThread
 
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
-                        self.is_continue = False
-                        # cap1 = cv2.VideoCapture(0)
-                        # cap2 = cv2.VideoCapture(1)
-                        # cap3 = cv2.VideoCapture(2)
-                        # cap4 = cv2.VideoCapture(3)
-                        # cap5 = cv2.VideoCapture(4)
-                        # cap6 = cv2.VideoCapture(5)
-                        # cap1.release()
-                        # print('capr', cap1.release())
-                        # cap2.release()
-                        # print('cap2r', cap2.release())
-                        # cap3.release()
-                        # print('cap3r', cap3.release())
-                        # cap4.release()
-                        # print('cap4r', cap4.release())
-                        # cap5.release()
-                        # print('cap5r', cap5.release())
-                        # cap6.release()
-                        # print('cap6r', cap6.release())
-                        # # print('cap.is_open', self.cap.isOpened())
-                        # self.send_percent.emit(0)
-                        # self.send_msg.emit('Stop')
+                        if self.vid_cap.isOpened():
+                            self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
+                            logging.info("vid_cap.release...")
+                            time.sleep(1.5)
+                            continue
+
+                        self.send_percent.emit(0)
+                        self.send_msg.emit('Stop')
                         # if hasattr(self, 'out'):
                         #     self.out.release()
                         #     print('self.out.release')
-                        # break
-                        '''
-                        c = 2
-                        while c > -1:
-                            print('2-vid_cap', self.vid_cap)
-                            if self.vid_cap is not None:
-                                self.vid_cap.release() # 释放视频捕获对象
-                                print('2-in loop', c, self.vid_cap.release(), self.vid_cap)
-                            else:
-                                print('2-in loop', c, 'vid_cap is None')
-                            c -= 1
-                            if c >= 0:
-                                self.vid_cap = cv2.VideoCapture(c)
-                                print('2-fix cap', self.vid_cap)
-                            else:
-                                print('2-fix cap None')
-                        if self.vid_cap is None:
-                            self.send_percent.emit(c)
-                            self.send_msg.emit('Stop')
-                            if hasattr(self, 'out'):
-                                self.out.release()
-                                print('self.out released')
-                            break
-                        '''
-                        #     if c == -1:
-                        #         self.vid_cap = None
-                        #         # self.jump_out = False
-                        #         # self.is_continue = False
-                        #         self.send_percent.emit(c)
-                        #         self.send_msg.emit('Stop')
-                        #         if hasattr(self, 'out'):
-                        #             self.out.release()
-                        #             print('self.out.release')
-                        #         break
-                        #         print('2-reset cap', self.vid_cap)
-                        # break
 
-                        self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
-                        print('self.vid_cap.release-22', type(self.vid_cap))
-                        self.send_percent.emit(0)
-                        self.send_msg.emit('Stop')
-                        if hasattr(self, 'out'):
-                            self.out.release()
-                            print('self.out.release')
-                        break
+                self.is_continue = False  # exit inner loop
+                print('self.is_continue set False')
+                loop_flag = False  # exit main loop
 
-
-                if percent == self.percent_length:
-                    print(count)
-                    self.send_percent.emit(0)
-                    self.send_msg.emit('finished')
-                    if hasattr(self, 'out'):
-                        self.out.release()
-                    break
+                # if percent == self.percent_length:
+                #     print(count)
+                #     self.send_percent.emit(0)
+                #     self.send_msg.emit('finished')
+                #     if hasattr(self, 'out'):
+                #         self.out.release()
+                #     break
             else:
                 print('is_continue break', self.is_continue)
+            # loop_flag = False  # exit main loop  # todo bug 此处退出会卡死
+
+        if update:
+            strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
 
         #### 生成结果文件夹
         # if save_txt or save_img:
         #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
         #     print(f"Results saved to {save_dir}{s}")
-
-        if update:
-            strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
 
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
@@ -614,7 +548,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
 
 
-    def run_or_continue(self):
+    def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
         print('runbutton is check', self.runButton.isChecked())
@@ -814,12 +748,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print('shut down modbus_flag = False')
 
 
-    def stop(self):
+    def stop(self):  # connect stopButton
         if not self.det_thread.jump_out:
             self.det_thread.jump_out = True
+
         # self.saveCheckBox.setEnabled(True)
-
-
         # self.det_thread.stop()  #### bug-1 加入此语句 停止线程会卡死  未解决
 
     def search_pt(self):
@@ -949,10 +882,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # self.qtimer.start(3000)
 
     def show_msg(self, msg):
-        self.runButton.setChecked(Qt.Unchecked)
+        # self.runButton.setChecked(Qt.Unchecked)
         self.statistic_msg(msg)
+
         if msg == "Finished":
-            self.CheckBox_autoSave.setEnabled(True)
+            print(' msg == Finished')
+            # self.CheckBox_autoSave.setEnabled(True)
 
     def change_model(self, x):
         self.model_type = self.comboBox_model.currentText()  #comboBox

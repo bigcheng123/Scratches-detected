@@ -1048,7 +1048,10 @@ def dataset_stats(path='coco128.yaml', autodownload=False, verbose=False, profil
 # for testing  # TODO: debug  bug-2 stop all threads and  release cameras
 logging.basicConfig(filename='app.log', level=logging.DEBUG)  # 将日志写入到文件
 if __name__ == "__main__":  # __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True)
-    source = f'D:\code\scratch-detect\streams.txt'
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    streams_file = os.path.join(parent_dir, 'streams.txt')
+    source = streams_file
     dataset = LoadStreams(source, img_size=640, stride=32)  #### loadstreams  return self.sources, img, img0, None
     n = 0
     streams_update_flag = True
@@ -1075,14 +1078,21 @@ if __name__ == "__main__":  # __init__(self, sources='streams.txt', img_size=640
                 cv2.imshow(winname, frame)
             stop = time.time()
 
-            if key == ord('q') or key == 27 or n == 100000:  # q键或ESC退出
-                logging.info("vid_cap.release...")
+            if key == ord('q') or key == 27 or n >= 700:  # q键或ESC退出
+                logging.info("trigger vid_cap.release...")
                 # print('cap.isOpened', cap.isOpened)
                 # streams_update_flag = False
-                print('streams_update_flag = false ')
+                # print('streams_update_flag = false ')
                 # thread_list = dataset[4]
-                vid_cap.release()
+                if vid_cap.isOpened():
+                    vid_cap.release()
+                    logging.info("vid_cap.release...")
+                    continue
+                else:
+                    logging.info("vid_cap.release.finished..")
                 # LoadStreams.release_camera(thread_list)
         logging.info("Exiting loop...")
         print('break while')
-        streams_update_flag = False
+        if n >= 700:
+            streams_update_flag = False
+            # break
