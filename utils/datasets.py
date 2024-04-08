@@ -2,7 +2,7 @@
 """
 Dataloaders and dataset utils
 """
-
+import logging
 import glob
 import hashlib
 import json
@@ -312,7 +312,7 @@ class LoadStreams:
                 h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
                 fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
                 self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
-                self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
+                self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 60  # 30 FPS fallback
                 _, self.imgs[i] = self.cap.read()  # guarantee first frame
                 self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
                 LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
@@ -1043,3 +1043,46 @@ def dataset_stats(path='coco128.yaml', autodownload=False, verbose=False, profil
     if verbose:
         print(json.dumps(stats, indent=2, sort_keys=False))
     return stats
+
+
+# for testing  # TODO: debug  bug-2 stop all threads and  release cameras
+logging.basicConfig(filename='app.log', level=logging.DEBUG)  # 将日志写入到文件
+if __name__ == "__main__":  # __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True)
+    source = f'D:\code\scratch-detect\streams.txt'
+    dataset = LoadStreams(source, img_size=640, stride=32)  #### loadstreams  return self.sources, img, img0, None
+    n = 0
+    streams_update_flag = True
+    start = time.time()
+    stop = time.time()
+    while streams_update_flag:
+        key = chr(cv2.waitKey(1) & 0xFF)
+        # logging.debug(f"Key pressed: {key}")  # 记录按键值
+
+        # print('n: ', n)
+        # if n == 2000 or key == ord('q') or key == 27:  # q to quit or ESC key
+        for path, img, im0s, vid_cap in dataset: ## loop
+            n += 1
+            print(n)
+            start = time.time()
+            for x in path:
+                winname = 'ch'+ str(x)
+                index = int(x)
+                frame = im0s[index]
+                fsp = 0 if start-stop <= 0 else int(1/(start-stop))
+                cv2.putText(frame, str(f'FPS. {fsp}  CAM. {x}'), (40, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+                frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
+                cv2.imshow(winname, frame)
+            stop = time.time()
+
+            if key == ord('q') or key == 27 or n == 100000:  # q键或ESC退出
+                logging.info("vid_cap.release...")
+                # print('cap.isOpened', cap.isOpened)
+                # streams_update_flag = False
+                print('streams_update_flag = false ')
+                # thread_list = dataset[4]
+                vid_cap.release()
+                # LoadStreams.release_camera(thread_list)
+        logging.info("Exiting loop...")
+        print('break while')
+        streams_update_flag = False

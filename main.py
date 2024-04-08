@@ -189,8 +189,10 @@ class DetThread(QThread): ###继承 QThread
             if self.is_continue:
                 #  loadstreams // dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
                 for path, img, im0s, self.vid_cap in dataset:  # 由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
-                    # print('child loop running')
-                    # print('self.pred_flag', self.pred_flag)
+                    t1 = time_sync()
+                    # print(path)
+                    # print(len(path), type(img), len(im0s), type(self.vid_cap))
+                    # ['0', '1'] <class 'numpy.ndarray'> <class 'list'> <class 'cv2.VideoCapture'>
                     # #for testing : show row image
                     # cv2.imshow('ch0', im0s[0])
                     # cv2.imshow('ch1', im0s[1])
@@ -205,8 +207,8 @@ class DetThread(QThread): ###继承 QThread
                     count += 1  # ### FSP counter
                     if count % 30 == 0 and count >= 30:
                         loopcycle = int(30/(time.time()-start_time))  #### 大循环周期
-                        self.send_fps.emit('fps：'+str(loopcycle))
-                        start_time = time.time() # updata start-time
+                        self.send_fps.emit('fsp:'+str(loopcycle))
+                        start_time = time.time()  # update start-time
                     if self.vid_cap:
                         percent = int(count/self.vid_cap.get(cv2.CAP_PROP_FRAME_COUNT)*self.percent_length)
                         self.send_percent.emit(percent)
@@ -215,7 +217,7 @@ class DetThread(QThread): ###继承 QThread
 
                     # # todo  建立 pred 预测开关， 2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = self.pred_flag
                     if not self.pred_flag and self.is_continue: # if not pred_frag  output raw frame
-                        t1 = time_sync()
+
                         for i, index in enumerate(streams_list):
                             t2 = time_sync()
                             ms = round((t2 - t1), 3)  # frame text: fsp
@@ -223,10 +225,10 @@ class DetThread(QThread): ###继承 QThread
                             # print(fsp,t1,t2)
                             label_chanel = str(streams_list[i])
                             # print(i, index, label_chanel)
-                            im0 = im0s[i].copy()
+                            im0 = im0s[i].copy()  # for path, img, im0s, self.vid_cap in dataset
                             cv2.putText(im0, str(f'FPS. {fsp}  CAM. {label_chanel}'), (40, 60),
                                         cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-                            res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                            im0 = cv2.resize(im0, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
                             if label_chanel == '0':
                                 self.send_img_ch0.emit(im0)  ### 发送图像
@@ -260,7 +262,6 @@ class DetThread(QThread): ###继承 QThread
                     if self.pred_flag and self.is_continue:
                         # pred = model(img, augment=augment)[0] #### 预测  使用loadWebcam是 加载的model
                         # print('pred_flag = true pred')
-                        t1 = time_sync()
                         pred = model(img,
                                      augment=augment,
                                      visualize=increment_path(save_dir / Path(path).stem,
@@ -343,7 +344,7 @@ class DetThread(QThread): ###继承 QThread
                                                     # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
                                                     # cv2.imwrite(save_path, imc)  # imc = no box
                                                     im = imc if not add_box else im0
-                                                    cv2.imwrite(save_path, im)
+                                                    cv2.imwrite(save_path, im)  # save image
                                                     print('box_CheckBox', myWin.box_CheckBox.isChecked())
                                                     print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
                                                     print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
@@ -351,7 +352,7 @@ class DetThread(QThread): ###继承 QThread
                                             print('save_one_box')
                                 # print('detection is running')
                             t2 = time_sync()
-                            fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0 # frame text:
+                            fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0  # frame text:
                             # print(f'{s}Done. ({t2 - t1:.3f}s fsp ={fsp})')
                             # precition end #######################################################################
 
@@ -359,7 +360,7 @@ class DetThread(QThread): ###继承 QThread
 
                             # if self.is_continue: # ##### send image in loop @  for i, det in enumerate(pred):
                             cv2.putText(im0, str(f'FSP. {fsp}  CAM. {label_chanel}'), (40, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-                            res = cv2.resize(im0, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                            im0 = cv2.resize(im0, None, fx=0.4, fy=0.4, interpolation=cv2.INTER_CUBIC)
                             # chanel-0  ##### show images
                             if label_chanel == '0':
                                 self.send_img_ch0.emit(im0)  ### 发送图像

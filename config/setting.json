@@ -1,9 +1,9 @@
 {
   "iou": 0.9,
-  "conf": 0.9,
-  "rate": 9,
+  "conf": 0.8,
+  "rate": 1,
   "check": 0,
-  "savecheck": 0,
+  "savecheck": 2,
   "device": 0,
   "port": 7,
   "source": 0,
