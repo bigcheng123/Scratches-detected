@@ -71,7 +71,7 @@ def writedata(ser,hexcode):
     # time.sleep(random.random()*0.5) ##每次writeport要 分隔开  防止同时进行 写操作 间隔越大 
     send_data = bytes.fromhex(hexcode)    ### HEX码 转换 bytes 字节码     发送数据转换为b'\xff\x01\x00U\x00\x00V'
     ser.write(send_data)   # 发送命令
-    time.sleep(0.06)        # 延时，否则len_return_data将返回0，此处易忽视！！！ 延迟低于 0.01无法接收数据
+    time.sleep(0.02)        # 延时，否则len_return_data将返回0，此处易忽视！！！ 延迟低于 0.01无法接收数据
     len_return_data = ser.inWaiting()  # 获取缓冲数据（接收数据）长度
     # if len_return_data:
     return_data = ser.read(len_return_data)  # 读取缓冲数据

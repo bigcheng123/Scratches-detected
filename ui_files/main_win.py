@@ -124,7 +124,7 @@ class Ui_mainWindow(object):
         self.label_4.setObjectName("label_4")
         self.horizontalLayout.addWidget(self.label_4)
         self.pushButton_okng = QtWidgets.QPushButton(self.groupBox)
-        self.pushButton_okng.setMinimumSize(QtCore.QSize(340, 40))
+        self.pushButton_okng.setMinimumSize(QtCore.QSize(100, 40))
         self.pushButton_okng.setToolTipDuration(0)
         self.pushButton_okng.setStyleSheet("QPushButton {\n"
 "font-size: 20px;\n"
@@ -137,20 +137,62 @@ class Ui_mainWindow(object):
 "")
         self.pushButton_okng.setObjectName("pushButton_okng")
         self.horizontalLayout.addWidget(self.pushButton_okng)
+        self.label_okCounter = QtWidgets.QLabel(self.groupBox)
+        self.label_okCounter.setMinimumSize(QtCore.QSize(100, 0))
+        self.label_okCounter.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.label_okCounter.setStyleSheet("font-size:18px;\n"
+"font-family: \"Microsoft YaHei\";\n"
+"font-weight: bold;\n"
+"border-radius:4px;\n"
+"background-color: rgb(255, 255, 255);\n"
+"")
+        self.label_okCounter.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_okCounter.setObjectName("label_okCounter")
+        self.horizontalLayout.addWidget(self.label_okCounter)
+        self.line_3 = QtWidgets.QFrame(self.groupBox)
+        self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_3.setObjectName("line_3")
+        self.horizontalLayout.addWidget(self.line_3)
+        self.pushButton_okng_2 = QtWidgets.QPushButton(self.groupBox)
+        self.pushButton_okng_2.setMinimumSize(QtCore.QSize(100, 40))
+        self.pushButton_okng_2.setToolTipDuration(0)
+        self.pushButton_okng_2.setStyleSheet("QPushButton {\n"
+"font-size: 16px;\n"
+"font-family: \"Microsoft YaHei\";\n"
+"font-weight: bold;\n"
+"border-radius:4px;\n"
+"background-color: rgb(255, 85, 127);\n"
+"color: rgb(255, 255, 255);\n"
+"}\n"
+"")
+        self.pushButton_okng_2.setObjectName("pushButton_okng_2")
+        self.horizontalLayout.addWidget(self.pushButton_okng_2)
+        self.label_ngCounter = QtWidgets.QLabel(self.groupBox)
+        self.label_ngCounter.setMinimumSize(QtCore.QSize(100, 0))
+        self.label_ngCounter.setMaximumSize(QtCore.QSize(16777215, 40))
+        self.label_ngCounter.setStyleSheet("font-size:18px;\n"
+"font-family: \"Microsoft YaHei\";\n"
+"font-weight: bold;\n"
+"border-radius:4px;\n"
+"background-color: rgb(255, 255, 255);\n"
+"")
+        self.label_ngCounter.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_ngCounter.setObjectName("label_ngCounter")
+        self.horizontalLayout.addWidget(self.label_ngCounter)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.timeEdit = QtWidgets.QTimeEdit(self.groupBox)
-        self.timeEdit.setMinimumSize(QtCore.QSize(60, 30))
-        self.timeEdit.setStyleSheet("font-size: 18px;\n"
+        self.dateTimeEdit = QtWidgets.QDateTimeEdit(self.groupBox)
+        self.dateTimeEdit.setMinimumSize(QtCore.QSize(0, 40))
+        self.dateTimeEdit.setToolTip("")
+        self.dateTimeEdit.setStyleSheet("font-size: 14px;\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-weight: regular;\n"
 "border-radius:9px;\n"
 "background:rgba(66, 195, 255, 0);\n"
-"color: rgb(218, 218, 218);\n"
-"\n"
-"")
-        self.timeEdit.setObjectName("timeEdit")
-        self.horizontalLayout.addWidget(self.timeEdit)
+"color: rgb(218, 218, 218);")
+        self.dateTimeEdit.setObjectName("dateTimeEdit")
+        self.horizontalLayout.addWidget(self.dateTimeEdit)
         self.label_modbus = QtWidgets.QLabel(self.groupBox)
         self.label_modbus.setAutoFillBackground(False)
         self.label_modbus.setStyleSheet("font-size: 18px;\n"
@@ -1455,27 +1497,6 @@ class Ui_mainWindow(object):
         self.tab.setObjectName("tab")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.tab)
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.video_label_ch2 = Label_click_Mouse(self.tab)
-        self.video_label_ch2.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch2.sizePolicy().hasHeightForWidth())
-        self.video_label_ch2.setSizePolicy(sizePolicy)
-        self.video_label_ch2.setMinimumSize(QtCore.QSize(200, 0))
-        self.video_label_ch2.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        font.setPointSize(36)
-        self.video_label_ch2.setFont(font)
-        self.video_label_ch2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch2.setAutoFillBackground(True)
-        self.video_label_ch2.setStyleSheet("color: rgb(218, 218, 218);\n"
-"")
-        self.video_label_ch2.setScaledContents(False)
-        self.video_label_ch2.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch2.setObjectName("video_label_ch2")
-        self.gridLayout_3.addWidget(self.video_label_ch2, 0, 2, 1, 1)
         self.video_label_ch0 = Label_click_Mouse(self.tab)
         self.video_label_ch0.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1498,6 +1519,49 @@ class Ui_mainWindow(object):
         self.video_label_ch0.setAlignment(QtCore.Qt.AlignCenter)
         self.video_label_ch0.setObjectName("video_label_ch0")
         self.gridLayout_3.addWidget(self.video_label_ch0, 0, 0, 1, 1)
+        self.video_label_ch12 = Label_click_Mouse(self.tab)
+        self.video_label_ch12.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.video_label_ch12.sizePolicy().hasHeightForWidth())
+        self.video_label_ch12.setSizePolicy(sizePolicy)
+        self.video_label_ch12.setMinimumSize(QtCore.QSize(200, 0))
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        font.setPointSize(36)
+        self.video_label_ch12.setFont(font)
+        self.video_label_ch12.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.video_label_ch12.setAutoFillBackground(True)
+        self.video_label_ch12.setStyleSheet("color: rgb(218, 218, 218);\n"
+"border-color: rgb(255, 0, 0);\n"
+"border-width: 2px;\n"
+"")
+        self.video_label_ch12.setScaledContents(False)
+        self.video_label_ch12.setAlignment(QtCore.Qt.AlignCenter)
+        self.video_label_ch12.setObjectName("video_label_ch12")
+        self.gridLayout_3.addWidget(self.video_label_ch12, 1, 2, 1, 1)
+        self.video_label_ch2 = Label_click_Mouse(self.tab)
+        self.video_label_ch2.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.video_label_ch2.sizePolicy().hasHeightForWidth())
+        self.video_label_ch2.setSizePolicy(sizePolicy)
+        self.video_label_ch2.setMinimumSize(QtCore.QSize(200, 0))
+        self.video_label_ch2.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        font.setPointSize(36)
+        self.video_label_ch2.setFont(font)
+        self.video_label_ch2.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.video_label_ch2.setAutoFillBackground(True)
+        self.video_label_ch2.setStyleSheet("color: rgb(218, 218, 218);\n"
+"")
+        self.video_label_ch2.setScaledContents(False)
+        self.video_label_ch2.setAlignment(QtCore.Qt.AlignCenter)
+        self.video_label_ch2.setObjectName("video_label_ch2")
+        self.gridLayout_3.addWidget(self.video_label_ch2, 0, 2, 1, 1)
         self.video_label_ch1 = Label_click_Mouse(self.tab)
         self.video_label_ch1.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1560,28 +1624,6 @@ class Ui_mainWindow(object):
         self.video_label_ch11.setAlignment(QtCore.Qt.AlignCenter)
         self.video_label_ch11.setObjectName("video_label_ch11")
         self.gridLayout_3.addWidget(self.video_label_ch11, 1, 1, 1, 1)
-        self.video_label_ch12 = Label_click_Mouse(self.tab)
-        self.video_label_ch12.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch12.sizePolicy().hasHeightForWidth())
-        self.video_label_ch12.setSizePolicy(sizePolicy)
-        self.video_label_ch12.setMinimumSize(QtCore.QSize(200, 0))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        font.setPointSize(36)
-        self.video_label_ch12.setFont(font)
-        self.video_label_ch12.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch12.setAutoFillBackground(True)
-        self.video_label_ch12.setStyleSheet("color: rgb(218, 218, 218);\n"
-"border-color: rgb(255, 0, 0);\n"
-"border-width: 2px;\n"
-"")
-        self.video_label_ch12.setScaledContents(False)
-        self.video_label_ch12.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch12.setObjectName("video_label_ch12")
-        self.gridLayout_3.addWidget(self.video_label_ch12, 1, 2, 1, 1)
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -1808,6 +1850,7 @@ class Ui_mainWindow(object):
         icon11.addPixmap(QtGui.QPixmap(":/icon/ui_files/icon/stop-1.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.stopButton.setIcon(icon11)
         self.stopButton.setIconSize(QtCore.QSize(40, 30))
+        self.stopButton.setCheckable(True)
         self.stopButton.setObjectName("stopButton")
         self.gridLayout_2.addWidget(self.stopButton, 0, 2, 1, 1)
         self.runButton = QtWidgets.QPushButton(self.groupBox_201)
@@ -1947,7 +1990,10 @@ class Ui_mainWindow(object):
         mainWindow.setWindowTitle(_translate("mainWindow", "Scratch Dectected"))
         self.fileButton_2.setToolTip(_translate("mainWindow", "file"))
         self.label_4.setText(_translate("mainWindow", "Scratch Dectect"))
-        self.pushButton_okng.setText(_translate("mainWindow", "OK"))
+        self.pushButton_okng.setText(_translate("mainWindow", "pushButton_okng"))
+        self.label_okCounter.setText(_translate("mainWindow", "LoopCunter"))
+        self.pushButton_okng_2.setText(_translate("mainWindow", "NG计数"))
+        self.label_ngCounter.setText(_translate("mainWindow", "<html><head/><body><p>ngCounter</p></body></html>"))
         self.label_modbus.setText(_translate("mainWindow", "modbus"))
         self.fileButton_3.setToolTip(_translate("mainWindow", "file"))
         self.fileButton_3.setText(_translate("mainWindow", "Settings..."))
@@ -2016,12 +2062,12 @@ class Ui_mainWindow(object):
         self.checkBox_15.setText(_translate("mainWindow", "DI 5"))
         self.checkBox_16.setText(_translate("mainWindow", "DI 6"))
         self.checkBox_17.setText(_translate("mainWindow", "DI 7"))
-        self.video_label_ch2.setText(_translate("mainWindow", "CAM 2"))
         self.video_label_ch0.setText(_translate("mainWindow", "CAM 0"))
+        self.video_label_ch12.setText(_translate("mainWindow", "CAM 5"))
+        self.video_label_ch2.setText(_translate("mainWindow", "CAM 2"))
         self.video_label_ch1.setText(_translate("mainWindow", "CAM 1"))
         self.video_label_ch3.setText(_translate("mainWindow", "CAM 3"))
         self.video_label_ch11.setText(_translate("mainWindow", "CAM 4"))
-        self.video_label_ch12.setText(_translate("mainWindow", "CAM 5"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("mainWindow", "Multipel"))
         self.video_label_ch4.setText(_translate("mainWindow", "CAM 0"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("mainWindow", "CAM_0"))

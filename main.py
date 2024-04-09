@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QActi
 from ui_files.main_win import Ui_mainWindow
 from ui_files.dialog.rtsp_win import Window
 
-from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal, QTime, QDateTime
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QIcon
 from pathlib import Path
 import sys
@@ -31,8 +31,10 @@ from utils.capnums import Camera
 import logging
 ## set global variable 设置全局变量
 modbus_flag = False
-results =[]
-
+results = []
+okCounter = 0
+ngCounter = 0
+loopCounter = 0
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
     send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
@@ -149,6 +151,7 @@ class DetThread(QThread): ###继承 QThread
         print('streams:', streams_list)
 
         # dataset = iter(dataset)  ##迭代器 iter 创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用 object
+
         while loop_flag: ##### 采用循环来 检查是否 停止推理
             print('marker while loop')
             print(' while loop self.is_continue', self.is_continue)
@@ -176,6 +179,8 @@ class DetThread(QThread): ###继承 QThread
             # _pred_flag = True
 
             if self.is_continue:
+                global results, ngCounter, okCounter,loopCounter
+                det_flag = None
                 #  loadstreams // dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
                 for path, img, im0s, self.vid_cap in dataset:  # 由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
                     t1 = time_sync()
@@ -206,7 +211,6 @@ class DetThread(QThread): ###继承 QThread
 
                     # # todo  建立 pred 预测开关， 2种图像输出方式 ， 原始输出  VS  预测结果后输出，控制变量 = self.pred_flag
                     if not self.pred_flag and self.is_continue: # if not pred_frag  output raw frame
-
                         for i, index in enumerate(streams_list):
                             t2 = time_sync()
                             ms = round((t2 - t1), 3)  # frame text: fsp
@@ -265,12 +269,23 @@ class DetThread(QThread): ###继承 QThread
                             print(f'type pred:', type(pred), len(pred))
 
                         # emit frame  & Process detections
-                        for i, det in enumerate(pred):  # detections per image
-                            # ## label_index 方法1  ↓ ###label_chanel 依据 list det的 元素
-                            # label_chanel = str(i)
-                            ### label_index 方法2  ↓  依据 streams.txt camera号码
+                        for i, det in enumerate(pred):  # pred = []
+                            # print(f'i: {i}')
+                            if i == len(pred)-1:  # the last one
+                                loopCounter += 1
+                                # print(f'main loop: {loopCounter} ')
+                                if det_flag:
+                                    ngCounter += 1
+                                    det_flag = False  # Reset det_flag
+                                else:
+                                    det_flag = False  # Reset det_flag
+                            # #label_index 方法1  ↓ ###label_chanel 依据 list det的 元素
+                            # #label_chanel = str(i)
+                            # ##label_index 方法2  ↓  依据 streams.txt camera号码
                             if len(pred) <= len(streams_list):
                                 label_chanel = str(streams_list[i])
+                                # print(f'len(pred) : {len(pred)} ')
+
                             else:
                                 print(f'streams : {len(pred)} camera quantity : {len(streams_list)}')
                                 break
@@ -287,10 +302,14 @@ class DetThread(QThread): ###继承 QThread
                             s += '%gx%g ' % img.shape[2:]  # print string
                             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
                             imc = im0.copy() #if save_crop else im0  # for save NG frame
-                            if len(det):
+                            if len(det):  # if trigger    detection per image
+                                # #counter of ng judgement
+                                det_flag = True
+                                # if det_flag and i == len(pred) - 1:
+                                #     ngCounter += 1
+                                #     det_flag = False
                                 # Rescale boxes from img_size to im0 size
                                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
-
                                 # Print results
                                 for c in det[:, -1].unique():
                                     n = (det[:, -1] == c).sum()  # detections per class
@@ -305,7 +324,7 @@ class DetThread(QThread): ###继承 QThread
                                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
                                     # plot_one_box here
                                     if save_img or save_crop or view_img:  # Add bbox to image
-                                        print('plot_one_box', save_img, save_crop, view_img)
+                                        # print('plot_one_box', save_img, save_crop, view_img)
                                         # save_img = not nosave and not self.source.endswith('.txt')  # save inference images
                                         # save_crop=False,  # save cropped prediction boxes
                                         # view_img =check_inshow() # Check if environment supports image displays
@@ -320,7 +339,7 @@ class DetThread(QThread): ###继承 QThread
                                         #### save NG image at here
 
                                         # auto_save  Write results  save NG image in floder jpg
-                                        global results
+
                                         if self.save_fold:  #### when checkbox: autosave is  setcheck
                                             os.makedirs(self.save_fold, exist_ok=True)
                                             if len(det):
@@ -339,6 +358,7 @@ class DetThread(QThread): ###继承 QThread
                                                     print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
                                         if save_crop:
                                             print('save_one_box')
+
                                 # print('detection is running')
                             t2 = time_sync()
                             fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0  # frame text:
@@ -399,10 +419,6 @@ class DetThread(QThread): ###继承 QThread
                     if self.rate_check:
                         time.sleep(1/self.rate)
                     # im0 = annotator.result()
-
-                    if self.rate_check:
-                        time.sleep(1/self.rate)
-                    # im0 = annotator.result()
                     # Write results
 
                     if self.jump_out:
@@ -410,7 +426,7 @@ class DetThread(QThread): ###继承 QThread
                         if self.vid_cap.isOpened():
                             self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
                             logging.info("vid_cap.release...")
-                            time.sleep(1.5)
+                            time.sleep(2)
                             continue
 
                         self.send_percent.emit(0)
@@ -421,7 +437,8 @@ class DetThread(QThread): ###继承 QThread
 
                 self.is_continue = False  # exit inner loop
                 print('self.is_continue set False')
-                loop_flag = False  # exit main loop
+                # if not self.vid_cap.isOpened():
+                #     loop_flag = False  # exit main loop
 
                 # if percent == self.percent_length:
                 #     print(count)
@@ -432,7 +449,8 @@ class DetThread(QThread): ###继承 QThread
                 #     break
             else:
                 print('is_continue break', self.is_continue)
-            # loop_flag = False  # exit main loop  # todo bug 此处退出会卡死
+            if not self.vid_cap.isOpened():
+                loop_flag = False  # exit main loop  # todo bug 此处退出会卡死
 
         if update:
             strip_optimizer(self.weights)  # update model (to fix SourceChangeWarning)
@@ -589,7 +607,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def thread_mudbus_run(self):
         global modbus_flag
         modbus_flag = True
-        # hexcode   comunicate with PC and modbus device
+        # hexcode   comunicate with PLC or modbus device
         # IN0_READ = '01 02 00 00 00 01 B9 CA'
         # IN1_READ = '01 02 00 01 00 01 E8 0A'
         # IN2_READ = '01 02 00 02 00 01 18 0A'
@@ -623,10 +641,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
-
             while self.runButton_modbus.isChecked() and modbus_flag:
                 start = time.time()
-                # 240228屏蔽537-595:速度提升0.26s
+                self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
+
+                #todo 240228屏蔽537-595:速度提升0.26s  fsp=3.3  目标周期= 30r/sec
+                '''
                 # feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
                 # if feedback_data_in0:#### 有返回数据
                 #     text_in0 = feedback_data_in0[0:8]  ## 读取8位字符
@@ -685,22 +705,32 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 #     feedback_list.clear()
                 # else:
                 #     self.statistic_msg(str(feedback_list))
-
+                '''
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
                 output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
-                for i , n in enumerate(output_box_list):
-                    if n:
+                for i, n in enumerate(output_box_list):
+                    if self.runButton.isChecked():
+                        modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
+                    else:  # stop_button
+                        modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
+                        modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
+                        modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
+                    if n:  # output NG
                         # print('scratch detected')
-                        feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)  ### OUT4 = 1
-                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  ###PLC控制，灭绿灯-240228
-                    else:
+                        feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
+                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
+                    if not n and self.runButton.isChecked(): # self.runButton.isChecked():
                         # print('scratch has not detected')
-                        feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  ### OUT4 = 0
-                        feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  ###PLC控制，亮绿灯-240228
-                        time.sleep(0.1)
-                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)
+                        feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
+                        feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228
+                        # time.sleep(0.02)
+                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
+                stop = time.time()
+                freq = int(1/(stop-start))
+                self.label_modbus.setText(str(freq))
+                # print(f'modbus freq: {freq}Hz,{(stop-start)*1000}ms')
             else:
                 modbus_flag = False
                 print('modbus shut off')
@@ -977,16 +1007,21 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print(repr(e))
 
     def show_statistic(self, statistic_dic):  ### predicttion  output
-        global results
+        global results, okCounter, ngCounter
         try:
+
             self.resultWidget.clear()
             statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
             statistic_dic = [i for i in statistic_dic if i[1] > 0] ## append to List  while the value greater than 0
             results = [' '+str(i[0]) + '：' + str(i[1]) for i in statistic_dic]  ### reform the list
             # print('output result:', type(results), results)
             self.resultWidget.addItems(results)
-            if len(results) :
-                self.pushButton_okng.setText(f"NG :class= {len(results)}")
+            self.label_okCounter.setText(str(loopCounter))
+            if len(results):
+                # ngCounter += 1
+                self.label_ngCounter.setText(str(ngCounter))
+                print(f'ngCounter: {ngCounter}')
+                self.pushButton_okng.setText(f"NG: {len(results)}")
                 self.pushButton_okng.setStyleSheet('''QPushButton{
                         font-size: 20px;
                         font-family: "Microsoft YaHei";
@@ -1034,7 +1069,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.checkBox_5.setChecked(False)
                 self.checkBox_6.setChecked(False)
                 # self.checkBox_2.setText("")
-                # print("result = []")
+                # print(f'okCounter: {okCounter}')
 
         except Exception as e:
             print(repr(e))
