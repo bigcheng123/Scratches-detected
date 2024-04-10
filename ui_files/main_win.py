@@ -220,8 +220,9 @@ class Ui_mainWindow(object):
 "border-width: 0px;\n"
 "border-radius: 0px;\n"
 "background-color: rgba(223, 223, 223, 150);}\n"
-"#QPushButton::checked {\n"
-"#background-color: rgb(0, 170, 127);}\n"
+"QPushButton::checked {\n"
+"background-color: rgb(0, 170, 127);}\n"
+"\n"
 "")
         self.runButton_modbus.setText("")
         icon1 = QtGui.QIcon()
@@ -1990,7 +1991,7 @@ class Ui_mainWindow(object):
         mainWindow.setWindowTitle(_translate("mainWindow", "Scratch Dectected"))
         self.fileButton_2.setToolTip(_translate("mainWindow", "file"))
         self.label_4.setText(_translate("mainWindow", "Scratch Dectect"))
-        self.pushButton_okng.setText(_translate("mainWindow", "pushButton_okng"))
+        self.pushButton_okng.setText(_translate("mainWindow", "检测结果"))
         self.label_okCounter.setText(_translate("mainWindow", "LoopCunter"))
         self.pushButton_okng_2.setText(_translate("mainWindow", "NG计数"))
         self.label_ngCounter.setText(_translate("mainWindow", "<html><head/><body><p>ngCounter</p></body></html>"))

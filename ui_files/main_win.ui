@@ -217,7 +217,7 @@ color: rgb(255, 255, 255);
 </string>
             </property>
             <property name="text">
-             <string>pushButton_okng</string>
+             <string>检测结果</string>
             </property>
            </widget>
           </item>
@@ -391,8 +391,9 @@ border-style: solid;
 border-width: 0px;
 border-radius: 0px;
 background-color: rgba(223, 223, 223, 150);}
-#QPushButton::checked {
-#background-color: rgb(0, 170, 127);}
+QPushButton::checked {
+background-color: rgb(0, 170, 127);}
+
 </string>
             </property>
             <property name="text">

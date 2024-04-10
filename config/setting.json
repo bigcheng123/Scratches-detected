@@ -3,9 +3,9 @@
   "conf": 0.8,
   "rate": 1,
   "check": 0,
-  "savecheck": 0,
+  "savecheck": 2,
   "device": 0,
   "port": 7,
   "source": 0,
-  "model": 1
+  "model": 2
 }

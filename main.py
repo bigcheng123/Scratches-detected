@@ -564,7 +564,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.pred_CheckBox.clicked.connect(self.pred_run)
         self.load_setting()  #### loading config
 
-
+        self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
@@ -625,7 +625,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'#'01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
 
         # self.ret = None
-        self.port_type = self.comboBox_port.currentText()
+        self.port_type = self.comboBox_port.currentText()  # 6070:COM7  8072:5
         print(type(self.port_type), self.port_type)
         # try:
         #     self.ser, self.ret, _ = modbus_rtu.openport(port='COM5', baudrate=9600, timeout=5)  # 打开端口
@@ -643,7 +643,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             feedback_list = []
             while self.runButton_modbus.isChecked() and modbus_flag:
                 start = time.time()
-                self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())
+                # self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
 
                 #todo 240228屏蔽537-595:速度提升0.26s  fsp=3.3  目标周期= 30r/sec
                 '''
@@ -721,6 +721,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
+                        writeD10 = '01 05 33 0C FF 00 43 7D'  # 功能代码：06H 保持寄存器编号： 写入数据：
+                        modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC D10 写入NG次数
+                        writeD11 = ''
+                        modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC D11 写入NG次数
                     if not n and self.runButton.isChecked(): # self.runButton.isChecked():
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
@@ -755,7 +759,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
             if not self.ret:
                 self.runButton_modbus.setChecked(False)
-                self.runButton_modbus.setStyleSheet('background-color:rgb(220,0,0)') ### background = red
+                # self.runButton_modbus.setStyleSheet('background-color:rgb(220,0,0)') ### background = red
                 MessageBox(
                     self.closeButton, title='Error', text='Connection Error: '+ str(error), time=2000,
                     auto=True).exec_()
@@ -770,7 +774,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             else: # self.ret is  True
                 self.runButton_modbus.setChecked(True)
                 _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
-                self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
+                # self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
         else: # shut down modbus
             print('runButton_modbus.is unChecked')
             modbus_flag = False
@@ -797,7 +801,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def is_save(self):
         if self.CheckBox_autoSave.isChecked():
-            self.det_thread.save_fold = './auto_save/jpg/pt0403'  ### save result as .mp4
+            self.det_thread.save_fold = r'.\auto_save\jpg\pt0410'  ### save result as .mp4
         else:
             self.det_thread.save_fold = None
     def pred_run(self):
@@ -1009,7 +1013,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def show_statistic(self, statistic_dic):  ### predicttion  output
         global results, okCounter, ngCounter
         try:
-
+            self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
             self.resultWidget.clear()
             statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
             statistic_dic = [i for i in statistic_dic if i[1] > 0] ## append to List  while the value greater than 0
