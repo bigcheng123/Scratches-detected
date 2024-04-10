@@ -30,8 +30,7 @@ from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
 import logging
 ## set global variable 设置全局变量
-modbus_flag = False
-results = []
+modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0

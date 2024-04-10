@@ -1391,6 +1391,7 @@ class Ui_mainWindow(object):
         self.horizontalLayout_6.setContentsMargins(11, 0, 11, 0)
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
         self.checkBox_2 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_2.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_2.setAutoFillBackground(False)
         self.checkBox_2.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;\n"
@@ -1406,36 +1407,43 @@ class Ui_mainWindow(object):
         self.checkBox_2.setObjectName("checkBox_2")
         self.horizontalLayout_6.addWidget(self.checkBox_2)
         self.checkBox_3 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_3.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_3.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_3.setObjectName("checkBox_3")
         self.horizontalLayout_6.addWidget(self.checkBox_3)
         self.checkBox_4 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_4.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_4.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_4.setObjectName("checkBox_4")
         self.horizontalLayout_6.addWidget(self.checkBox_4)
         self.checkBox_5 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_5.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_5.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_5.setObjectName("checkBox_5")
         self.horizontalLayout_6.addWidget(self.checkBox_5)
         self.checkBox_6 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_6.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_6.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_6.setObjectName("checkBox_6")
         self.horizontalLayout_6.addWidget(self.checkBox_6)
         self.checkBox_7 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_7.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_7.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_7.setObjectName("checkBox_7")
         self.horizontalLayout_6.addWidget(self.checkBox_7)
         self.checkBox_8 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_8.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_8.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_8.setObjectName("checkBox_8")
         self.horizontalLayout_6.addWidget(self.checkBox_8)
         self.checkBox_9 = QtWidgets.QCheckBox(self.groupBox_3)
+        self.checkBox_9.setMinimumSize(QtCore.QSize(51, 0))
         self.checkBox_9.setStyleSheet("color: rgb(218, 218, 218);\n"
 "font-size: 14px;")
         self.checkBox_9.setObjectName("checkBox_9")

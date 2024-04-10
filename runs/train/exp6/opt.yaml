@@ -1,9 +1,9 @@
-weights: pt/yolov5s.pt
+weights: runs/train/exp5/weights/best.pt
 cfg: models/yolov5s.yaml
-data: data/mycoco128.yaml
+data: D:/1_code/dataset/data/0-impress-train.yaml
 hyp: data/hyps/hyp.scratch-low.yaml
-epochs: 100
-batch_size: 8
+epochs: 300
+batch_size: -1
 imgsz: 640
 rect: false
 resume: false
@@ -19,7 +19,7 @@ multi_scale: false
 single_cls: false
 optimizer: SGD
 sync_bn: false
-workers: 8
+workers: 4
 project: runs/train
 name: exp
 exist_ok: false
