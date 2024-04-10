@@ -2431,6 +2431,12 @@ font-size: 14px;
                </property>
                <item>
                 <widget class="QCheckBox" name="checkBox_2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="autoFillBackground">
                   <bool>false</bool>
                  </property>
@@ -2454,6 +2460,12 @@ QCheckBox::indicator:checked {
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_3">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2465,6 +2477,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_4">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2476,6 +2494,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_5">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2487,6 +2511,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_6">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2498,6 +2528,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_7">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2509,6 +2545,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_8">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>
@@ -2520,6 +2562,12 @@ font-size: 14px;</string>
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_9">
+                 <property name="minimumSize">
+                  <size>
+                   <width>51</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(218, 218, 218);
 font-size: 14px;</string>

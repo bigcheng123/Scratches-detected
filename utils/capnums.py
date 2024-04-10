@@ -2,7 +2,7 @@ import cv2
 
 
 class Camera:
-    def __init__(self, cam_preset_num=5):
+    def __init__(self, cam_preset_num=2):
         self.cam_preset_num = cam_preset_num
 
     def get_cam_num(self):
