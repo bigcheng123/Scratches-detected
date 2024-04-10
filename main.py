@@ -720,10 +720,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
+                        ''' #写入寄存器代码
                         writeD10 = '01 05 33 0C FF 00 43 7D'  # 功能代码：06H 保持寄存器编号： 写入数据：
                         modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC D10 写入NG次数
                         writeD11 = ''
                         modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC D11 写入NG次数
+                        '''
                     if not n and self.runButton.isChecked(): # self.runButton.isChecked():
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
