@@ -312,7 +312,7 @@ class LoadStreams:
                 h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
                 fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
                 self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
-                self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 200  # 30 FPS fallback
+                self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
                 _, self.imgs[i] = self.cap.read()  # guarantee first frame
                 self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
                 LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
@@ -345,7 +345,7 @@ class LoadStreams:
                 if success:
                     self.imgs[i] = im
                 else:
-                    LOGGER.warning('WARNING: Video stream unresponsive, please check your IP camera connection.')
+                    LOGGER.warning(f'WARNING: Video stream unresponsive, please check your {i} camera connection.')
                     self.imgs[i] = np.zeros_like(self.imgs[i])
                     cap.open(stream)  # re-open stream if signal was lost
             time.sleep(1 / self.fps[i])  # wait time

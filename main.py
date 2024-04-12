@@ -635,14 +635,37 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         #     self.statistic_msg(str(e))
         #     self.runButton_modbus.setChecked(False)
 
+
+
         if self.ret: ### openport sucessfully
             feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
             self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
+
+            # print('write register')
+            # writeD0 = '01 06 00 00 00 64 88 21'  # 触发次数 D0 写入 100
+            # modbus_rtu.writedata(self.ser, writeD0)
+            # writeD1 = '01 06 00 01 00 64 D9 E1'  # OK次数 D1 写入 100
+            # modbus_rtu.writedata(self.ser, writeD1)
+            # writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
+            # modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
+            # writeD11 = '01 06 00 0B 00 65 38 23'  # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
+            # modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+
+
             while self.runButton_modbus.isChecked() and modbus_flag:
                 start = time.time()
                 # self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
+                print('write register')
+                writeD0 = '01 06 00 00 00 64 88 21'  # 触发次数 D0 写入 100
+                modbus_rtu.writedata(self.ser, writeD0)
+                writeD1 = '01 06 00 01 00 64 D9 E1'  # OK次数 D1 写入 100
+                modbus_rtu.writedata(self.ser, writeD1)
+                writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
+                modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
+                writeD11 = '01 06 00 0B 00 65 38 23'  # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
+                modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
 
                 #todo 240228屏蔽537-595:速度提升0.26s  fsp=3.3  目标周期= 30r/sec
                 '''
@@ -721,15 +744,20 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
                         ''' #写入寄存器代码
-                        writeD10 = '01 05 33 0C FF 00 43 7D'  # 功能代码：06H 保持寄存器编号： 写入数据：
+                        writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
                         modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC D10 写入NG次数
-                        writeD11 = ''
-                        modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC D11 写入NG次数
+                        writeD11 = '01 06 00 0B 00 64 F9 E3' # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
+                        modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC D11 写入
+                        
+                        writeD0 = '01 06 00 00 00 64 F9 E3' # D0 写入 100
+                        modbus_rtu.writedata(self.ser, writeD0)
+                        
                         '''
                     if not n and self.runButton.isChecked(): # self.runButton.isChecked():
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228
+
                         # time.sleep(0.02)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
                 stop = time.time()
