@@ -112,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.idea
 
 # Spyder project settings
 .spyderproject
@@ -146,10 +147,11 @@ install_torch
 ### 类别二 仅忽略 folderName 文件，不忽略 folderName 目录 (!) 表示保留folderName文件会被上传，但是 里面的内容不会被上传，要2行语句同时使用？
 folderName
 !folderName/
-auto_save
-!auto_save/*
 
-
+# auto_save/jpg/ 表示忽略auto_save/jpg文件夹中的所有文件，
+# !auto_save/jpg/.gitkeep 表示 保留auto_save/jpg文件夹本身
+auto_save/jpg/
+!auto_save/jpg/.gitkeep
 
 ### 忽略特定目录下的所有文件和子目录（例如一个名为"temp"的目录）
 !runs/*
@@ -163,8 +165,6 @@ data/
 
 
 
-
-/auto_save/
 /main-multicam.py
 /main-multicam2.py
 /multitest.py
