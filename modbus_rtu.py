@@ -12,7 +12,7 @@ STRGLO =  "" #读取的数据
 serflag = True  #读取标志位
 #读数代码本体实现
 def ReadData(ser):
-    global STRGLO,serflag
+    global STRGLO , serflag
     # 循环接收数据，此为死循环，可用线程实现
     while serflag:
         if ser.in_waiting:
@@ -60,7 +60,7 @@ def DReadPort():
 
     # serial .isOpen()
 
-def writedata(ser,hexcode):
+def writedata(ser, hexcode):
     # lock= threading.Lock()
     # openport()
     # if (ser.is_open):
@@ -68,15 +68,15 @@ def writedata(ser,hexcode):
     str_return_data = ""
 # try:
     # time.sleep(0.2)
-    # time.sleep(random.random()*0.5) ##每次writeport要 分隔开  防止同时进行 写操作 间隔越大 
-    send_data = bytes.fromhex(hexcode)    ### HEX码 转换 bytes 字节码     发送数据转换为b'\xff\x01\x00U\x00\x00V'
+    # time.sleep(random.random()*0.5) # 每次write port要 分隔开  防止同时进行 写操作 间隔越大
+    send_data = bytes.fromhex(hexcode)    # HEX码 转换 bytes 字节码     发送数据转换为b'\xff\x01\x00U\x00\x00V'
     ser.write(send_data)   # 发送命令
     time.sleep(0.02)        # 延时，否则len_return_data将返回0，此处易忽视！！！ 延迟低于 0.01无法接收数据
     len_return_data = ser.inWaiting()  # 获取缓冲数据（接收数据）长度
     # if len_return_data:
     return_data = ser.read(len_return_data)  # 读取缓冲数据
     # bytes(2进制)转换为hex(16进制)，应注意Python3.7与Python2.7此处转换的不同，并转为字符串后截取所需数据字段，再转为10进制
-    str_return_data = str(return_data.hex())   ###bytes(2进制)转换为hex(16进制
+    str_return_data = str(return_data.hex())   # bytes(2进制)转换为hex(16进制
     # feedback_data = int(str_return_data[-6:-2], 16) ### j截取所需字段
     # feedback_data = int(str_return_data[-6:-2], 16)
     # print(feedback_data)
@@ -85,7 +85,9 @@ def writedata(ser,hexcode):
 #     print('writedata error',e)       
 # else:
 #     pass
+#     global str_return_data
     return(str_return_data)  ##返回数据
+
     # lock.release()
 # else:
     #     print("open failed")

@@ -34,6 +34,8 @@ modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
+computer_is_open = False
+
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
     send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
@@ -569,7 +571,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
         print('runbutton is check', self.runButton.isChecked())
-        if self.runButton.isChecked():
+        if self.runButton.isChecked() or computer_is_open:
             self.runButton.setText('PAUSE')
             # self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
@@ -603,25 +605,65 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         #     self.LoadStreams_thread.streams_update_flag = True
         #     # print('streams_update_flag', self.LoadStreams_thread.streams_update_flag)
 
+    def calculate_crc(self, raw_data):  # raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+        # 将 raw_data 转换为 hex_data
+        hex_data = [format(x, 'X').zfill(4) for x in raw_data]
+        string = hex_data[0]
+        hex_data[0] = string[-2:]
+        string = hex_data[1]
+        hex_data[1] = string[-2:]
+        # 将 hex_data 转换为 str_data
+        str_data = ' '.join([x[i:i + 2] for x in hex_data for i in range(0, len(x), 2)])
+        # 将字符串转换为十六进制数组
+        data_array = [int(x, 16) for x in str_data.split(' ')]
+
+        # 计算CRC校验码
+        crc = 0xFFFF
+        for i in range(len(data_array)):
+            crc ^= data_array[i]
+            for j in range(8):
+                if crc & 1:
+                    crc >>= 1
+                    crc ^= 0xA001
+                else:
+                    crc >>= 1
+        # 将CRC校验码添加到原始数据后面
+        crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
+        return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
     def thread_mudbus_run(self):
-        global modbus_flag
+        global modbus_flag , okCounter, ngCounter
         modbus_flag = True
         # hexcode   comunicate with PLC or modbus device
         # IN0_READ = '01 02 00 00 00 01 B9 CA'
         # IN1_READ = '01 02 00 01 00 01 E8 0A'
         # IN2_READ = '01 02 00 02 00 01 18 0A'
         # IN3_READ = '01 02 00 03 00 01 49 CA'
-        DO0_ON = '01 05 33 0A FF 00 A3 7C'#地址330A-Y12接通亮黄灯 原代码：'01 05 00 00 FF 00 8C 3A'
-        DO0_OFF = '01 05 33 0A 00 00 E2 8C'#地址330A-Y12断开灭黄灯 原代码：'01 05 00 00 00 00 CD CA'
-        # DO1_ON = '01 05 00 01 FF 00 DD FA'
-        # DO1_OFF = '01 05 00 01 00 00 9C 0A'
-        DO2_ON = '01 05 33 0C FF 00 43 7D'#地址330C-Y14接通亮绿灯 原代码：'01 05 00 02 FF 00 2D FA'
-        DO2_OFF = '01 05 33 0C 00 00 02 8D'#地址330C-Y14断开灭绿灯 原代码：'01 05 00 02 00 00 6C 0A'
-        DO3_ON = '01 05 33 0B FF 00 F2 BC'#地址330B-Y13接通亮红灯 原代码：'01 05 00 03 FF 00 7C 3A'
-        DO3_OFF = '01 05 33 0B 00 00 B3 4C'#地址330B-Y13断开灭红灯 原代码：'01 05 00 03 00 00 3D CA'
+        DO0_ON = '01 05 33 0A FF 00 A3 7C'  # 地址330A-Y12接通亮黄灯 原代码：'01 05 00 00 FF 00 8C 3A' #hex2dec: 线圈ON=FF00 = 65280
+        DO0_ON = self.calculate_crc([1, 5, 13066, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        print(DO0_ON)
+
+        DO0_OFF = '01 05 33 0A 00 00 E2 8C'  # 地址330A-Y12断开灭黄灯 原代码：'01 05 00 00 00 00 CD CA' #hex2dec: 线圈OFF=0000 = 0
+        DO0_OFF = self.calculate_crc([1, 5, 13066, 0])  # hex2dec: 线圈OFF=0000 = 0
+        print(DO0_OFF)
+
+        DO2_ON = '01 05 33 0C FF 00 43 7D'  # 地址330C-Y14接通亮绿灯 原代码：'01 05 00 02 FF 00 2D FA'
+        DO2_ON = self.calculate_crc([1, 5, 13068, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        print(DO2_ON)
+
+        DO2_OFF = '01 05 33 0C 00 00 02 8D'  # 地址330C-Y14断开灭绿灯 原代码：'01 05 00 02 00 00 6C 0A'
+        DO2_OFF = self.calculate_crc([1, 5, 13068, 0])  # hex2dec: 线圈OFF=0000 = 0
+        print(DO2_OFF)
+
+        DO3_ON = '01 05 33 0B FF 00 F2 BC'  # 地址330B-Y13接通亮红灯 原代码：'01 05 00 03 FF 00 7C 3A'
+        DO3_ON = self.calculate_crc([1, 5, 13067, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        print(DO3_ON)
+
+        DO3_OFF = '01 05 33 0B 00 00 B3 4C'  # 地址330B-Y13断开灭红灯 原代码：'01 05 00 03 00 00 3D CA'
+        DO3_OFF = self.calculate_crc([1, 5, 13067, 0])  # hex2dec: 线圈OFF=0000 = 0
+        print(DO3_OFF)
 
         DO_ALL_ON = '01 0F 00 00 00 04 01 FF 7E D6'
-        DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'#'01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
+        DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'  # '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
 
         # self.ret = None
         self.port_type = self.comboBox_port.currentText()  # 6070:COM7  8072:5
@@ -642,32 +684,62 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
-
-            # print('write register')
+            '''
+            # print('write register')  以下为 测试代码 用完删除
             # writeD0 = '01 06 00 00 00 64 88 21'  # 触发次数 D0 写入 100
-            # modbus_rtu.writedata(self.ser, writeD0)
+            writeD0 = self.calculate_crc([1, 6, 0, 123])  # TODO :写不进
+            modbus_rtu.writedata(self.ser, writeD0)
             # writeD1 = '01 06 00 01 00 64 D9 E1'  # OK次数 D1 写入 100
-            # modbus_rtu.writedata(self.ser, writeD1)
+            writeD1 = self.calculate_crc([1, 6, 1, 456])  # OK计数  OK
+            modbus_rtu.writedata(self.ser, writeD1)
             # writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
-            # modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
+            writeD10 = self.calculate_crc([1, 6, 10, 789])
+            modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
             # writeD11 = '01 06 00 0B 00 65 38 23'  # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
-            # modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+            writeD11 = self.calculate_crc([1, 6, 11, 111])  # D11  OK
+            modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+            '''
+
+            write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M10线圈，给触摸屏电脑已开机信号
+            print(write_m20_on)
+            modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
+            print("M20已闭合", write_m20_on)
+            global write_m20_off
+            global write_m21_off
+            write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M10线圈，给触摸屏电脑关机/检查程序关闭信号
+            write_m21_off = self.calculate_crc([1, 5, 21, 0])
+            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
 
 
             while self.runButton_modbus.isChecked() and modbus_flag:
                 start = time.time()
                 # self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
-                print('write register')
-                writeD0 = '01 06 00 00 00 64 88 21'  # 触发次数 D0 写入 100
-                modbus_rtu.writedata(self.ser, writeD0)
-                writeD1 = '01 06 00 01 00 64 D9 E1'  # OK次数 D1 写入 100
-                modbus_rtu.writedata(self.ser, writeD1)
-                writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
+                # # 更新HMI 面板显示数据  ↓
+                # print('write register')
+                # writeD0 = '01 06 00 00 00 64 88 21'  # 触发次数 D0 写入 100
+                # modbus_rtu.writedata(self.ser, writeD0)
+                # writeD1 = '01 06 00 01 00 64 D9 E1'  # OK次数 D1 写入 100
+                # modbus_rtu.writedata(self.ser, writeD1)
+                # print('type ngcountor:', type(ngCounter))
+                writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
                 modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
-                writeD11 = '01 06 00 0B 00 65 38 23'  # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
+                # print('type loopCounter:', type(loopCounter), loopCounter)
+                writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
                 modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+                m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
+                print("m21_result", m21_result)
+                if m21_result == '010101019048':
+                    global computer_is_open
+                    computer_is_open = True
+                    self.run_or_continue()
+                    # computer_is_open = True
+                else:
+                    computer_is_open = False
+                    print("M11_FALSE")
 
-                #todo 240228屏蔽537-595:速度提升0.26s  fsp=3.3  目标周期= 30r/sec
+
+
+                # todo 240228屏蔽537-595:速度提升0.26s  fsp=3.3  目标周期= 30r/sec
                 '''
                 # feedback_data_in0 = modbus_rtu.writedata(self.ser, IN0_READ)  #### 检查IN1 触发 返回01 02 01 00 a188
                 # if feedback_data_in0:#### 有返回数据
@@ -733,7 +805,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i, n in enumerate(output_box_list):
-                    if self.runButton.isChecked():
+                    if self.runButton.isChecked() or computer_is_open:
                         modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
                     else:  # stop_button
                         modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
@@ -743,17 +815,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
-                        ''' #写入寄存器代码
-                        writeD10 = '01 06 00 0A 00 64 A8 23'  # 功能代码：06H 保持寄存器编号：00 0A=D10 写入数据：00 64 = 100
-                        modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC D10 写入NG次数
-                        writeD11 = '01 06 00 0B 00 64 F9 E3' # 功能代码：06H 保持寄存器编号：00 0B=D11 写入数据：00 64 = 100
-                        modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC D11 写入
-                        
-                        writeD0 = '01 06 00 00 00 64 F9 E3' # D0 写入 100
-                        modbus_rtu.writedata(self.ser, writeD0)
-                        
-                        '''
-                    if not n and self.runButton.isChecked(): # self.runButton.isChecked():
+                    # if not n and self.runButton.isChecked(): # FIX240413 817→818
+                    else:
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228
@@ -1131,7 +1194,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 f.write(new_json)
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
-            print('load config:',type(config), config)
+            print('load config:', type(config), config)
             if len(config) != 9 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
@@ -1165,6 +1228,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
     def closeEvent(self, event):
+        modbus_rtu.writedata(self.ser, write_m20_off)  # 关闭窗口，重置电脑状态线圈M20
+        modbus_rtu.writedata(self.ser, write_m21_off)  # 关闭窗口，重置电脑状态线圈M21
+        print(write_m20_off)
+        print(write_m21_off)
         self.det_thread.jump_out = True
         config_path = 'config/setting.json'
         config = dict()
@@ -1179,12 +1246,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
         ####新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
+
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write(config_json)
             print('confi_json write')
         MessageBox(
             self.closeButton, title='Tips', text='Program is exiting.', time=2000, auto=True).exec_()
         sys.exit(0)
+
+
 
     def load_config(self):   ####  初始化 modbus connection
       try:

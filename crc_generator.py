@@ -1,6 +1,16 @@
-def calculate_crc(data):
+
+
+def calculate_crc(raw_data): # raw_data 十进制格式： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+    # 将 raw_data 转换为 hex_data
+    hex_data = [format(x, 'X').zfill(4) for x in raw_data]
+    string = hex_data[0]
+    hex_data[0] = string[-2:]
+    string = hex_data[1]
+    hex_data[1] = string[-2:]
+    # 将 hex_data 转换为 str_data
+    str_data = ' '.join([x[i:i + 2] for x in hex_data for i in range(0, len(x), 2)])
     # 将字符串转换为十六进制数组
-    data_array = [int(x, 16) for x in data.split(' ')]
+    data_array = [int(x, 16) for x in str_data.split(' ')]
 
     # 计算CRC校验码
     crc = 0xFFFF
@@ -12,31 +22,20 @@ def calculate_crc(data):
                 crc ^= 0xA001
             else:
                 crc >>= 1
-
     # 将CRC校验码添加到原始数据后面
-    crc_code = data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
+    crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
+    return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
 
-    return crc_code
-
-raw_data = [1, 6, 1, 100]
-
-# 将 raw_data 转换为 hex_data
-hex_data = [format(x, 'X').zfill(4) for x in raw_data]
-string = hex_data[0]
-hex_data[0] = string[-2:]
-string = hex_data[1]
-hex_data[1] = string[-2:]
-
-# 将 hex_data 转换为 str_data
-str_data = ' '.join([x[i:i+2] for x in hex_data for i in range(0, len(x), 2)])
+raw_data = [1, 6, 10, 111]  # raw_data 十进制格式： [站号  功能码 软元件地址  读写位数/数据]
+crc_data = calculate_crc(raw_data)
 
 print("raw_data:", raw_data)
-print("hex_data:", hex_data)
-print("str_data:", str_data)
+# print("hex_data:", hex_data)
+# print("str_data:", str_data)
+print("crc_data:", crc_data)
 
-
-hex_data: ['0001', '0006', '0001', '0064']
-hex_data: ['01', '06', '0001', '0064']
+# hex_data: ['0001', '0006', '0001', '0064']
+# hex_data: ['01', '06', '0001', '0064']
 # 测试
 # raw_data = [1, 5, 13066, 00]
 # hex_data = ['{:02X}'.format(x) for x in raw_data]
