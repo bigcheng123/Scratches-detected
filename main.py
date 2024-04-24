@@ -571,7 +571,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
         print('runbutton is check', self.runButton.isChecked())
-        if self.runButton.isChecked() or computer_is_open:
+        if self.runButton.isChecked():
             self.runButton.setText('PAUSE')
             # self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
@@ -631,7 +631,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
         return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
     def thread_mudbus_run(self):
-        global modbus_flag , okCounter, ngCounter
+        global modbus_flag, okCounter, ngCounter
         modbus_flag = True
         # hexcode   comunicate with PLC or modbus device
         # IN0_READ = '01 02 00 00 00 01 B9 CA'
@@ -703,15 +703,40 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M10线圈，给触摸屏电脑已开机信号
             print(write_m20_on)
             modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
-            print("M20已闭合", write_m20_on)
+            print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
             global write_m20_off
             global write_m21_off
+            # global computer_is_open
             write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M10线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
             read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
-
-
             while self.runButton_modbus.isChecked() and modbus_flag:
+                m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
+                # print("m21_result", m21_result)
+                if m21_result == '010101019048':
+                    global computer_is_open
+                    computer_is_open = True
+                    self.runButton.setChecked(True)
+                    self.run_or_continue()
+                    break
+                else:
+                    computer_is_open = False
+                    # print("M11_FALSE")
+            else:
+                modbus_flag = False
+                print('modbus shut off')
+                time.sleep(0.2)
+                shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+                time.sleep(0.2)
+                modbus_rtu.writedata(self.ser, write_m20_off)
+                time.sleep(0.2)
+                modbus_rtu.writedata(self.ser, write_m21_off)
+
+                self.ser.close()
+
+
+            # while self.runButton_modbus.isChecked() and modbus_flag:
+            while computer_is_open and modbus_flag:
                 start = time.time()
                 # self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
                 # # 更新HMI 面板显示数据  ↓
@@ -726,16 +751,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 # print('type loopCounter:', type(loopCounter), loopCounter)
                 writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
                 modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
-                m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
-                print("m21_result", m21_result)
-                if m21_result == '010101019048':
-                    global computer_is_open
-                    computer_is_open = True
-                    self.run_or_continue()
-                    # computer_is_open = True
-                else:
-                    computer_is_open = False
-                    print("M11_FALSE")
+
 
 
 
@@ -805,7 +821,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i, n in enumerate(output_box_list):
-                    if self.runButton.isChecked() or computer_is_open:
+                    if self.runButton.isChecked():
                         modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
                     else:  # stop_button
                         modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
@@ -815,12 +831,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
-                    # if not n and self.runButton.isChecked(): # FIX240413 817→818
-                    else:
+                    if not n and self.runButton.isChecked(): # FIX240413 817→818
+                    # else:
                         # print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                         feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228
-
                         # time.sleep(0.02)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
                 stop = time.time()
@@ -830,8 +845,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             else:
                 modbus_flag = False
                 print('modbus shut off')
+                time.sleep(0.2)
                 shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
-
+                time.sleep(0.2)
+                modbus_rtu.writedata(self.ser, write_m20_off)
+                time.sleep(0.2)
+                modbus_rtu.writedata(self.ser, write_m21_off)
                 self.ser.close()
 
 
@@ -1228,10 +1247,16 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
     def closeEvent(self, event):
-        modbus_rtu.writedata(self.ser, write_m20_off)  # 关闭窗口，重置电脑状态线圈M20
-        modbus_rtu.writedata(self.ser, write_m21_off)  # 关闭窗口，重置电脑状态线圈M21
-        print(write_m20_off)
-        print(write_m21_off)
+        global modbus_flag
+        modbus_flag = False
+        # self.runButton.setChecked(False)
+        # global computer_is_open
+        # computer_is_open = False
+        # time.sleep(0.1)
+        # modbus_rtu.writedata(self.ser, write_m20_off)  # 关闭窗口，重置电脑状态线圈M20
+        # modbus_rtu.writedata(self.ser, write_m21_off)  # 关闭窗口，重置电脑状态线圈M21
+        # print("write_m21_off")
+        # print(write_m21_off)
         self.det_thread.jump_out = True
         config_path = 'config/setting.json'
         config = dict()
