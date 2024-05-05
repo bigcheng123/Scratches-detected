@@ -12,7 +12,7 @@ HIM program based on Weinview MT8072IP
 
 
 ### Demo Video：
-[https://www.bilibili.com/video/BV1sQ4y1C7Vk?spm_id_from=333.999.0.0](https://www.bilibili.com/video/BV1sQ4y1C7Vk?spm_id_from=333.999.0.0)
+[Demo:https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
 
 ### Install
 You need to install [conda](https://www.anaconda.com/download/success) first,and then you need to prepare torch.whl==1.8.1 and torchvision.whl==0.9.1 and put them to the /install_torch folder<br>
