@@ -424,11 +424,13 @@ class DetThread(QThread): ###继承 QThread
 
                     if self.jump_out:
                         print('jump_out push-2', self.jump_out)
-                        if self.vid_cap.isOpened():
-                            self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
-                            logging.info("vid_cap.release...")
-                            time.sleep(2)
-                            continue
+                        stopcam = LoadStreams()
+                        stopcam.stop_cam()
+                        # if self.vid_cap.isOpened():
+                        #     self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
+                        #     logging.info("vid_cap.release...")
+                        #     time.sleep(2)
+                        #     continue
 
                         self.send_percent.emit(0)
                         self.send_msg.emit('Stop')
@@ -706,13 +708,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
             global write_m20_off
             global write_m21_off
-            # global computer_is_open
-            write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M10线圈，给触摸屏电脑关机/检查程序关闭信号
+            write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
             read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
             while self.runButton_modbus.isChecked() and modbus_flag:
                 m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
-                # print("m21_result", m21_result)
                 if m21_result == '010101019048':
                     global computer_is_open
                     computer_is_open = True
@@ -721,17 +721,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     break
                 else:
                     computer_is_open = False
-                    # print("M11_FALSE")
             else:
                 modbus_flag = False
                 print('modbus shut off')
-                time.sleep(0.2)
+                time.sleep(0.1)
                 shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
-                time.sleep(0.2)
+                time.sleep(0.1)
                 modbus_rtu.writedata(self.ser, write_m20_off)
-                time.sleep(0.2)
+                time.sleep(0.1)
                 modbus_rtu.writedata(self.ser, write_m21_off)
-
                 self.ser.close()
 
 
@@ -821,21 +819,20 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
 
                 for i, n in enumerate(output_box_list):
-                    if self.runButton.isChecked():
-                        modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
-                    else:  # stop_button
-                        modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
-                        modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
-                        modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
+                    # if self.runButton.isChecked():     #240505fix:取消黄灯输出，PLC设定设备启动未检测时亮黄灯
+                    #     modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
+                    # else:  # stop_button
+                    #     modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
+                    #     modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
+                    #     modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                     if n:  # output NG
-                        # print('scratch detected')
+                        print('scratch detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
-                        feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
-                    if not n and self.runButton.isChecked(): # FIX240413 817→818
-                    # else:
-                        # print('scratch has not detected')
+                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
+                    if not n and self.runButton.isChecked():
+                        print('scratch has not detected')
                         feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
-                        feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228
+                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228     #240505fix：新增继电器，取消绿灯输出
                         # time.sleep(0.02)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
                 stop = time.time()

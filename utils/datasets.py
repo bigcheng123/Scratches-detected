@@ -332,6 +332,19 @@ class LoadStreams:
         self.rect = np.unique(s, axis=0).shape[0] == 1  # rect inference if all shapes equal
         if not self.rect:
             LOGGER.warning('WARNING: Stream shapes differ. For optimal performance supply similarly-shaped streams.')
+    def stop_cam(self, sources = 'streams.txt'):
+        if os.path.isfile(sources):
+            with open(sources) as f:
+                sources = [x.strip() for x in f.read().strip().splitlines() if len(x.strip())]
+        else:
+            sources = [sources]
+        for i, s in enumerate(sources):  # index, source
+            self.threads[i].join()
+            self.cap = cv2.VideoCapture(s) ### get  the streams
+            # self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
+            self.cap.release()
+            print(f'loop {i}')
+            print(f'close cam {i} succesfully')
 
     def update(self, i, cap, stream):
         # Read stream `i` frames in daemon thread
