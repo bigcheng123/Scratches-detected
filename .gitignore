@@ -160,6 +160,7 @@ auto_save/jpg/
 data/
 !data/*
 !imgs/*
+log/*
 
 ### !folderName/ 表示忽略 folderName里面的文件  而保留folderName文件夹
 
@@ -169,3 +170,4 @@ data/
 /main-multicam2.py
 /multitest.py
 /plc/gxw/backup/
+/log/

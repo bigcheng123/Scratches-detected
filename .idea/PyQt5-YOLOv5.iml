@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/auto_save" />
       <excludeFolder url="file://$MODULE_DIR$/plc/gxw/backup" />
+      <excludeFolder url="file://$MODULE_DIR$/log" />
     </content>
     <orderEntry type="jdk" jdkName="yolov5_pyqt5" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
