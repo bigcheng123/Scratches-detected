@@ -97,3 +97,12 @@ git commit -m "Update .gitignore, XXXX"
 2/3/5运行正常-可使用GPU至35%
 
 2024/4/3  moldel=impress-0403  iou = 90  confidence = 60
+
+240509：闪退
+WARNING: Video stream unresponsive, please check your 5 camera connection.
+Traceback (most recent call last):
+  File "C:\ProgramData\anaconda3\envs\yolov5_pyqt5\lib\site-packages\torch\autograd\grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "main.py", line 209, in run
+    percent = int(count/self.vid_cap.get(cv2.CAP_PROP_FRAME_COUNT)*self.percent_length)
+ZeroDivisionError: float division by zero

@@ -617,6 +617,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         hex_data[0] = string[-2:]
         string = hex_data[1]
         hex_data[1] = string[-2:]
+        try:
+            hex_data[4]
+        except:
+            print("no hex 4")
+        else:
+            string = hex_data[4]
+            hex_data[4] = string[-2:]
+            string = hex_data[5]
+            hex_data[5] = string.zfill(8)
         # 将 hex_data 转换为 str_data
         str_data = ' '.join([x[i:i + 2] for x in hex_data for i in range(0, len(x), 2)])
         # 将字符串转换为十六进制数组
@@ -669,6 +678,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             feedback_list = []
 
             write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M10线圈，给触摸屏电脑已开机信号
+            test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
+            print(test_hex)
             # print(write_m20_on)
             modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
             print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
@@ -702,9 +713,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # while self.runButton_modbus.isChecked() and modbus_flag:
             while computer_is_open and modbus_flag:
                 start = time.time()
-                writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
+                # writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
+                writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])
                 modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
-                writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
+                # writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
+                writeD11 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
                 modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
 
                 #### 同步UI 信号
