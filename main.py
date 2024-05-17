@@ -618,14 +618,18 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         string = hex_data[1]
         hex_data[1] = string[-2:]
         try:
-            hex_data[4]
+            hex_data[4]   # 确认是否有第五位→多寄存器读写
         except:
             print("no hex 4")
         else:
             string = hex_data[4]
-            hex_data[4] = string[-2:]
+            hex_data[4] = string[-2:]   # 多寄存器位数信息
             string = hex_data[5]
-            hex_data[5] = string.zfill(8)
+            hex_data[5] = string.zfill(8)   # 写入2个寄存器/补充至8位16进制数
+            string = hex_data[5]
+            string1 = string[-4:]     # 串口写入高低位与PLC高低位逻辑不一致，需要高低4位互换
+            string2 = string[:4]
+            hex_data[5] = ''.join([string1, string2])
         # 将 hex_data 转换为 str_data
         str_data = ' '.join([x[i:i + 2] for x in hex_data for i in range(0, len(x), 2)])
         # 将字符串转换为十六进制数组
