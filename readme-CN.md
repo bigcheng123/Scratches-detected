@@ -83,7 +83,12 @@ python main.py
 8. ./requirement-trg.txt 依赖包清单
 9. ./requirement-torch Local Installation.txt 本地依赖包清单
 
-### 六、模型训练
+### 六、程序结构
+
+ **程序结构见下图：** 
+![程序结构图](imgs/%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%9B%BE.png)
+
+### 七、模型训练
 1. 使用[labelImg](https://blog.csdn.net/klaus_x/article/details/106854136)对图片进行标注
 2. 修改data中的训练脚本的训练集位置，详细[点击这里](https://blog.csdn.net/qq_45945548/article/details/121701492)
 3. 训练适合自己使用的模型文件，将模型文件放入./pt中即可在主程序main.py运行时选取使用
