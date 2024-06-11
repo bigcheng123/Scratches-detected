@@ -1,4 +1,4 @@
-### Readme EN [https://gitee.com/trgtokai/scratch-detect/edit/master/readme.md](https://gitee.com/trgtokai/scratch-detect/edit/master/readme.md)
+### Readme EN [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
 
 ### 一、提示
 
