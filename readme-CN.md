@@ -1,5 +1,5 @@
-### Readme EN [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
-
+### Readme English [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
+### Readme Chinese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
 ### 一、提示
 
 这个程序基于[YOLOv5 v6.1](https://github.com/ultralytics/yolov5/tree/v6.1)
