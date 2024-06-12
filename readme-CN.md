@@ -1,8 +1,8 @@
 ### Readme English [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
 ### 中文 Chinese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
 ### 日本語 Japanese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md)
-
-### 项目名称： 【Scratch-detect】伤痕检测
+……………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………
+## 项目名称： 【Scratch-detect】伤痕检测  
 
 ### 一、提示 Tips <br>
 
@@ -27,7 +27,7 @@ PLC:三菱FX3S＋modbus模块<br>
 3.Python环境：[anaconda](https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Windows-x86_64.exe)<br>
 4.PythonIDE：[PyCharm Community Edition](https://www.jetbrains.com/pycharm/download/download-thanks.html?platform=windows&code=PCC)<br>
 5.Python版本：Python3.8<br>
-6.插件：[Git](https://git-scm.com/download/win)
+6.版本控制：[Git](https://git-scm.com/download/win)
 
 ### 二、演示视频 Demo
 中国地区 演示Demo ↓
