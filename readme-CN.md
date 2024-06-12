@@ -1,7 +1,7 @@
 ### Readme English [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
 ### 中文 Chinese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
 ### 日本語 Japanese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md)
-……………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………
+…………………………………………………………………………………………………………………………………………………………………………………………………………
 ## 项目名称： 【Scratch-detect】伤痕检测  
 
 ### 一、提示 Tips <br>
