@@ -24,7 +24,7 @@ Light source controller: [Digital 8-channel light source controller](https://det
 
 **Software platform Software:**<br>
 1. System: win10 x64 <br>
-2. Driver: [Hik MVS](https://www.hikrobotics.com/cn2/source/support/software/MVS_STD_4.3.2_240529.zip), [Weinview EBPRO](https://www.weinview.cn/Admin/Others/DownloadsPage.aspx?nid=3&id=10917&tag=0&ref=download&t=a4ff8b5703a191fe), [NVIDIA graphics card driver](https://cn.download.nvidia.com/Windows/555 .99/555.99-desktop-win10-win11-64bit-international-nsd-dch-whql.exe), [Mitsubishi GXWORKS2](https://www.mitsubishielectric-fa.cn/site/file-software-detail?id=18), etc.<br>
+2. Driver: [Hik MVS](https://www.hikrobotics.com/cn2/source/support/software/MVS_STD_4.3.2_240529.zip), [Weinview EBPRO](https://www.weinview.cn/Admin/Others/DownloadsPage.aspx?nid=3&id=10917&tag=0&ref=download&t=a4ff8b5703a191fe), [NVIDIA driver](https://cn.download.nvidia.com/Windows/555.99/555.99-desktop-win10-win11-64bit-international-nsd-dch-whql.exe), [Mitsubishi GXWORKS2](https://www.mitsubishielectric-fa.cn/site/file-software-detail?id=18), etc.<br>
 3. Python environment: [anaconda](https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Windows-x86_64.exe)<br>
 4. Python IDE: [PyCharm Community Edition](https://www.jetbrains.com/pycharm/download/download-thanks.html?platform=windows&code=PCC)<br>
 5. Python version: Python3.8<br>
@@ -103,7 +103,7 @@ python main.py
 **The program structure is shown in the figure below:**
 ![Program structure diagram](imgs/%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%9B%BE.png)
 
-### 7. Model training Trains
+### 7. Model training
 1. Use [labelImg](https://blog.csdn.net/klaus_x/article/details/106854136) to label the image
 2. Modify the training set location of the training script in data, for details [click here](https://blog.csdn.net/qq_45945548/article/details/121701492)
 3. Train a model file suitable for your own use, put the model file in ./pt and select it when the main program main.py is running
