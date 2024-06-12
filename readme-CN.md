@@ -80,15 +80,15 @@ python main.py
 
 ### 五、文件构成 Files
 
-1. ./data/ 训练脚本
-2. ./pt/ 模型文件储存位置
-3. ./plc/ PLC工程文件及触摸屏工程文件
-4. ./runs/ 运行结果储存位置
-5. ./ui_files/ GUI可视化界面源代码储存位置
-6. ./main.py 主程序
-7. ./train.py 模型训练程序
-8. ./requirement-trg.txt 依赖包清单
-9. ./requirement-torch Local Installation.txt 本地依赖包清单
+1. ./data/ —— 训练脚本
+2. ./pt/ —— 模型文件储存位置
+3. ./plc/ —— PLC工程文件及触摸屏工程文件
+4. ./runs/ —— 运行结果储存位置
+5. ./ui_files/ —— GUI可视化界面源代码储存位置
+6. ./main.py —— 主程序
+7. ./train.py ——模型训练程序
+8. ./requirement-trg.txt —— 依赖包清单
+9. ./requirement-torch Local Installation.txt —— 本地依赖包清单
 
 ### 六、程序结构 Network
 
