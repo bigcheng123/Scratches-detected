@@ -1,6 +1,10 @@
 ### Readme English [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
-### Readme Chinese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
-### 一、提示
+### 中文 Chinese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
+### 日本語 Japanese [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md)
+
+### 项目名称： 【Scratch-detect】伤痕检测
+
+### 一、提示 Tips <br>
 
 这个程序基于[YOLOv5 v6.1](https://github.com/ultralytics/yolov5/tree/v6.1)
 
@@ -11,25 +15,28 @@ PLC:三菱FX3S＋modbus模块<br>
 光源：海康环形光源MV-LRSS-H-80-W<br>
 光源控制器：[数字8通道光源控制器](https://detail.tmall.com/item.htm?abbucket=1&id=656543446110&rn=21d65f2d271defe4d3b29e10ced9b2a5&spm=a1z10.5-b.w4011-23573612475.52.201646d6ZWIsQh&skuId=4738283905874)<br>
 
-**主机建议配置：**<br>
+**主机建议配置 Hardware：**<br>
 1.CPU：i7 13700k及以上<br>
 2.显卡：RTX3050及以上(只支持NVIDIA显卡)<br>
 3.内存：建议16G以上<br>
 4.硬盘：建议1TB及以上<br>
 
-**软件平台：**<br>
-1.系统：win10<br>
+**软件平台 Software：**<br>
+1.系统：win10 x64 <br>
 2.驱动：[海康MVS](https://www.hikrobotics.com/cn2/source/support/software/MVS_STD_4.3.2_240529.zip)、[威纶通EBPRO](https://www.weinview.cn/Admin/Others/DownloadsPage.aspx?nid=3&id=10917&tag=0&ref=download&t=a4ff8b5703a191fe)、[NVIDIA显卡驱动](https://cn.download.nvidia.com/Windows/555.99/555.99-desktop-win10-win11-64bit-international-nsd-dch-whql.exe)、[三菱GXWORKS2](https://www.mitsubishielectric-fa.cn/site/file-software-detail?id=18)等<br>
-3.系统环境：[anaconda](https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Windows-x86_64.exe)<br>
+3.Python环境：[anaconda](https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Windows-x86_64.exe)<br>
 4.PythonIDE：[PyCharm Community Edition](https://www.jetbrains.com/pycharm/download/download-thanks.html?platform=windows&code=PCC)<br>
 5.Python版本：Python3.8<br>
 6.插件：[Git](https://git-scm.com/download/win)
 
-### 二、演示视频
-
+### 二、演示视频 Demo
+中国地区 演示Demo ↓
 [Demo:https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
 
-### 三、安装方式
+中国以外地区 演示Demo ↓
+[输入链接说明](http://)
+
+### 三、安装方式 Installation
 
 1.在克隆仓库代码前，需要安装好anaconda、PyCharm、Git等工具<br>
 2.使用以下代码，将代码克隆至本地，创建Python环境，安装依赖包
@@ -53,7 +60,7 @@ pip install -r requirement-torch Local Installation.txt
 python main.py
 ```
 
-### 四、功能
+### 四、功能 Functions
 
 1. 支持图片、视频、多摄像头及网络rtsp串流作为输入
 2. 下拉菜单更换训练模型
@@ -71,7 +78,7 @@ python main.py
 **运行界面：**
 ![输入图片说明](imgs/%E7%BA%BF%E4%B8%8A%E6%A3%80%E6%9F%A5%5B00_10_57%5D%5B20240605-174147%5D.png)
 
-### 五、文件构成
+### 五、文件构成 Files
 
 1. ./data/ 训练脚本
 2. ./pt/ 模型文件储存位置
@@ -83,12 +90,12 @@ python main.py
 8. ./requirement-trg.txt 依赖包清单
 9. ./requirement-torch Local Installation.txt 本地依赖包清单
 
-### 六、程序结构
+### 六、程序结构 Network
 
  **程序结构见下图：** 
 ![程序结构图](imgs/%E7%A8%8B%E5%BA%8F%E7%BB%93%E6%9E%84%E5%9B%BE.png)
 
-### 七、模型训练
+### 七、模型训练 Trains
 1. 使用[labelImg](https://blog.csdn.net/klaus_x/article/details/106854136)对图片进行标注
 2. 修改data中的训练脚本的训练集位置，详细[点击这里](https://blog.csdn.net/qq_45945548/article/details/121701492)
 3. 训练适合自己使用的模型文件，将模型文件放入./pt中即可在主程序main.py运行时选取使用
