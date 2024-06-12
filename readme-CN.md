@@ -38,10 +38,10 @@ PLC:三菱FX3S＋modbus模块<br>
 
 ### 二、演示视频 Demo
 中国地区 演示Demo ↓
-[Demo:https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
+[https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
 
 中国以外地区 演示Demo ↓
-[输入链接说明](http://)
+[https://youtu.be/mEYHFr3ZQhM](https://youtu.be/mEYHFr3ZQhM)
 
 ### 三、安装方式 Installation
 
