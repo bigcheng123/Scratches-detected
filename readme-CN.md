@@ -37,10 +37,10 @@ PLC:三菱FX3S＋modbus模块<br>
 5. 如果希望运行你自己的检测模型，请把训练好的模型文件 放入 pt文件夹，然后在UI界面中选择对应的PT文件
 
 ### 二、演示视频 Demo
-中国地区 演示Demo ↓
+中国地区 Bilibili Demo ↓
 [https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
 
-中国以外地区 演示Demo ↓
+中国以外地区 YouTube Demo ↓
 [https://youtu.be/mEYHFr3ZQhM](https://youtu.be/mEYHFr3ZQhM)
 
 ### 三、安装方式 Installation
