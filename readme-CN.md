@@ -29,6 +29,13 @@ PLC:三菱FX3S＋modbus模块<br>
 5.Python版本：Python3.8<br>
 6.版本控制：[Git](https://git-scm.com/download/win)
 
+**AI检测程序 Code：**<br>
+1. 克隆/下载 此项目全部文件到本地电脑
+2. 使用 Pycharm 或其他 IDE软件 打开此项目
+3. 配置环境 并确保所有依赖包都成功安装（清单=requirement-trg.txt)
+4. 运行主程序 main.py
+5. 如果希望运行你自己的检测模型，请把训练好的模型文件 放入 pt文件夹，然后在UI界面中选择对应的PT文件
+
 ### 二、演示视频 Demo
 中国地区 演示Demo ↓
 [Demo:https://www.bilibili.com/video/BV1nz421S7KR](https://www.bilibili.com/video/BV1nz421S7KR)
