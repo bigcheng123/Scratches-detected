@@ -1,4 +1,4 @@
-### Readme 英語 [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
+### Readme English [https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme.md)
 ### Readme 中国語 [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-CN.md)
 ### Readme 日本語 [https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md](https://gitee.com/trgtokai/scratch-detect/blob/master/readme-JP.md)
 …………………………………………………………………………………………………………………………………………………………………………
