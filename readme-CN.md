@@ -106,3 +106,6 @@ python main.py
 1. 使用[labelImg](https://blog.csdn.net/klaus_x/article/details/106854136)对图片进行标注
 2. 修改data中的训练脚本的训练集位置，详细[点击这里](https://blog.csdn.net/qq_45945548/article/details/121701492)
 3. 训练适合自己使用的模型文件，将模型文件放入./pt中即可在主程序main.py运行时选取使用
+
+### 八、联系我们 
+如果程序有BUG或其他建议，可通过本站私信@li-chey /  @Alex_Kwan 
