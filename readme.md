@@ -107,3 +107,6 @@ python main.py
 1. Use [labelImg](https://blog.csdn.net/klaus_x/article/details/106854136) to label the image
 2. Modify the training set location of the training script in data, for details [click here](https://blog.csdn.net/qq_45945548/article/details/121701492)
 3. Train a model file suitable for your own use, put the model file in ./pt and select it when the main program main.py is running
+
+### 8. Contact Us
+If there are any bugs or other suggestions, please send a private message to  @li-chey /  @Alex_Kwan 
