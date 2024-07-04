@@ -15,7 +15,7 @@ import time
 import cv2
 import modbus_rtu
 import _thread
-import logging
+import serial
 
 from shutil import copy
 
@@ -36,6 +36,8 @@ okCounter = 0
 ngCounter = 0
 loopCounter = 0
 computer_is_open = False
+current_state = 'inactive'  # 初始状态为不活跃
+ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
 
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
@@ -469,6 +471,19 @@ class DetThread(QThread): ###继承 QThread
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
 
+def read_sensor():
+    t1 = time.time()
+    global ser2
+    # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
+    t2 = time.time()
+    sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
+    t3 = time.time()
+    print("tt", t3 - t2, t2 - t1)
+    if sensor == '010201016048':
+        return 'active'
+    else:
+        return 'inactive'
+
 
 
 class MainWindow(QMainWindow, Ui_mainWindow):
@@ -495,6 +510,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.qtimer = QTimer(self)
         self.qtimer.setSingleShot(True)
         self.qtimer.timeout.connect(lambda: self.statistic_label.clear())
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_sensor_data)   #  sensor data update
+        self.timer.start(100)
 
         # search models automatically
         self.comboBox_model.clear()  ### clear model
@@ -571,6 +590,40 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.load_setting()  #### loading config
 
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
+
+    def update_sensor_data(self):
+        t1 = time.time()
+        sensor_data = read_sensor()
+        t3 = time.time()
+        # print("t3", t3 - t1)
+        # print("sensor_data", sensor_data)
+        # current_state = 'inactive'  # 初始状态为不活跃
+        if self.det_thread.isRunning():
+            global current_state
+            # print(current_state)
+            new_state = sensor_data
+            if new_state != current_state:
+                if sensor_data == 'active':
+                    print("sensor start")
+                    self.runButton.setChecked(True)
+                    self.runButton.setText('PAUSE')
+                    self.det_thread.is_continue = True
+                    # self.run_or_continue()
+                elif sensor_data == 'inactive':
+                    print("sensor stop")
+                    self.runButton.setChecked(False)
+                    self.runButton.setText('RUN')
+                    self.det_thread.is_continue = False
+                    # self.run_or_continue()
+                current_state = new_state
+                # print(new_state)
+        t2 = time.time()
+        FPS = t2 - t3
+
+        print("t2", FPS)
+
+        # else:
+            # self.run_or_continue()
 
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
@@ -1158,6 +1211,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         global modbus_flag
         modbus_flag = False
         self.det_thread.jump_out = True
+        self.det_thread.is_continue = False
+        ser2.close()  #240704
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
