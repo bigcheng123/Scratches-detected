@@ -472,13 +472,9 @@ class DetThread(QThread): ###继承 QThread
         #     self.send_msg.emit('%s' % e)
 
 def read_sensor():
-    t1 = time.time()
     global ser2
     # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
-    t2 = time.time()
     sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
-    t3 = time.time()
-    print("tt", t3 - t2, t2 - t1)
     if sensor == '010201016048':
         return 'active'
     else:
@@ -513,7 +509,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_sensor_data)   #  sensor data update
-        self.timer.start(100)
+        self.timer.start(1000)
 
         # search models automatically
         self.comboBox_model.clear()  ### clear model
@@ -592,10 +588,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
     def update_sensor_data(self):
-        t1 = time.time()
         sensor_data = read_sensor()
-        t3 = time.time()
-        # print("t3", t3 - t1)
         # print("sensor_data", sensor_data)
         # current_state = 'inactive'  # 初始状态为不活跃
         if self.det_thread.isRunning():
@@ -617,10 +610,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     # self.run_or_continue()
                 current_state = new_state
                 # print(new_state)
-        t2 = time.time()
-        FPS = t2 - t3
 
-        print("t2", FPS)
 
         # else:
             # self.run_or_continue()
