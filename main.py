@@ -29,6 +29,7 @@ from utils.plots import Annotator, colors, save_one_box,plot_one_box
 
 from utils.torch_utils import select_device,time_sync,load_classifier
 from utils.capnums import Camera
+from SQL_write import writesql, closesql
 import logging
 ## set global variable 设置全局变量
 modbus_flag = Falseresults = []
@@ -38,6 +39,13 @@ loopCounter = 0
 computer_is_open = False
 current_state = 'inactive'  # 初始状态为不活跃
 ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
+feedback_data_D3 = None
+# server = 'TRG-327-PC'  # 替换为你的SQL Server服务器名或IP地址
+# database = 'PE_DataBase'      # 数据库名
+# username = 'TRG-PE'           # 登录名
+# password = '705705'          # 密码
+# # 构建连接字符串
+# conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
 class DetThread(QThread): ###继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
@@ -364,6 +372,13 @@ class DetThread(QThread): ###继承 QThread
                                             print('save_one_box')
 
                                 # print('detection is running')
+                                if feedback_data_D3 == '0105330BFF00F2BC':    #'0105330BFF00F2BC'
+                                    feedbacksql = 'Output successful'
+                                else:
+                                    feedbacksql = 'Output failed'
+                                sqltime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())   #写入时间
+                                writesql(sqltime, names[c], feedbacksql)
+                                # print(names[c])
                             t2 = time_sync()
                             fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0  # frame text:
                             # print(f'{s}Done. ({t2 - t1:.3f}s fsp ={fsp})')
@@ -471,7 +486,7 @@ class DetThread(QThread): ###继承 QThread
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
 
-def read_sensor():
+def read_sensor(): ### 检查触发开关
     global ser2
     # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
     sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
@@ -587,7 +602,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
-    def update_sensor_data(self):
+    def update_sensor_data(self):  ### 光纤开关信号reflash
         sensor_data = read_sensor()
         # print("sensor_data", sensor_data)
         # current_state = 'inactive'  # 初始状态为不活跃
@@ -780,7 +795,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     #     modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                     if n:  # output NG
                         # print('scratch detected')
-                        feedback_data = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
+                        global feedback_data_D3
+                        feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
                     if not n and self.runButton.isChecked():
                         # print('scratch has not detected')
@@ -1083,6 +1099,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # print('output result:', type(results), results)
             self.resultWidget.addItems(results)
             self.label_okCounter.setText(str(loopCounter))
+            # sqltime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            # writesql(sqltime, results, feedback_data_D3)
             if len(results):
                 # ngCounter += 1
                 self.label_ngCounter.setText(str(ngCounter))
@@ -1096,7 +1114,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         background-color: rgb(240,20,30);
                         color: rgb(255, 255, 255);
                         }''')
-                for i , n in enumerate(results):
+                for i, n in enumerate(results):
                     # str = re.sub("[\u4e00-\u9fa5\0-9\,\。]", "", i)
                     # print('class name = ', n)
                     if i == 0:
@@ -1203,6 +1221,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.jump_out = True
         self.det_thread.is_continue = False
         ser2.close()  #240704
+        closesql()
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
@@ -1221,7 +1240,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             f.write(config_json)
             print('confi_json write')
         MessageBox(
-            self.closeButton, title='Tips', text='Program is exiting.', time=2000, auto=True).exec_()
+            self.closeButton, title='Tips', text='Terminate Program.', time=2000, auto=True).exec_()
         sys.exit(0)
 
 
