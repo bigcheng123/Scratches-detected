@@ -7,7 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/plc/gxw/backup" />
       <excludeFolder url="file://$MODULE_DIR$/log" />
     </content>
-    <orderEntry type="jdk" jdkName="pyqt5-yolov5" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="yolov5_pyqt5" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

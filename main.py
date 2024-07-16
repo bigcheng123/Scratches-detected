@@ -38,7 +38,7 @@ ngCounter = 0
 loopCounter = 0
 computer_is_open = False
 current_state = 'inactive'  # 初始状态为不活跃
-ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
+ser2 = serial.Serial('COM3', 38400, 8, 'N', 1, 0.3)
 feedback_data_D3 = None
 # server = 'TRG-327-PC'  # 替换为你的SQL Server服务器名或IP地址
 # database = 'PE_DataBase'      # 数据库名
@@ -372,7 +372,8 @@ class DetThread(QThread): ###继承 QThread
                                             print('save_one_box')
 
                                 # print('detection is running')
-                                if feedback_data_D3 == '0105330BFF00F2BC':    #'0105330BFF00F2BC'
+                                print(feedback_data_D3)
+                                if feedback_data_D3 == '0110000c000281cb':    #'0105330BFF00F2BC'
                                     feedbacksql = 'Output successful'
                                 else:
                                     feedbacksql = 'Output failed'
@@ -781,6 +782,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 # writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
                 writeD11 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
                 modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+                # print("check counter", loopCounter)
 
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
@@ -797,6 +799,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         global feedback_data_D3
                         feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
+                        print("d3",feedback_data_D3)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
                     if not n and self.runButton.isChecked():
                         # print('scratch has not detected')

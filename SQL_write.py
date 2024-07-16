@@ -2,7 +2,7 @@ import pyodbc
 
 # def connectsql(database):
 # 连接数据库
-server = 'TRG-327-PC'  # 替换为你的SQL Server服务器名或IP地址
+server = 'DESKTOP-QGKNIRA\SQLEXPRESS'  # 替换为你的SQL Server服务器名或IP地址
 database = 'PE_DataBase'      # 数据库名
 username = 'TRG-PE'           # 登录名
 password = '705705'          # 密码
@@ -68,7 +68,7 @@ def readsql(read_line = 10):
     except pyodbc.Error as e:
         print(f"Error connecting to database: {e}")
 
-
-read_line = input("请输入读取行数")
-readsql(read_line)
+#
+# read_line = input("请输入读取行数")
+# readsql(read_line)
 
