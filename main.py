@@ -1,6 +1,9 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QAction
+
+import SQL_write
 from ui_files.main_win import Ui_mainWindow
 from ui_files.dialog.rtsp_win import Window
+from ui_files.setting_TRG import Ui_TRG
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, QThread, pyqtSignal, QTime, QDateTime
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QIcon
@@ -23,38 +26,43 @@ from models.experimental import attempt_load
 from utils.datasets import LoadImages, LoadWebcam, LoadStreams
 from utils.CustomMessageBox import MessageBox
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, non_max_suppression, \
-    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path,clean_str
+    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, clean_str
 # from utils.plots import colors, plot_one_box, plot_one_box_PIL
-from utils.plots import Annotator, colors, save_one_box,plot_one_box
+from utils.plots import Annotator, colors, save_one_box, plot_one_box
 
-from utils.torch_utils import select_device,time_sync,load_classifier
+from utils.torch_utils import select_device, time_sync, load_classifier
 from utils.capnums import Camera
 from SQL_write import writesql, closesql
 import logging
-## set global variable 设置全局变量
+# set global variable 设置全局变量
 modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
-computer_is_open = False
-current_state = 'inactive'  # 初始状态为不活跃
-ser2 = serial.Serial('COM3', 38400, 8, 'N', 1, 0.3)
-feedback_data_D3 = None
-# server = 'TRG-327-PC'  # 替换为你的SQL Server服务器名或IP地址
-# database = 'PE_DataBase'      # 数据库名
-# username = 'TRG-PE'           # 登录名
-# password = '705705'          # 密码
-# # 构建连接字符串
-# conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
-class DetThread(QThread): ###继承 QThread
-    send_img_ch0 = pyqtSignal(np.ndarray)  ### CH0 output image
-    send_img_ch1 = pyqtSignal(np.ndarray)  ### CH1 output image
-    send_img_ch2 = pyqtSignal(np.ndarray)  ### CH2 output image
-    send_img_ch3 = pyqtSignal(np.ndarray)  ### CH3 output image
-    send_img_ch4 = pyqtSignal(np.ndarray)  ### CH4 output image
-    send_img_ch5 = pyqtSignal(np.ndarray)  ### CH5 output image
-    send_statistic = pyqtSignal(dict)  ###
+
+computer_is_open = False
+
+# 光电传感器状态初始化，默认为不活跃
+current_state = 'inactive'  # 初始状态为不活跃
+
+# 光电传感器COM口设定
+# ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+ser2 = None
+feedback_data_D3 = None
+
+# Initialization function "SQL_is_open", SQL writing disabled by default //初始化函数：SQL_is_open，默认不开启SQL写入
+SQL_is_open = False
+
+
+class DetThread(QThread): # ##继承 QThread
+    send_img_ch0 = pyqtSignal(np.ndarray)  # ## CH0 output image
+    send_img_ch1 = pyqtSignal(np.ndarray)  # ## CH1 output image
+    send_img_ch2 = pyqtSignal(np.ndarray)  # ## CH2 output image
+    send_img_ch3 = pyqtSignal(np.ndarray)  # ## CH3 output image
+    send_img_ch4 = pyqtSignal(np.ndarray)  # ## CH4 output image
+    send_img_ch5 = pyqtSignal(np.ndarray)  # ## CH5 output image
+    send_statistic = pyqtSignal(dict)  # ##
     # emit：detecting/pause/stop/finished/error msg
     send_msg = pyqtSignal(str)
     send_percent = pyqtSignal(int)
@@ -76,6 +84,7 @@ class DetThread(QThread): ###继承 QThread
         self.rate = 100
         self.save_fold = None  ####'./auto_save/jpg'
         self.pred_flag = False  #pred_CheckBox
+
     @torch.no_grad()
     def run(self,
             imgsz=640, #1440 # inference size (pixels)//推理大小
@@ -372,14 +381,16 @@ class DetThread(QThread): ###继承 QThread
                                             print('save_one_box')
 
                                 # print('detection is running')
-                                print(feedback_data_D3)
-                                if feedback_data_D3 == '0110000c000281cb':    #'0105330BFF00F2BC'
-                                    feedbacksql = 'Output successful'
-                                else:
-                                    feedbacksql = 'Output failed'
-                                sqltime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())   #写入时间
-                                writesql(sqltime, names[c], feedbacksql)
-                                # print(names[c])
+
+                                # if 'sql_is_open' is true, write data to SQL
+                                if SQL_is_open:
+                                    if feedback_data_D3 == '0110000c000281cb':    #'0105330BFF00F2BC'
+                                        feedbacksql = 'Output successful'
+                                    else:
+                                        feedbacksql = 'Output failed'
+                                    sqltime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())   #写入时间
+                                    writesql(sqltime, names[c], feedbacksql)
+
                             t2 = time_sync()
                             fsp = int(1 / (t2 - t1)) if (t2 - t1) > 0 else 0  # frame text:
                             # print(f'{s}Done. ({t2 - t1:.3f}s fsp ={fsp})')
@@ -489,12 +500,14 @@ class DetThread(QThread): ###继承 QThread
 
 def read_sensor(): ### 检查触发开关
     global ser2
-    # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)
-    sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
-    if sensor == '010201016048':
-        return 'active'
-    else:
-        return 'inactive'
+    # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
+    if ser2 != None:
+        sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
+        if sensor == '010201016048':
+            return 'active'
+        else:
+            return 'inactive'
+    return 'inactive'
 
 
 
@@ -601,6 +614,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.pred_CheckBox.clicked.connect(self.pred_run)
         self.load_setting()  #### loading config
 
+        # 设置按键跳转至设置UI
+        self.actionGeneral.triggered.connect(self.setting_ui)
+
+
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
     def update_sensor_data(self):  ### 光纤开关信号reflash
@@ -627,9 +644,16 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 current_state = new_state
                 # print(new_state)
 
+    def sensor_on_off(self):
+        global ser2, sensor_is_open
+        if self.checkbox_3.isChecked():
+            ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+            sensor_is_open = True
 
-        # else:
-            # self.run_or_continue()
+        if not self.checkBox_3.isChecked():
+            sensor_is_open = False
+
+
 
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
@@ -1102,8 +1126,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # print('output result:', type(results), results)
             self.resultWidget.addItems(results)
             self.label_okCounter.setText(str(loopCounter))
-            # sqltime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            # writesql(sqltime, results, feedback_data_D3)
             if len(results):
                 # ngCounter += 1
                 self.label_ngCounter.setText(str(ngCounter))
@@ -1236,6 +1258,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
+        # config['On/Off State'] =
         ####新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
 
@@ -1269,6 +1292,47 @@ class MainWindow(QMainWindow, Ui_mainWindow):
       except Exception as e:
           print('openport erro', e)
           self.statistic_msg(str(e))
+
+
+    def setting_ui(self):
+        print("into setting")
+        self.trg_setting_ui = setting_page()
+        self.trg_setting_ui.show()
+
+
+
+# 设置UI
+class setting_page(QMainWindow, Ui_TRG):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+
+
+        self.checkBox_2.clicked.connect(self.runsql)
+
+
+    def runsql(self):
+        # print("into runsql")
+        if self.checkBox_2.isChecked():
+            # self.conn = SQL_write.opensql(self.server, self.database, self.username, self.password)  # 打开SQL
+            # self.conn = SQL_write.opensql()  # 打开SQL
+            SQL_write.opensql()  # 打开SQL
+            # SQL_write.opensql()
+
+            # return self.conn
+
+            global SQL_is_open
+            SQL_is_open = True
+
+        if not self.checkBox_2.isChecked():
+            try:
+                print("into try close sql")
+                # SQL_write.closesql(self.conn)
+                SQL_write.closesql()
+                SQL_is_open = False
+            except:
+                print("no sql")
+                # SQL_write.closesql()
 
 
 
