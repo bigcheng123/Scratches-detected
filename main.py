@@ -141,7 +141,7 @@ class DetThread(QThread): # ##继承 QThread
 
         # Dataloader
         if webcam: ###self.source.isnumeric() or self.source.endswith('.txt') or
-            print('if webcam is running')
+            # print('if webcam is running')
             view_img = check_imshow()
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
@@ -177,7 +177,6 @@ class DetThread(QThread): # ##继承 QThread
             print('marker while loop')
             print(' while loop self.is_continue', self.is_continue)
             print(' while loop self.jump_out', self.jump_out)
-            # print(' while loop camera.cap', type(self.vid_cap))
 
             # change model & device  20230810
             if self.current_weight != self.weights:
@@ -500,11 +499,10 @@ class DetThread(QThread): # ##继承 QThread
 
 def read_sensor(): ### 检查触发开关
     global ser2
-    print("readsensor", ser2)
+    # print("in read sensor")
     # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
     if not ser2 == None:
         sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
-        print(ser2)
         if sensor == '010201016048':
             return 'active'
         else:
@@ -759,7 +757,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
             write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M10线圈，给触摸屏电脑已开机信号
             test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
-            print(test_hex)
             # print(write_m20_on)
             modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
             print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
@@ -816,7 +813,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         # print('scratch detected')
                         global feedback_data_D3
                         feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
-                        print("d3",feedback_data_D3)
+                        # print("d3", feedback_data_D3)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
                     if not n and self.runButton.isChecked():
                         # print('scratch has not detected')
@@ -1234,14 +1231,17 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
     def closeEvent(self, event):
-        global modbus_flag
+        global modbus_flag, sensor_is_open, SQL_is_open
         modbus_flag = False
         self.det_thread.jump_out = True
         self.det_thread.is_continue = False
         if not ser2 == None:
             ser2.close()  #240704
+            sensor_is_open = False
+
         if SQL_is_open:
             closesql()
+            SQL_is_open = False
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
@@ -1307,41 +1307,144 @@ class setting_page(QMainWindow, Ui_TRG):
 
         # 传感器com口勾选开关
         self.checkBox_3.clicked.connect(self.sensor_on_off)
+        self.load_setting()
+
+    def load_setting(self):
+        print("into load setting")
+        config_file = 'config/setting2.json'
+
+        if not os.path.exists(config_file):
+            iou = 0.26
+            conf = 0.33
+            rate = 10
+            check = 0
+            savecheck = 0
+            device = 0
+            port = "COM3"
+            sensor_switch = 0
+            SQL_switch = 0
+            new_config = {"iou": iou,
+                          "conf": conf,
+                          "rate": rate,
+                          "check": check,
+                          "savecheck": savecheck,
+                          "device": device,
+                          "port": port,
+                          "sensor_switch": sensor_switch,
+                          "SQL_switch": SQL_switch
+                          }
+            new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
+            with open(config_file, 'w', encoding='utf-8') as f:
+                f.write(new_json)
+        else:
+            config = json.load(open(config_file, 'r', encoding='utf-8'))
+            print('load config:', type(config), config)
+            if len(config) != 2:  ### 参数不足时  补充参数
+                print("len", len(config))
+                # iou = 0.26
+                # conf = 0.33
+                # rate = 10
+                # check = 0
+                # savecheck = 0
+                # device = 0
+                # port = 0
+                # source = 0
+                # model = 0
+                sensor_switch = 0
+                SQL_switch = 2
+            else:
+                # iou = config['iou']
+                # conf = config['conf']
+                # rate = config['rate']
+                # check = config['check']
+                # savecheck = config['savecheck']
+                # device = config['device']  ## index number
+                # port = config['port']  ## index number
+                # source = config['source']
+                # model = config['model']
+                sensor_switch = config['sensor_switch']
+                SQL_switch = config['SQL_switch']
+        ### 依据存储的json文件 更新 ui参数
+        # self.confSpinBox.setValue(conf)
+        # self.iouSpinBox.setValue(iou)
+        # self.rateSpinBox.setValue(rate)
+        # self.checkBox_latency.setCheckState(check)
+        # self.det_thread.rate_check = check
+        # self.CheckBox_autoSave.setCheckState(savecheck)
+        # self.is_save()  ###auto save  checkbox
+        # self.comboBox_device.setCurrentIndex(device)  # 设置当前索引号 "device": 0
+        # self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
+        # self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
+        # self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
+        self.checkBox_2.setCheckState(SQL_switch)
+        print(SQL_switch)
+        self.checkBox_3.setCheckState(sensor_switch)
 
 
-    def sensor_on_off(self):
-        global ser2, sensor_is_open
-        print("sensor_on_off is checked")
-        if self.checkbox_3.isChecked():
-            print("checkbox_3 is checked")
-            ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
-            sensor_is_open = True
+    def save_setting(self):
+        print("into save setting")
+        config_path = 'config/setting2.json'
+        config = dict()
+        # config['iou'] = self.iouSpinBox.value()
+        # config['conf'] = self.confSpinBox.value()  # self.confSpinBox.value()
+        # config['rate'] = self.rateSpinBox.value()
+        # config['check'] = self.checkBox_latency.checkState()  # Latency funtion
+        # config['savecheck'] = self.CheckBox_autoSave.checkState()  # Auto Save
+        # config['device'] = self.comboBox_device.currentIndex()  # 获取当前索引号
+        # config['port'] = self.comboBox_port.currentIndex()  # 获取当前索引号
+        # config['source'] = self.comboBox_source.currentIndex()  # 获取当前索引号
+        # config['model'] = self.comboBox_model.currentIndex()  # 获取当前索引号 20240403
+        # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
+        config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
+        config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
+        # 新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
+        config_json = json.dumps(config, ensure_ascii=False, indent=2)
 
-        if not self.checkBox_3.isChecked():
-            sensor_is_open = False
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write(config_json)
+            print('confi_json2 write')
+
+    def closeEvent(self, event):
+        print("into setting close event")
+        # 保存设置窗口参数
+        self.save_setting()
+        event.accept()
 
     def runsql(self):
         # print("into runsql")
         if self.checkBox_2.isChecked():
-            # self.conn = SQL_write.opensql(self.server, self.database, self.username, self.password)  # 打开SQL
-            # self.conn = SQL_write.opensql()  # 打开SQL
             SQL_write.opensql()  # 打开SQL
-            # SQL_write.opensql()
+            print(self.lineEdit.text, self.lineEdit_2.text, self.lineEdit_3.text, self.lineEdit_4.text)   # bug
 
-            # return self.conn
 
             global SQL_is_open
             SQL_is_open = True
 
         if not self.checkBox_2.isChecked():
             try:
-                print("into try close sql")
-                # SQL_write.closesql(self.conn)
                 SQL_write.closesql()
                 SQL_is_open = False
             except:
                 print("no sql")
-                # SQL_write.closesql()
+
+    def sensor_on_off(self):
+        global ser2, sensor_is_open
+        if self.checkBox_3.isChecked():
+            try:
+                ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+                sensor_is_open = True
+                print("sensor is open")
+
+            except Exception as e:
+                print('openport erro-2', e)
+                self.statistic_msg(str(e))
+
+        if not self.checkBox_3.isChecked():
+            sensor_is_open = False
+            if not ser2 == None:
+                ser2.close()
+            print("sensor is close")
+
 
 
 
