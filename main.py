@@ -500,9 +500,11 @@ class DetThread(QThread): # ##继承 QThread
 
 def read_sensor(): ### 检查触发开关
     global ser2
+    print("readsensor", ser2)
     # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
-    if ser2 != None:
+    if not ser2 == None:
         sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
+        print(ser2)
         if sensor == '010201016048':
             return 'active'
         else:
@@ -643,15 +645,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     # self.run_or_continue()
                 current_state = new_state
                 # print(new_state)
-
-    def sensor_on_off(self):
-        global ser2, sensor_is_open
-        if self.checkbox_3.isChecked():
-            ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
-            sensor_is_open = True
-
-        if not self.checkBox_3.isChecked():
-            sensor_is_open = False
 
 
 
@@ -1245,8 +1238,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         modbus_flag = False
         self.det_thread.jump_out = True
         self.det_thread.is_continue = False
-        ser2.close()  #240704
-        closesql()
+        if not ser2 == None:
+            ser2.close()  #240704
+        if SQL_is_open:
+            closesql()
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
@@ -1307,9 +1302,23 @@ class setting_page(QMainWindow, Ui_TRG):
         super().__init__()
         self.setupUi(self)
 
-
+        # SQL勾选开关
         self.checkBox_2.clicked.connect(self.runsql)
 
+        # 传感器com口勾选开关
+        self.checkBox_3.clicked.connect(self.sensor_on_off)
+
+
+    def sensor_on_off(self):
+        global ser2, sensor_is_open
+        print("sensor_on_off is checked")
+        if self.checkbox_3.isChecked():
+            print("checkbox_3 is checked")
+            ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+            sensor_is_open = True
+
+        if not self.checkBox_3.isChecked():
+            sensor_is_open = False
 
     def runsql(self):
         # print("into runsql")
