@@ -49,6 +49,7 @@ current_state = 'inactive'  # 初始状态为不活跃
 # 光电传感器COM口设定
 # ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
 ser2 = None
+ret2 = None
 feedback_data_D3 = None
 
 # Initialization function "SQL_is_open", SQL writing disabled by default //初始化函数：SQL_is_open，默认不开启SQL写入
@@ -617,6 +618,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # 设置按键跳转至设置UI
         self.actionGeneral.triggered.connect(self.setting_ui)
 
+        # # 加载设置页选项，开启com口
+        # setting_page.runsql()
+        # setting_page.sensor_on_off()
 
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
@@ -1175,6 +1179,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def load_setting(self):
         config_file = 'config/setting.json'
+        loading_other_setting = setting_page()
+        loading_other_setting.runsql()
+        loading_other_setting.sensor_on_off()
 
         if not os.path.exists(config_file):
             iou = 0.26
@@ -1231,13 +1238,18 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
     def closeEvent(self, event):
-        global modbus_flag, sensor_is_open, SQL_is_open
+        global modbus_flag, sensor_is_open, SQL_is_open, ser2
         modbus_flag = False
         self.det_thread.jump_out = True
         self.det_thread.is_continue = False
-        if not ser2 == None:
-            ser2.close()  #240704
-            sensor_is_open = False
+        # if not ser2 == None:
+        if sensor_is_open == True:
+            try:
+                ser2.close()  #240704
+                sensor_is_open = False
+                ser2 = None
+            except:
+                ser2 = None
 
         if SQL_is_open:
             closesql()
@@ -1304,9 +1316,11 @@ class setting_page(QMainWindow, Ui_TRG):
 
         # SQL勾选开关
         self.checkBox_2.clicked.connect(self.runsql)
+        # self.runsql()
 
         # 传感器com口勾选开关
         self.checkBox_3.clicked.connect(self.sensor_on_off)
+
         self.load_setting()
 
     def load_setting(self):
@@ -1377,7 +1391,7 @@ class setting_page(QMainWindow, Ui_TRG):
         # self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         # self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
         self.checkBox_2.setCheckState(SQL_switch)
-        print(SQL_switch)
+        # self.runsql()
         self.checkBox_3.setCheckState(sensor_switch)
 
 
@@ -1412,15 +1426,17 @@ class setting_page(QMainWindow, Ui_TRG):
 
     def runsql(self):
         # print("into runsql")
+        print("checkbox2", self.checkBox_2.isChecked())
         if self.checkBox_2.isChecked():
             SQL_write.opensql()  # 打开SQL
-            print(self.lineEdit.text, self.lineEdit_2.text, self.lineEdit_3.text, self.lineEdit_4.text)   # bug
+            # print(self.lineEdit.text, self.lineEdit_2.text, self.lineEdit_3.text, self.lineEdit_4.text)   # bug
 
 
             global SQL_is_open
             SQL_is_open = True
 
         if not self.checkBox_2.isChecked():
+            # self.checkBox_2.setChecked(False)
             try:
                 SQL_write.closesql()
                 SQL_is_open = False
@@ -1428,7 +1444,7 @@ class setting_page(QMainWindow, Ui_TRG):
                 print("no sql")
 
     def sensor_on_off(self):
-        global ser2, sensor_is_open
+        global ser2, ret2, sensor_is_open
         if self.checkBox_3.isChecked():
             try:
                 ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
@@ -1440,10 +1456,52 @@ class setting_page(QMainWindow, Ui_TRG):
                 self.statistic_msg(str(e))
 
         if not self.checkBox_3.isChecked():
+            # self.checkBox_2.setChecked(False)
             sensor_is_open = False
             if not ser2 == None:
-                ser2.close()
-            print("sensor is close")
+                try:
+                    ser2.close()
+                    print("sensor is close")
+                    ser2 = None
+                except Exception as e:
+                    print('close port erro-2', e)
+                    self.statistic_msg(str(e))
+        # if self.checkBox_3.isChecked():
+        #     print('sensor_switch.isChecked')
+        #     sensor_is_open = True
+        #     print('set  sensor is open = True')
+        #     try:
+        #         ser2, ret2, error2 = modbus_rtu.openport('com4', 38400, 1)  # 打开端口
+        #     except Exception as e:
+        #         print('openport erro -1', e)
+        #         self.statistic_msg(str(e))
+        #
+        #     if not ret2:
+        #         self.checkBox_3.setChecked(False)
+        #         MessageBox(
+        #             self.closeButton, title='Error', text='Connection Error: '+ str(error2), time=2000,
+        #             auto=True).exec_()
+        #         print('port did not open')
+        #         try:
+        #             ser2, ret2, error2 = modbus_rtu.openport('com4', 38400, 1)  # 打开端口
+        #             if ret2:
+        #                 print("_thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环")
+        #         except Exception as e:
+        #             print('openport erro-2', e)
+        #             self.statistic_msg(str(e))
+        #     else: # self.ret is  True
+        #         self.checkBox_3.setChecked(True)
+        #         print("_thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环")
+        #         # self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
+        # else: # shut down modbus
+        #     print('sensor switch.is unChecked')
+        #     sensor_is_open = False
+        #     self.checkBox_3.setChecked(False)
+        #     try:
+        #         ser2.close
+        #     except:
+        #         print('shut down sensor = False')
+
 
 
 
