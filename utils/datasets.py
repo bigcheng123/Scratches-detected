@@ -320,6 +320,8 @@ class LoadStreams:
 
             except:# 20240220 by alex
                 print(f'无法启动摄像头线程{i}')
+
+                self.threads[i].john()
                 break
 
             else:# 20240220 by alex
@@ -339,12 +341,15 @@ class LoadStreams:
         else:
             sources = [sources]
         for i, s in enumerate(sources):  # index, source
-            self.threads[i].join()
-            self.cap = cv2.VideoCapture(s) ### get  the streams
-            # self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
-            self.cap.release()
-            print(f'loop {i}')
-            print(f'close cam {i} succesfully')
+            try:
+                self.threads[i].join()
+                self.cap = cv2.VideoCapture(s) ### get  the streams
+                # self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
+                self.cap.release()
+                print(f'loop {i}')
+                print(f'close cam {i} succesfully')
+            except:
+                print("can't close camera")
 
     def update(self, i, cap, stream):
         # Read stream `i` frames in daemon thread

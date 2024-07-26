@@ -146,9 +146,9 @@ class DetThread(QThread): # ##继承 QThread
             view_img = check_imshow()
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
-            print('dataset type', type(dataset), dataset)
+            # print('dataset type', type(dataset), dataset)
             bs = len(dataset)  # batch_size
-            print('len(dataset)=', bs)
+            # print('len(dataset)=', bs)
             # #### streams = LoadStreams
 
         else:  ### load the images
@@ -457,7 +457,7 @@ class DetThread(QThread): # ##继承 QThread
                         global cam_stop
                         cam_stop = True
                         stopcam = LoadStreams()
-                        stopcam.stop_cam()
+                        stopcam.stop_cam()  # 使用非streams.txt时存在bug，默认Stop参数为streams.txt
                         # if self.vid_cap.isOpened():
                         #     self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
                         #     logging.info("vid_cap.release...")
@@ -653,7 +653,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
-        print('runbutton is check', self.runButton.isChecked())
+        # print('runbutton is check', self.runButton.isChecked())
         if self.runButton.isChecked():
             self.runButton.setText('PAUSE')
             # self.saveCheckBox.setEnabled(False)
@@ -673,7 +673,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.det_thread.is_continue = False
             self.runButton.setText('RUN')
             self.statistic_msg('Pause')
-            print('self.det_thread.is_continue', self.det_thread.is_continue)
+            # print('self.det_thread.is_continue', self.det_thread.is_continue)
 
     def testfuntion(self):
         print('------------------------------testfuntion button push')
@@ -1204,7 +1204,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 f.write(new_json)
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
-            print('load config:', type(config), config)
+            # print('load config:', type(config), config)
             if len(config) != 9 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
@@ -1324,7 +1324,7 @@ class setting_page(QMainWindow, Ui_TRG):
         self.load_setting()
 
     def load_setting(self):
-        print("into load setting")
+        # print("into load setting")
         config_file = 'config/setting2.json'
 
         if not os.path.exists(config_file):
@@ -1426,7 +1426,7 @@ class setting_page(QMainWindow, Ui_TRG):
 
     def runsql(self):
         # print("into runsql")
-        print("checkbox2", self.checkBox_2.isChecked())
+        # print("checkbox2", self.checkBox_2.isChecked())
         if self.checkBox_2.isChecked():
             SQL_write.opensql()  # 打开SQL
             # print(self.lineEdit.text, self.lineEdit_2.text, self.lineEdit_3.text, self.lineEdit_4.text)   # bug
