@@ -1353,7 +1353,7 @@ class setting_page(QMainWindow, Ui_TRG):
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             print('load config:', type(config), config)
-            if len(config) != 2:  ### 参数不足时  补充参数
+            if len(config) != 6:  ### 参数不足时  补充参数
                 print("len", len(config))
                 # iou = 0.26
                 # conf = 0.33
@@ -1366,6 +1366,10 @@ class setting_page(QMainWindow, Ui_TRG):
                 # model = 0
                 sensor_switch = 0
                 SQL_switch = 2
+                self.server = 'TRG-327-PC'
+                self.database = 'PE_DataBase'
+                self.username = 'TRG-PE'
+                self.password = '705705'
             else:
                 # iou = config['iou']
                 # conf = config['conf']
@@ -1378,6 +1382,10 @@ class setting_page(QMainWindow, Ui_TRG):
                 # model = config['model']
                 sensor_switch = config['sensor_switch']
                 SQL_switch = config['SQL_switch']
+                self.server = config['server']
+                self.database = config['database']
+                self.username = config['username']
+                self.password = config['password']
         ### 依据存储的json文件 更新 ui参数
         # self.confSpinBox.setValue(conf)
         # self.iouSpinBox.setValue(iou)
@@ -1411,6 +1419,10 @@ class setting_page(QMainWindow, Ui_TRG):
         # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
         config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
         config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
+        config['server'] = self.lineEdit.text()
+        config['database'] = self.lineEdit_2.text()
+        config['username'] = self.lineEdit_3.text()
+        config['password'] = self.lineEdit_4.text()
         # 新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
 
@@ -1428,8 +1440,8 @@ class setting_page(QMainWindow, Ui_TRG):
         # print("into runsql")
         # print("checkbox2", self.checkBox_2.isChecked())
         if self.checkBox_2.isChecked():
-            SQL_write.opensql()  # 打开SQL
-            # print(self.lineEdit.text, self.lineEdit_2.text, self.lineEdit_3.text, self.lineEdit_4.text)   # bug
+            SQL_write.opensql(self.server, self.database, self.username, self.password)  # 打开SQL
+
 
 
             global SQL_is_open
@@ -1453,7 +1465,7 @@ class setting_page(QMainWindow, Ui_TRG):
 
             except Exception as e:
                 print('openport erro-2', e)
-                self.statistic_msg(str(e))
+                # self.statistic_msg(str(e))
 
         if not self.checkBox_3.isChecked():
             # self.checkBox_2.setChecked(False)
@@ -1465,7 +1477,7 @@ class setting_page(QMainWindow, Ui_TRG):
                     ser2 = None
                 except Exception as e:
                     print('close port erro-2', e)
-                    self.statistic_msg(str(e))
+                    # self.statistic_msg(str(e))
         # if self.checkBox_3.isChecked():
         #     print('sensor_switch.isChecked')
         #     sensor_is_open = True
