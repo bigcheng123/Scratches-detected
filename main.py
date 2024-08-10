@@ -40,13 +40,13 @@ okCounter = 0
 ngCounter = 0
 loopCounter = 0
 
-
+# 初始化电脑状态为关机
 computer_is_open = False
 
 # 光电传感器状态初始化，默认为不活跃
 current_state = 'inactive'  # 初始状态为不活跃
 
-# 光电传感器COM口设定
+# 光电传感器COM口初始化
 # ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
 ser2 = None
 ret2 = None
@@ -498,6 +498,7 @@ class DetThread(QThread): # ##继承 QThread
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
 
+# modbus模块读取光电传感器信号，返回活跃或不活跃
 def read_sensor(): ### 检查触发开关
     global ser2
     # print("in read sensor")
@@ -537,6 +538,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.qtimer.setSingleShot(True)
         self.qtimer.timeout.connect(lambda: self.statistic_label.clear())
 
+        # 使用QTimer定时，每隔一秒读取一次光电传感器状态
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_sensor_data)   #  sensor data update
         self.timer.start(1000)
@@ -624,6 +626,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
+
+    #根据def read_sensor读取传感器后返回结果执行开始或暂停
     def update_sensor_data(self):  ### 光纤开关信号reflash
         sensor_data = read_sensor()
         # print("sensor_data", sensor_data)
@@ -689,7 +693,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         #     # print('streams_update_flag', self.LoadStreams_thread.streams_update_flag)
 
     def calculate_crc(self, raw_data):  # raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
-        # 将 raw_data 转换为 hex_data
+        # 将 raw_data 转换为 hex_data 增加多寄存器写入，高低位互换功能
         hex_data = [format(x, 'X').zfill(4) for x in raw_data]
         string = hex_data[0]
         hex_data[0] = string[-2:]
@@ -768,7 +772,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             global write_m21_off
             write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
-            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
+            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M21线圈闭合状态，
+
+            # 循环读取M21线圈状态，线圈闭合时检测开始
             while self.runButton_modbus.isChecked() and modbus_flag:
                 m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
                 if m21_result == '010101019048':
@@ -1308,7 +1314,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
 
 
-# 设置UI
+# 主页面下拉菜单-设置UI
 class setting_page(QMainWindow, Ui_TRG):
     def __init__(self):
         super().__init__()
@@ -1323,6 +1329,7 @@ class setting_page(QMainWindow, Ui_TRG):
 
         self.load_setting()
 
+    # 根据setting2.json加载设置
     def load_setting(self):
         # print("into load setting")
         config_file = 'config/setting2.json'
@@ -1403,6 +1410,7 @@ class setting_page(QMainWindow, Ui_TRG):
         self.checkBox_3.setCheckState(sensor_switch)
 
 
+    # 每次关闭设置窗口执行设置保存
     def save_setting(self):
         print("into save setting")
         config_path = 'config/setting2.json'
@@ -1430,12 +1438,14 @@ class setting_page(QMainWindow, Ui_TRG):
             f.write(config_json)
             print('confi_json2 write')
 
+    # 窗口关闭操作
     def closeEvent(self, event):
         print("into setting close event")
         # 保存设置窗口参数
         self.save_setting()
         event.accept()
 
+    # 打开SQL连接
     def runsql(self):
         # print("into runsql")
         # print("checkbox2", self.checkBox_2.isChecked())
@@ -1455,6 +1465,7 @@ class setting_page(QMainWindow, Ui_TRG):
             except:
                 print("no sql")
 
+    # 启用或关闭光电传感器-检查启停功能
     def sensor_on_off(self):
         global ser2, ret2, sensor_is_open
         if self.checkBox_3.isChecked():
