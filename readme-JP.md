@@ -15,7 +15,7 @@ PLC:三菱FX3S+modbusモジュール<br>
 光源: Hikvision リング光源 MV-LRSS-H-80-W<br>
 光源コントローラー: [デジタル 8 チャンネル光源コントローラー](https://detail.tmall.com/item.htm?abbucket=1&id=656543446110&rn=21d65f2d271defe4d3b29e10ced9b2a5&spm=a1z10.5-b.w4011-23573612475.52.201646d6ZWIsQh&skuId=4738283905874)<br>
 
-**ホスト推奨構成ハードウェア:**<br>
+**PC推奨構成ハードウェア:**<br>
 1. CPU: i7 13700k 以上<br>
 2. グラフィックス カード: RTX3050 以降 (NVIDIA グラフィックス カードのみをサポート)<br>
 3. メモリ: 16G 以上を推奨<br>
