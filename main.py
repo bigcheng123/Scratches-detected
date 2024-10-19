@@ -47,7 +47,7 @@ computer_is_open = False
 current_state = 'inactive'  # 初始状态为不活跃
 
 # 光电传感器COM口设定
-# ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+# ser2 = serial.Serial('COM10', 38400, 8, 'N', 1, 0.3)
 ser2 = None
 ret2 = None
 feedback_data_D3 = None
@@ -501,7 +501,7 @@ class DetThread(QThread): # ##继承 QThread
 def read_sensor(): ### 检查触发开关
     global ser2
     # print("in read sensor")
-    # ser2 = serial.Serial('com4', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
+    # ser2 = serial.Serial('com10', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
     if not ser2 == None:
         sensor = modbus_rtu.writedata(ser2, '01 02 00 00 00 01 B9 CA')
         if sensor == '010201016048':
@@ -759,7 +759,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
 
-            write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M10线圈，给触摸屏电脑已开机信号
+            write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M20线圈，给触摸屏电脑已开机信号
             test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
             # print(write_m20_on)
             modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
@@ -814,10 +814,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     #     modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
                     #     modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                     if n:  # output NG
-                        # print('scratch detected')
+                        print('scratch detected')
+                        print('d3', DO3_ON)
                         global feedback_data_D3
                         feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
-                        # print("d3", feedback_data_D3)
+                        print("ng output", feedback_data_D3)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
                     if not n and self.runButton.isChecked():
                         # print('scratch has not detected')
@@ -1334,7 +1335,7 @@ class setting_page(QMainWindow, Ui_TRG):
             check = 0
             savecheck = 0
             device = 0
-            port = "COM3"
+            port = "COM9"
             sensor_switch = 0
             SQL_switch = 0
             new_config = {"iou": iou,
@@ -1366,7 +1367,7 @@ class setting_page(QMainWindow, Ui_TRG):
                 # model = 0
                 sensor_switch = 0
                 SQL_switch = 2
-                self.server = 'TRG-327-PC'
+                self.server = 'DESKTOP-QGKNIRA'
                 self.database = 'PE_DataBase'
                 self.username = 'TRG-PE'
                 self.password = '705705'
@@ -1459,7 +1460,7 @@ class setting_page(QMainWindow, Ui_TRG):
         global ser2, ret2, sensor_is_open
         if self.checkBox_3.isChecked():
             try:
-                ser2 = serial.Serial('COM4', 38400, 8, 'N', 1, 0.3)
+                ser2 = serial.Serial('COM10', 38400, 8, 'N', 1, 0.3)
                 sensor_is_open = True
                 print("sensor is open")
 
@@ -1483,7 +1484,7 @@ class setting_page(QMainWindow, Ui_TRG):
         #     sensor_is_open = True
         #     print('set  sensor is open = True')
         #     try:
-        #         ser2, ret2, error2 = modbus_rtu.openport('com4', 38400, 1)  # 打开端口
+        #         ser2, ret2, error2 = modbus_rtu.openport('com10', 38400, 1)  # 打开端口
         #     except Exception as e:
         #         print('openport erro -1', e)
         #         self.statistic_msg(str(e))
@@ -1495,7 +1496,7 @@ class setting_page(QMainWindow, Ui_TRG):
         #             auto=True).exec_()
         #         print('port did not open')
         #         try:
-        #             ser2, ret2, error2 = modbus_rtu.openport('com4', 38400, 1)  # 打开端口
+        #             ser2, ret2, error2 = modbus_rtu.openport('com10', 38400, 1)  # 打开端口
         #             if ret2:
         #                 print("_thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环")
         #         except Exception as e:
