@@ -34,29 +34,25 @@ from utils.torch_utils import select_device, time_sync, load_classifier
 from utils.capnums import Camera
 from SQL_write import writesql, closesql
 import logging
-# set global variable 设置全局变量
+# ↓ 【set global variable】 设置全局变量  ↓
 modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
 
-
 computer_is_open = False
-
 # 光电传感器状态初始化，默认为不活跃
 current_state = 'inactive'  # 初始状态为不活跃
-
 # 光电传感器COM口设定
 # ser2 = serial.Serial('COM10', 38400, 8, 'N', 1, 0.3)
 ser2 = None
 ret2 = None
 feedback_data_D3 = None
-
 # Initialization function "SQL_is_open", SQL writing disabled by default //初始化函数：SQL_is_open，默认不开启SQL写入
 SQL_is_open = False
+sensor_is_open = False
 
-
-class DetThread(QThread): # ##继承 QThread
+class DetThread(QThread): # ## 检测功能主线程  继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  # ## CH0 output image
     send_img_ch1 = pyqtSignal(np.ndarray)  # ## CH1 output image
     send_img_ch2 = pyqtSignal(np.ndarray)  # ## CH2 output image
@@ -511,7 +507,7 @@ def read_sensor(): ### 检查触发开关
     return 'inactive'
 
 
-
+####  ↓ Class Main Window 主窗口
 class MainWindow(QMainWindow, Ui_mainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -564,24 +560,24 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.source = self.source_type # get origin source index
         self.det_thread.percent_length = self.progressBar.maximum()
         #### the connect funtion transform to  def run_or_continue(self):
-        #### tab1-mutil
+        #### tab0-mutil
         self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch0))
         self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch1))
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch2))
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch3))
         self.det_thread.send_img_ch4.connect(lambda x: self.show_image(x, self.video_label_ch11))
         self.det_thread.send_img_ch5.connect(lambda x: self.show_image(x, self.video_label_ch12))
-        #### tab-2
+        #### tab-1
         self.det_thread.send_img_ch0.connect(lambda x: self.show_image(x, self.video_label_ch4))
-        #### tab-3
+        #### tab-2
         self.det_thread.send_img_ch1.connect(lambda x: self.show_image(x, self.video_label_ch5))
-        #### tab-4
+        #### tab-3
         self.det_thread.send_img_ch2.connect(lambda x: self.show_image(x, self.video_label_ch6))
-        #### tab-5
+        #### tab-4
         self.det_thread.send_img_ch3.connect(lambda x: self.show_image(x, self.video_label_ch7))
-        #### tab-6
+        #### tab-5
         self.det_thread.send_img_ch4.connect(lambda x: self.show_image(x, self.video_label_ch8))
-        #### tab-7
+        #### tab-6
         self.det_thread.send_img_ch5.connect(lambda x: self.show_image(x, self.video_label_ch9))
 
         self.det_thread.send_statistic.connect(self.show_statistic)
@@ -595,7 +591,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.runButton.clicked.connect(self.run_or_continue)
         self.runButton_modbus.clicked.connect(self.modbus_on_off)
-        self.testButton.clicked.connect(self.testfuntion)
         self.stopButton.clicked.connect(self.stop)
 
         self.comboBox_model.currentTextChanged.connect(self.change_model)
@@ -610,18 +605,17 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.rateSpinBox.valueChanged.connect(lambda x: self.change_val(x, 'rateSpinBox'))
         self.rateSlider.valueChanged.connect(lambda x: self.change_val(x, 'rateSlider'))
 
-        self.checkBox_latency.clicked.connect(self.checkrate)
-        self.CheckBox_autoSave.clicked.connect(self.is_save)
+        self.checkBox_latency.clicked.connect(self.latency_check)
+        self.CheckBox_autoSave.clicked.connect(self.auto_save_folder)
         self.pred_CheckBox.clicked.connect(self.pred_run)
-        self.load_setting()  #### loading config
 
-        # 设置按键跳转至设置UI
-        self.actionGeneral.triggered.connect(self.setting_ui)
+        self.load_setting()  # Set MainWindow
 
+
+        self.actionGeneral.triggered.connect(self.setting_ui)  # 设置按键跳转至设置UI
         # # 加载设置页选项，开启com口
         # setting_page.runsql()
         # setting_page.sensor_on_off()
-
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
     def update_sensor_data(self):  ### 光纤开关信号reflash
@@ -647,16 +641,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     # self.run_or_continue()
                 current_state = new_state
                 # print(new_state)
-
-
-
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
         # print('runbutton is check', self.runButton.isChecked())
         if self.runButton.isChecked():
             self.runButton.setText('PAUSE')
-            # self.saveCheckBox.setEnabled(False)
             self.det_thread.is_continue = True
             self.det_thread.pred_flag = self.pred_CheckBox.isChecked()
             if not self.det_thread.isRunning():
@@ -674,21 +664,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton.setText('RUN')
             self.statistic_msg('Pause')
             # print('self.det_thread.is_continue', self.det_thread.is_continue)
-
-    def testfuntion(self):
-        print('------------------------------testfuntion button push')
-        # self.LoadStreams_thread = LoadStreams()  ####
-
-        # if LoadStreams.streams_update_flag:
-        #     self.LoadStreams_thread.streams_update_flag = False
-        #
-        # # print('streams_update_flag', self.LoadStreams_thread.streams_update_flag)
-        # else:
-        #     # LoadStreams.streams_update_flag = False
-        #     self.LoadStreams_thread.streams_update_flag = True
-        #     # print('streams_update_flag', self.LoadStreams_thread.streams_update_flag)
-
-    def calculate_crc(self, raw_data):  # raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+    def calculate_crc(self, raw_data):  #计算CRC校验码   raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
         # 将 raw_data 转换为 hex_data
         hex_data = [format(x, 'X').zfill(4) for x in raw_data]
         string = hex_data[0]
@@ -726,7 +702,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # 将CRC校验码添加到原始数据后面
         crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
         return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
-    def thread_mudbus_run(self):
+    def thread_mudbus_run(self):  ###  PC → PLC  通讯线程 ↓
         global modbus_flag, okCounter, ngCounter
         modbus_flag = True
         DO0_ON = self.calculate_crc([1, 5, 13066, 65280])  # hex2dec: 线圈ON=FF00 = 65280
@@ -841,10 +817,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 time.sleep(0.2)
                 modbus_rtu.writedata(self.ser, write_m21_off)
                 self.ser.close()
-
-
-
-    def modbus_on_off(self):
+    def modbus_on_off(self): ### modbus控制开关↓
         global modbus_flag
         # if not modbus_flag:
         if self.runButton_modbus.isChecked():
@@ -879,14 +852,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             print('runButton_modbus.is unChecked')
             modbus_flag = False
             self.runButton_modbus.setChecked(False)
-            print('shut down modbus_flag = False')
-
-
-    def stop(self):  # connect stopButton
+            print('shut down modbus_flag = False') ####  ###
+    def stop(self):  # connect stopButton  主窗口停止按键
         if not self.det_thread.jump_out:
             self.det_thread.jump_out = True
 
-        # self.saveCheckBox.setEnabled(True)
         # self.det_thread.join()  #### bug-1 加入此语句 停止线程会卡死  未解决
 
     def search_pt(self):
@@ -899,7 +869,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.comboBox.clear()
             self.comboBox.addItems(self.pt_list)
 
-    def is_save(self):
+    def auto_save_folder(self): ###auto_save folder
         if self.CheckBox_autoSave.isChecked():
             self.det_thread.save_fold = r'.\auto_save\jpg\pt0410'  ### save result as .mp4
         else:
@@ -910,8 +880,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             self.det_thread.pred_flag = False
 
-
-    def checkrate(self):  #####latency checkbox
+    def latency_check(self):  #####latency checkbox
         if self.checkBox_latency.isChecked():
             self.det_thread.rate_check = True
         else:
@@ -1068,7 +1037,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             self.showNormal()
 
-
     def mousePressEvent(self, event):
         self.m_Position = event.pos()
         if event.button() == Qt.LeftButton:
@@ -1178,27 +1146,35 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         except Exception as e:
             print(repr(e))
 
-    def load_setting(self):
+    def load_setting(self): ### laoding mainwindow object...'
+        print(' loading mainwindows setting')
         config_file = 'config/setting.json'
-        loading_other_setting = setting_page()
-        loading_other_setting.runsql()
-        loading_other_setting.sensor_on_off()
+        #### 加载 子窗口参数 ↓
+        # loading_other_setting = setting_page()
+        # loading_other_setting.runsql()
+        # loading_other_setting.sensor_on_off()
 
         if not os.path.exists(config_file):
             iou = 0.26
             conf = 0.33
             rate = 10
-            check = 0
-            savecheck = 0
+            latency = False
+            auto_save = False
             device = 0
-            port = "COM3"
+            port = 5
+            source = 0
+            model = 0
+            add_box = False
             new_config = {"iou": iou,
                           "conf": conf,
                           "rate": rate,
-                          "check": check,
-                          "savecheck": savecheck,
+                          "latency": latency,
+                          "auto_save": auto_save,
                           "device": device,
-                          "port": port
+                          "port": port,
+                          "source": source,
+                          "model": model,
+                          "add_box": add_box,
                           }
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
@@ -1206,70 +1182,87 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             # print('load config:', type(config), config)
-            if len(config) != 9 : ### 参数不足时  补充参数
+            if len(config) < 5 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
                 rate = 10
-                check = 0
-                savecheck = 0
+                latency = False
+                auto_save = False
                 device = 0
                 port = 0
                 source = 0
                 model = 0
+                add_box = False
             else:
+                print('laoding mainwindow object...', config_file, config)
                 iou = config['iou']
                 conf = config['conf']
                 rate = config['rate']
-                check = config['check']
-                savecheck = config['savecheck']
+                latency = config['latency']
+                auto_save = config['auto_save']
                 device = config['device'] ## index number
                 port = config['port'] ## index number
                 source = config['source']
                 model = config['model']
+                add_box = config['add_box']
+
         ### 依据存储的json文件 更新 ui参数
         self.confSpinBox.setValue(conf)
         self.iouSpinBox.setValue(iou)
         self.rateSpinBox.setValue(rate)
-        self.checkBox_latency.setCheckState(check)
-        self.det_thread.rate_check = check
-        self.CheckBox_autoSave.setCheckState(savecheck)
-        self.is_save() ###auto save  checkbox
+        self.checkBox_latency.setCheckState(latency)
+        self.det_thread.rate_check = latency
+        self.CheckBox_autoSave.setCheckState(auto_save)
+        # self.auto_save_folder() ### auto save  checkbox
         self.comboBox_device.setCurrentIndex(device) # 设置当前索引号 "device": 0
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
-    def closeEvent(self, event):
+        self.box_CheckBox.setCheckState(add_box)
+
+    def closeEvent(self, event): ###点击关闭开关按钮执行 以下
+        print('execute : closeEvent of main window')
         global modbus_flag, sensor_is_open, SQL_is_open, ser2
         modbus_flag = False
         self.det_thread.jump_out = True
         self.det_thread.is_continue = False
         # if not ser2 == None:
-        if sensor_is_open == True:
+        if sensor_is_open:
             try:
                 ser2.close()  #240704
                 sensor_is_open = False
                 ser2 = None
             except:
                 ser2 = None
-
         if SQL_is_open:
             closesql()
             SQL_is_open = False
+        #### read current paraments
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
         config['conf'] = self.confSpinBox.value() #self.confSpinBox.value()
         config['rate'] = self.rateSpinBox.value()
-        config['check'] = self.checkBox_latency.checkState()  ### Latency funtion
-        config['savecheck'] = self.CheckBox_autoSave.checkState() ### Auto Save
+        config['latency'] = self.checkBox_latency.isChecked()  ### Latency funtion .checkState()
+        config['auto_save'] = self.CheckBox_autoSave.isChecked() ### Auto Save check box .checkState()
         config['device'] = self.comboBox_device.currentIndex() ### 获取当前索引号
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
+        config['add_box'] = self.box_CheckBox.isChecked()
+
+        # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
+        # config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
+        # config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
+        # config['server'] = self.lineEdit.text()
+        # config['database'] = self.lineEdit_2.text()
+        # config['username'] = self.lineEdit_3.text()
+        # config['password'] = self.lineEdit_4.text()
+
         # config['On/Off State'] =
         ####新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
-
+        print('content config_json:', config_json)
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write(config_json)
             print('confi_json write')
@@ -1277,39 +1270,37 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.closeButton, title='Tips', text='Terminate Program.', time=2000, auto=True).exec_()
         sys.exit(0)
 
+    # def load_config(self):   #### # ##提取备份数据 当出现断电关机数据丢失时， 将Cahce中 备份文件拷贝出来
+    #   try:
+    #
+    #       cache_path = os.path.dirname(os.path.realpath(__file__)) + r'\config'
+    #       to_path = os.path.dirname(os.path.realpath(__file__))  ### root path
+    #
+    #       for root, dirs, files in os.walk(
+    #               cache_path):  # root 表示当前正在访问的文件夹路径# dirs 表示该文件夹下的子目录名list # files 表示该文件夹下的文件list
+    #           # print('files',files) ####['edgevalue.db.bak', 'edgevalue.db.dat', 'edgevalue.db.dir']
+    #           for i in files:
+    #               from_path = os.path.join(root, i)  # 合并成一个完整路径
+    #               # copy(from_path, to_path)  ### 第一个参数 是复制对象， 第二个是 复制到文件夹
+    #               # print('from_path', from_path)
+    #               # print('to_path', to_path)
+    #           print('files in config has been coppied sucessfully')
+    #
+    #       # self.ser, self.ret , error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+    #
+    #   except Exception as e:
+    #       print('openport erro', e)
+    #       self.statistic_msg(str(e))
 
 
-    def load_config(self):   ####  初始化 modbus connection
-      try:
-          # ##提取备份数据 当出现断电关机数据丢失时， 将Cahce中 备份文件拷贝出来
-          cache_path = os.path.dirname(os.path.realpath(__file__)) + r'\config'
-          to_path = os.path.dirname(os.path.realpath(__file__))  ### root path
-
-          for root, dirs, files in os.walk(
-                  cache_path):  # root 表示当前正在访问的文件夹路径# dirs 表示该文件夹下的子目录名list # files 表示该文件夹下的文件list
-              # print('files',files) ####['edgevalue.db.bak', 'edgevalue.db.dat', 'edgevalue.db.dir']
-              for i in files:
-                  from_path = os.path.join(root, i)  # 合并成一个完整路径
-                  # copy(from_path, to_path)  ### 第一个参数 是复制对象， 第二个是 复制到文件夹
-                  # print('from_path', from_path)
-                  # print('to_path', to_path)
-              print('files in config has been coppied sucessfully')
-
-          # self.ser, self.ret , error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
-
-      except Exception as e:
-          print('openport erro', e)
-          self.statistic_msg(str(e))
-
-
-    def setting_ui(self):
+    def setting_ui(self):  ### 菜单栏设定 genaral
         print("into setting")
         self.trg_setting_ui = setting_page()
         self.trg_setting_ui.show()
 
 
 
-# 设置UI
+#  Class child Window子窗口  参数设置页面 ↓
 class setting_page(QMainWindow, Ui_TRG):
     def __init__(self):
         super().__init__()
@@ -1324,16 +1315,16 @@ class setting_page(QMainWindow, Ui_TRG):
 
         self.load_setting()
 
-    def load_setting(self):
+    def load_setting(self): #### sql config setting.json'
         # print("into load setting")
-        config_file = 'config/setting2.json'
+        config_file = 'config/setting.json'
 
-        if not os.path.exists(config_file):
+        if not os.path.exists(config_file): #### 如果.json文件不存在则创建文件 ↓
             iou = 0.26
             conf = 0.33
             rate = 10
-            check = 0
-            savecheck = 0
+            latency = 0
+            auto_save = 0
             device = 0
             port = "COM9"
             sensor_switch = 0
@@ -1341,8 +1332,8 @@ class setting_page(QMainWindow, Ui_TRG):
             new_config = {"iou": iou,
                           "conf": conf,
                           "rate": rate,
-                          "check": check,
-                          "savecheck": savecheck,
+                          "latency": latency,
+                          "auto_save": auto_save,
                           "device": device,
                           "port": port,
                           "sensor_switch": sensor_switch,
@@ -1353,71 +1344,44 @@ class setting_page(QMainWindow, Ui_TRG):
                 f.write(new_json)
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
-            print('load config:', type(config), config)
-            if len(config) != 6:  ### 参数不足时  补充参数
+            print('setting_page loading config:', config_file, config)
+            if len(config) < 6:  ### 参数不足时  补充参数,否则无法启动
                 print("len", len(config))
-                # iou = 0.26
-                # conf = 0.33
-                # rate = 10
-                # check = 0
-                # savecheck = 0
-                # device = 0
-                # port = 0
-                # source = 0
-                # model = 0
                 sensor_switch = 0
                 SQL_switch = 2
                 self.server = 'DESKTOP-QGKNIRA'
                 self.database = 'PE_DataBase'
                 self.username = 'TRG-PE'
                 self.password = '705705'
-            else:
-                # iou = config['iou']
-                # conf = config['conf']
-                # rate = config['rate']
-                # check = config['check']
-                # savecheck = config['savecheck']
-                # device = config['device']  ## index number
-                # port = config['port']  ## index number
-                # source = config['source']
-                # model = config['model']
+            else: ####更新UI参数 ↓
+
                 sensor_switch = config['sensor_switch']
                 SQL_switch = config['SQL_switch']
                 self.server = config['server']
                 self.database = config['database']
                 self.username = config['username']
                 self.password = config['password']
+
         ### 依据存储的json文件 更新 ui参数
-        # self.confSpinBox.setValue(conf)
-        # self.iouSpinBox.setValue(iou)
-        # self.rateSpinBox.setValue(rate)
-        # self.checkBox_latency.setCheckState(check)
-        # self.det_thread.rate_check = check
-        # self.CheckBox_autoSave.setCheckState(savecheck)
-        # self.is_save()  ###auto save  checkbox
-        # self.comboBox_device.setCurrentIndex(device)  # 设置当前索引号 "device": 0
-        # self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
-        # self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
-        # self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
+
         self.checkBox_2.setCheckState(SQL_switch)
         # self.runsql()
         self.checkBox_3.setCheckState(sensor_switch)
 
-
     def save_setting(self):
         print("into save setting")
-        config_path = 'config/setting2.json'
+        config_path = 'config/setting.json'
         config = dict()
-        # config['iou'] = self.iouSpinBox.value()
-        # config['conf'] = self.confSpinBox.value()  # self.confSpinBox.value()
-        # config['rate'] = self.rateSpinBox.value()
-        # config['check'] = self.checkBox_latency.checkState()  # Latency funtion
-        # config['savecheck'] = self.CheckBox_autoSave.checkState()  # Auto Save
-        # config['device'] = self.comboBox_device.currentIndex()  # 获取当前索引号
-        # config['port'] = self.comboBox_port.currentIndex()  # 获取当前索引号
-        # config['source'] = self.comboBox_source.currentIndex()  # 获取当前索引号
-        # config['model'] = self.comboBox_model.currentIndex()  # 获取当前索引号 20240403
-        # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
+        config['iou'] = self.iouSpinBox.value()
+        config['conf'] = self.confSpinBox.value()  # self.confSpinBox.value()
+        config['rate'] = self.rateSpinBox.value()
+        config['latency'] = self.checkBox_latency.checkState()  # Latency funtion
+        config['auto_save'] = self.CheckBox_autoSave.checkState()  # Auto Save
+        config['device'] = self.comboBox_device.currentIndex()  # 获取当前索引号
+        config['port'] = self.comboBox_port.currentIndex()  # 获取当前索引号
+        config['source'] = self.comboBox_source.currentIndex()  # 获取当前索引号
+        config['model'] = self.comboBox_model.currentIndex()  # 获取当前索引号 20240403
+        config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
         config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
         config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
         config['server'] = self.lineEdit.text()
@@ -1443,8 +1407,6 @@ class setting_page(QMainWindow, Ui_TRG):
         if self.checkBox_2.isChecked():
             SQL_write.opensql(self.server, self.database, self.username, self.password)  # 打开SQL
 
-
-
             global SQL_is_open
             SQL_is_open = True
 
@@ -1460,7 +1422,7 @@ class setting_page(QMainWindow, Ui_TRG):
         global ser2, ret2, sensor_is_open
         if self.checkBox_3.isChecked():
             try:
-                ser2 = serial.Serial('COM10', 38400, 8, 'N', 1, 0.3)
+                ser2 = serial.Serial('COM9', 38400, 8, 'N', 1, 0.3)
                 sensor_is_open = True
                 print("sensor is open")
 
@@ -1516,10 +1478,6 @@ class setting_page(QMainWindow, Ui_TRG):
         #         print('shut down sensor = False')
 
 
-
-
-
-
 ####  for  testing  ↓ ##################################################
 def cvshow_image(img):  ### input img_src  output to pyqt label
     try:
@@ -1539,20 +1497,6 @@ if __name__ == "__main__":
     # time.sleep(1)
     # print('thread_mudbus_run start')
     # _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
-
-
-    #### 调试用代码
-    # det_thread = DetThread() #### 实例化
-    # det_thread.weights = "pt/yolov5s.pt"
-    # det_thread.device = '0'
-    # det_thread.source = 'streams.txt'
-    # det_thread.is_continue = True
-    # det_thread.start()   ###
-    # # ##### connect UI  调试输出到 UI  ↓
-    # det_thread.send_img_ch0.connect(lambda x: myWin.show_image(x, myWin.video_label_ch0))
-    # det_thread.send_img_ch1.connect(lambda x: myWin.show_image(x, myWin.video_label_ch1))
-    # det_thread.send_img_ch2.connect(lambda x: myWin.show_image(x, myWin.video_label_ch2))
-    # det_thread.send_img_ch3.connect(lambda x: myWin.show_image(x, myWin.video_label_ch3))
 
     # 单独输出 调试模式 ↓
     # det_thread.send_img_ch0.connect(lambda x: cvshow_image(x))

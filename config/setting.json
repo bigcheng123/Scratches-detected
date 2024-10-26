@@ -2,10 +2,11 @@
   "iou": 0.86,
   "conf": 0.7,
   "rate": 1,
-  "check": 0,
-  "savecheck": 2,
+  "latency": false,
+  "auto_save": true,
   "device": 0,
   "port": 5,
   "source": 0,
-  "model": 0
+  "model": 0,
+  "add_box": false
 }
