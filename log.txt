@@ -1,0 +1,838 @@
+QFont::setPointSize: Point size <= 0 (-1), must be greater than 0
+QFont::setPointSize: Point size <= 0 (-1), must be greater than 0
+QFont::setPointSize: Point size <= 0 (-1), must be greater than 0
+QFont::setPointSize: Point size <= 0 (-1), must be greater than 0
+load config: <class 'dict'> {'sensor_switch': 2, 'SQL_switch': 0, 'server': 'TRG-327-PC', 'database': 'PE_DataBase', 'username': 'TRG-PE', 'password': '705705'}
+SQL connect falsed, can't close SQL
+openport erro-2 could not open port 'COM10': FileNotFoundError(2, '系统找不到指定的文件。', None, 2)
+Change port to COM5
+prameters load completed
+runButton_modbus.isChecked
+set  modbus_flag = True
+no hex 4
+no hex 4
+no hex 4
+no hex 4
+no hex 4
+no hex 4
+<class 'str'> COM5
+thread_mudbus_run modbus_flag = True
+no hex 4
+M20已闭合 01050014ff00cc3e
+no hex 4
+no hex 4
+no hex 4
+Detecting >> model：impress-new-240410.pt，device: 0, source：streams.txt
+self.det_thread.is_continue True
+YOLOv5  f0d9e38 torch 1.8.1+cu111 CUDA:0 (NVIDIA GeForce RTX 4060 Ti, 16380MiB)
+
+Fusing layers... 
+Model Summary: 213 layers, 7015519 parameters, 0 gradients, 15.8 GFLOPs
+1/6: 0...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 0 succesfully
+2/6: 1...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 1 succesfully
+3/6: 2...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 2 succesfully
+4/6: 3...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 3 succesfully
+5/6: 4...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 4 succesfully
+6/6: 5...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 5 succesfully
+
+streams: ['0', '1', '2', '3', '4', '5']
+marker while loop
+ while loop self.is_continue True
+ while loop self.jump_out False
+self.current_weight != self.weights
+Fusing layers... 
+Model Summary: 213 layers, 7015519 parameters, 0 gradients, 15.8 GFLOPs
+label: scar 0.72 <class 'str'>
+ngCounter: 0
+ngCounter: 1
+ngCounter: 1
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.78 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_10_48_24_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 1
+ngCounter: 1
+ngCounter: 2
+ngCounter: 2
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.77 <class 'str'>
+label: scar 0.85 <class 'str'>
+label: scar 0.87 <class 'str'>
+label: scar 0.90 <class 'str'>
+ngCounter: 3
+ngCounter: 3
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.85 <class 'str'>
+ngCounter: 4
+ngCounter: 4
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.84 <class 'str'>
+ngCounter: 5
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 5
+ng output 01
+label: scar 0.81 <class 'str'>
+ngCounter: 6
+ngCounter: 6
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.83 <class 'str'>
+label: scar 0.87 <class 'str'>
+ngCounter: 7
+ngCounter: 7
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.79 <class 'str'>
+ngCounter: 8
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 8
+ng output 0110000c000281cb
+label: scar 0.71 <class 'str'>
+ngCounter: 9
+ngCounter: 9
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: impress 0.74 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_11_08_33_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 9
+ngCounter: 9
+ngCounter: 9
+ngCounter: 9
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 10
+ngCounter: 10
+ng output 0110000c000281cb
+label: impress 0.78 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_11_09_03_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 10
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 10
+ngCounter: 10
+ngCounter: 10
+ngCounter: 11
+ng output 0110000c000281cb
+ngCounter: 11
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.79 <class 'str'>
+ngCounter: 11
+ngCounter: 11
+scratch detected
+ngCounter: 11d3 
+01 05 33 0B FF 00 F2 BC
+ngCounter: 12
+ngCounter: 12
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.78 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_11_10_59_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 12
+ngCounter: 12
+ngCounter: 12
+ngCounter: 12
+ngCounter: 13
+ngCounter: 13
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.71 <class 'str'>
+ngCounter: 13
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.92 <class 'str'>
+ngCounter: 15
+ngCounter: 15
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.71 <class 'str'>
+ngCounter: 16
+ngCounter: 16
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.74 <class 'str'>
+ngCounter: 16
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.87 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_11_18_13_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 17
+ngCounter: 17
+ngCounter: 18
+ngCounter: 18
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.75 <class 'str'>
+ngCounter: 18
+ngCounter: 18
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 19
+ngCounter: 19
+ng output 
+label: impress 0.86 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_00_46_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 19
+ngCounter: 19
+ngCounter: 20
+ngCounter: 20
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.84 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_02_12_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 20
+ngCounter: 20
+ngCounter: 21
+ngCounter: 21
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.71 <class 'str'>
+ngCounter: 22
+ngCounter: 22
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.73 <class 'str'>
+ngCounter: 22
+ngCounter: 22
+ngCounter: 22
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 23
+ngCounter: 23
+ng output 01
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.73 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_18_23_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 23
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.76 <class 'str'>
+ngCounter: 24
+ngCounter: 25
+ngCounter: 25
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.92 <class 'str'>
+ngCounter: 25
+ngCounter: 26
+ngCounter: 26
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.83 <class 'str'>
+ngCounter: 26
+ngCounter: 26
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 26
+ngCounter: 27
+ngCounter: 27
+ng output 01
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.95 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_25_44_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 27
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 27
+ngCounter: 27
+ngCounter: 27
+ng output 0110000c000281cb
+ngCounter: 28
+ngCounter: 28
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.88 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_26_15_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 28
+ngCounter: 28
+ngCounter: 28
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 28
+ngCounter: 29
+ngCounter: 29
+ng output 0105330bff00f2bc
+label: impress 0.79 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_26_23_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 29
+ngCounter: 29
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 29
+ngCounter: 29
+ngCounter: 30
+ng output 0110000c000281cb
+ngCounter: 30
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.75 <class 'str'>
+ngCounter: 30
+ngCounter: 30
+ngCounter: 31
+ngCounter: 31
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.73 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_30_05_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 31
+ngCounter: 31
+ngCounter: 32
+ngCounter: 32
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.88 <class 'str'>
+ngCounter: 33
+ngCounter: 33
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.79 <class 'str'>
+box_CheckBox True
+save as .jpg im3 , CAM = 3,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_32_10_Cam3.jpg
+CheckBox_autoSave True
+ngCounter: 33
+ngCounter: 34
+ngCounter: 34
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.80 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_33_07_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 34
+ngCounter: 34
+ngCounter: 35
+ngCounter: 35
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.91 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_33_51_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 35
+ngCounter: 35
+ngCounter: 36
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 36
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.77 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_12_36_20_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 36
+ngCounter: 36
+ngCounter: 37
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 37
+ng output 
+label: scar 0.75 <class 'str'>
+ngCounter: 38
+ngCounter: 38
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.78 <class 'str'>
+ngCounter: 38
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 38
+ngCounter: 38
+ngCounter: 39
+ng output 01
+ngCounter: 39
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.90 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_27_Cam2.jpg
+CheckBox_autoSave True
+label: impress 0.93 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_27_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 39
+ngCounter: 39
+ngCounter: 40
+ngCounter: 40
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.75 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_43_Cam2.jpg
+CheckBox_autoSave True
+label: impress 0.77 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_43_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 40
+ngCounter: 40
+ngCounter: 41
+ngCounter: 41
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.82 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_44_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 41
+ngCounter: 41
+ngCounter: 42
+ngCounter: 42
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.85 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_15_51_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 42
+ngCounter: 42
+ngCounter: 42
+ngCounter: 42
+ngCounter: 43
+ngCounter: 43
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.81 <class 'str'>
+ngCounter: 43
+ngCounter: 43
+ngCounter: 43
+ngCounter: 44
+ngCounter: 44
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.89 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_44_40_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 44
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.91 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_45_03_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 45
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.71 <class 'str'>
+ngCounter: 47
+ngCounter: 47
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.87 <class 'str'>
+ngCounter: 47
+ngCounter: 47
+ngCounter: 47
+ngCounter: 48
+ngCounter: 48
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.71 <class 'str'>
+ngCounter: 48
+ngCounter: 49
+ngCounter: 49
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.81 <class 'str'>
+ngCounter: 49
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.81 <class 'str'>
+ngCounter: 50
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: impress 0.77 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_13_51_34_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 51
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 51
+ngCounter: 52
+ngCounter: 52
+ng output 
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.77 <class 'str'>
+label: scar 0.84 <class 'str'>
+ngCounter: 52
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.70 <class 'str'>
+ngCounter: 54
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 54
+ng output 0110000c000281cb
+label: scar 0.76 <class 'str'>
+ngCounter: 54
+ngCounter: 54
+ngCounter: 55
+ngCounter: 55
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.78 <class 'str'>
+ngCounter: 55
+ngCounter: 55
+ngCounter: 55
+ngCounter: 56
+ngCounter: 56
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.74 <class 'str'>
+ngCounter: 57
+ngCounter: 57
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.78 <class 'str'>
+ngCounter: 58
+ngCounter: 58
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.74 <class 'str'>
+ngCounter: 59
+ngCounter: 59
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.92 <class 'str'>
+ngCounter: 60
+ngCounter: 60
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.91 <class 'str'>
+ngCounter: 61
+ngCounter: 61
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.93 <class 'str'>
+ngCounter: 62
+label: scar 0.81 <class 'str'>
+ngCounter: 62
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.85 <class 'str'>
+ngCounter: 63
+ngCounter: 64
+ngCounter: 64
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.74 <class 'str'>
+box_CheckBox True
+save as .jpg im0 , CAM = 0,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_23_25_Cam0.jpg
+CheckBox_autoSave True
+ngCounter: 64
+ngCounter: 64
+ngCounter: 64
+ngCounter: 64
+ngCounter: 65
+ngCounter: 65
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.72 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_27_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 65
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.91 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_27_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 66
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.73 <class 'str'>
+ngCounter: 68
+ngCounter: 68
+label: scar 0.86 <class 'str'>
+ngCounter: 68
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: scar 0.82 <class 'str'>
+ngCounter: 69
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.91 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_30_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 70
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: impress 0.70 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_31_Cam5.jpg
+CheckBox_autoSave True
+label: impress 0.83 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_31_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 71
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.90 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_32_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 72
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: impress 0.84 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_14_51_32_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 73
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.82 <class 'str'>
+ngCounter: 74
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.73 <class 'str'>
+ngCounter: 75
+ngCounter: 75
+ngCounter: 75
+ngCounter: 76
+ngCounter: 76
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.81 <class 'str'>
+ngCounter: 76
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.90 <class 'str'>
+ngCounter: 77
+ngCounter: 78
+ngCounter: 78
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.71 <class 'str'>
+box_CheckBox True
+save as .jpg im1 , CAM = 1,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_18_16_Cam1.jpg
+CheckBox_autoSave True
+ngCounter: 78
+ngCounter: 78
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 78
+ng output 0110000c000281cb
+ngCounter: 79
+ngCounter: 79
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.70 <class 'str'>
+ngCounter: 79
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.75 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_35_11_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 80
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: impress 0.92 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_35_17_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 81
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+label: scar 0.77 <class 'str'>
+ngCounter: 82
+ngCounter: 83
+ngCounter: 83
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.73 <class 'str'>
+box_CheckBox True
+save as .jpg im2 , CAM = 2,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_40_24_Cam2.jpg
+CheckBox_autoSave True
+ngCounter: 83
+ngCounter: 83
+ngCounter: 84
+ngCounter: 84
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+label: impress 0.71 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_52_26_Cam5.jpg
+CheckBox_autoSave True
+label: impress 0.85 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_52_26_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 84
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: impress 0.90 <class 'str'>
+box_CheckBox True
+save as .jpg im5 , CAM = 5,save_path=.\auto_save\jpg\pt0410\impress_2024_10_23_15_53_57_Cam5.jpg
+CheckBox_autoSave True
+ngCounter: 85
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 0110000c000281cb
+label: scar 0.72 <class 'str'>
+ngCounter: 87
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ngCounter: 87
+ng output 
+scratch detected
+d3 01 05 33 0B FF 00 F2 BC
+ng output 01
+jump_out push-2 True
+WARNING: Video stream unresponsive, please check your 0 camera connection.
+1/6: 0...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 0 succesfullyWARNING: Video stream unresponsive, please check your 0 camera connection.
+
+2/6: 1...  Success (inf frames 1x1 at 30.00 FPS)
+open cam 1 succesfully
+WARNING: Video stream unresponsive, please check your 1 camera connection.
+WARNING: Video stream unresponsive, please check your 0 camera connection.
+WARNING: Video stream unresponsive, please check your 1 camera connection.
+WARNING: Video stream unresponsive, please check your 2 camera connection.
+[ERROR:0] global C:\projects\opencv-python\opencv\modules\videoio\src\cap.cpp (193) cv::VideoCapture::open VIDEOIO(DSHOW): raised unknown C++ exception!
+
+
+WARNING: Video stream unresponsive, please check your 0 camera connection.
