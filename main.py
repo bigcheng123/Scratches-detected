@@ -360,7 +360,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                         if self.save_fold:  #### when checkbox: autosave is  setcheck
                                             os.makedirs(self.save_fold, exist_ok=True)
                                             if len(det):
-                                                if names[c] == 'impress':  # 限定保存类型
+                                                # if names[c] == 'impress':  # 限定保存类型，特定名称
+                                                if names[c]:  # 不限定保存类型，非空即保存
                                                     save_path = os.path.join(self.save_fold,
                                                                              f'{names[c]}_' + time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                                            time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
@@ -1149,10 +1150,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def load_setting(self): ### laoding mainwindow object...'
         print(' loading mainwindows setting')
         config_file = 'config/setting.json'
-        #### 加载 子窗口参数 ↓
-        # loading_other_setting = setting_page()
-        # loading_other_setting.runsql()
-        # loading_other_setting.sensor_on_off()
+        ### 加载 子窗口参数 ↓
+        loading_other_setting = setting_page()
+        loading_other_setting.runsql()
+        loading_other_setting.sensor_on_off()
 
         if not os.path.exists(config_file):
             iou = 0.26
@@ -1206,14 +1207,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 model = config['model']
                 add_box = config['add_box']
 
-        ### 依据存储的json文件 更新 ui参数
+        ### 依据存储的json文件 更新 变量值
         self.confSpinBox.setValue(conf)
         self.iouSpinBox.setValue(iou)
         self.rateSpinBox.setValue(rate)
         self.checkBox_latency.setCheckState(latency)
         self.det_thread.rate_check = latency
         self.CheckBox_autoSave.setCheckState(auto_save)
-        # self.auto_save_folder() ### auto save  checkbox
+        self.auto_save_folder() ### creat path of  auto_save img
         self.comboBox_device.setCurrentIndex(device) # 设置当前索引号 "device": 0
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
@@ -1243,13 +1244,13 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         config['iou'] = self.iouSpinBox.value()
         config['conf'] = self.confSpinBox.value() #self.confSpinBox.value()
         config['rate'] = self.rateSpinBox.value()
-        config['latency'] = self.checkBox_latency.isChecked()  ### Latency funtion .checkState()
-        config['auto_save'] = self.CheckBox_autoSave.isChecked() ### Auto Save check box .checkState()
+        config['latency'] = self.checkBox_latency.checkState()  ### Latency funtion .checkState()
+        config['auto_save'] = self.CheckBox_autoSave.checkState() ### Auto Save check box .checkState()
         config['device'] = self.comboBox_device.currentIndex() ### 获取当前索引号
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
-        config['add_box'] = self.box_CheckBox.isChecked()
+        config['add_box'] = self.box_CheckBox.checkState()
 
         # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
         # config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
@@ -1305,39 +1306,30 @@ class setting_page(QMainWindow, Ui_TRG):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-
         # SQL勾选开关
         self.checkBox_2.clicked.connect(self.runsql)
         # self.runsql()
-
         # 传感器com口勾选开关
         self.checkBox_3.clicked.connect(self.sensor_on_off)
-
         self.load_setting()
 
     def load_setting(self): #### sql config setting.json'
         # print("into load setting")
-        config_file = 'config/setting.json'
+        config_file = 'config/setting2.json'
 
         if not os.path.exists(config_file): #### 如果.json文件不存在则创建文件 ↓
-            iou = 0.26
-            conf = 0.33
-            rate = 10
-            latency = 0
-            auto_save = 0
-            device = 0
-            port = "COM9"
             sensor_switch = 0
-            SQL_switch = 0
-            new_config = {"iou": iou,
-                          "conf": conf,
-                          "rate": rate,
-                          "latency": latency,
-                          "auto_save": auto_save,
-                          "device": device,
-                          "port": port,
-                          "sensor_switch": sensor_switch,
-                          "SQL_switch": SQL_switch
+            SQL_switch = 2
+            server = 'DESKTOP-QGKNIRA'
+            database = 'PE_DataBase'
+            username = 'TRG-PE'
+            password = '705705'
+            new_config = {"sensor_switch": sensor_switch,
+                          "SQL_switch": SQL_switch,
+                          "server": server,
+                          "database": database,
+                          "username": username,
+                          "password": password,
                           }
             new_json = json.dumps(new_config, ensure_ascii=False, indent=2)
             with open(config_file, 'w', encoding='utf-8') as f:
@@ -1354,7 +1346,6 @@ class setting_page(QMainWindow, Ui_TRG):
                 self.username = 'TRG-PE'
                 self.password = '705705'
             else: ####更新UI参数 ↓
-
                 sensor_switch = config['sensor_switch']
                 SQL_switch = config['SQL_switch']
                 self.server = config['server']
@@ -1370,17 +1361,8 @@ class setting_page(QMainWindow, Ui_TRG):
 
     def save_setting(self):
         print("into save setting")
-        config_path = 'config/setting.json'
+        config_path = 'config/setting2.json'
         config = dict()
-        config['iou'] = self.iouSpinBox.value()
-        config['conf'] = self.confSpinBox.value()  # self.confSpinBox.value()
-        config['rate'] = self.rateSpinBox.value()
-        config['latency'] = self.checkBox_latency.checkState()  # Latency funtion
-        config['auto_save'] = self.CheckBox_autoSave.checkState()  # Auto Save
-        config['device'] = self.comboBox_device.currentIndex()  # 获取当前索引号
-        config['port'] = self.comboBox_port.currentIndex()  # 获取当前索引号
-        config['source'] = self.comboBox_source.currentIndex()  # 获取当前索引号
-        config['model'] = self.comboBox_model.currentIndex()  # 获取当前索引号 20240403
         config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
         config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
         config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
@@ -1390,7 +1372,6 @@ class setting_page(QMainWindow, Ui_TRG):
         config['password'] = self.lineEdit_4.text()
         # 新增参数 请在此处添加↑ ， 运行UI后 点击关闭按钮 后保存为 json文件 地址= ./config/setting.json
         config_json = json.dumps(config, ensure_ascii=False, indent=2)
-
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write(config_json)
             print('confi_json2 write')
