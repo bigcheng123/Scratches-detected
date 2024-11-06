@@ -35,11 +35,12 @@ from utils.capnums import Camera
 from SQL_write import writesql, closesql
 import logging
 # ↓ 【set global variable】 设置全局变量  ↓
+results = None
 modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
-
+emit_frame_flag = True # 测试传输frame到UI ,对检查循环速度的影响
 computer_is_open = False
 # 光电传感器状态初始化，默认为不活跃
 current_state = 'inactive'  # 初始状态为不活跃
@@ -72,20 +73,20 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
         self.current_weight = './yolov5s.pt'
         self.source = '0'
         self.device = '0'
-        self.conf_thres = 0.25
-        self.iou_thres = 0.45
+        self.conf_thres = 0.50  # 置信度 阈值
+        self.iou_thres = 0.45   # iou 阈值
         self.jump_out = False                   # jump out of the loop
         self.is_continue = False                # continue/pause
         self.percent_length = 1000              # progress bar
         self.rate_check = True                  # Whether to enable delay
         self.rate = 100
-        self.save_fold = None  ####'./auto_save/jpg'
+        self.save_folder = None  ####'./auto_save/jpg'
         self.pred_flag = False  #pred_CheckBox
 
     @torch.no_grad()
     def run(self,
-            imgsz=640, #1440 # inference size (pixels)//推理大小
-            max_det=50,  # maximum detections per image//每个图像的最大检测次数
+            imgsz=640, #1440 # inference size (pixels)//推理大小 current value=640
+            max_det=3,  # maximum detections per image//每个图像的最大检测次数 current value =40
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
             view_img=False,  # show results
@@ -131,23 +132,23 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
             model.half()  # to FP16
 
         # Second-stage classifier
-        classify = False  ### TODO:bug-3  can not set True
+        classify = False  # TODO:bug-3  classify can not set True
         if classify:
             modelc = load_classifier(name='resnet50', n=2)  # initialize
             modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
 
         # Dataloader
-        if webcam: ###self.source.isnumeric() or self.source.endswith('.txt') or
+        if webcam:  # self.source.isnumeric() or self.source.endswith('.txt') or
             # print('if webcam is running')
             view_img = check_imshow()
             cudnn.benchmark = True  # set True to speed up constant image size inference
-            dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  #### loadstreams  return self.sources, img, img0, None
+            dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)   # loadstreams  return self.sources, img, img0, None
             # print('dataset type', type(dataset), dataset)
             bs = len(dataset)  # batch_size
             # print('len(dataset)=', bs)
             # #### streams = LoadStreams
 
-        else:  ### load the images
+        else:  # load the images
             print('if webcam false')
             dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
             bs = 1  # batch_size
@@ -187,7 +188,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                     model.half()  # to FP16将模型的权重参数和激活值的数据类型转换为半精度浮点数格式。
                     ### 这种转换可以减少模型的内存占用和计算开销，从而提高模型在 GPU 上的运行效率
                 # Run inference
-                if device.type != '0':#'cpu'
+                if device.type == 'cpu':  #'cpu' or GPU '0' '1''2'
                     model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
                 self.current_weight = self.weights
 
@@ -196,7 +197,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
             # _pred_flag = True
 
             if self.is_continue:
-                global results, ngCounter, okCounter, loopCounter
+                global results, ngCounter, okCounter, loopCounter, emit_frame_flag
                 det_flag = None
                 #  loadstreams // dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)
                 for path, img, im0s, self.vid_cap in dataset:  # 由于dataset在RUN中运行 会不断更新，所以此FOR循环 不会穷尽
@@ -240,27 +241,27 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                         cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                             im0 = cv2.resize(im0, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
-                            if label_chanel == '0':
+                            if label_chanel == '0'and emit_frame_flag:
                                 self.send_img_ch0.emit(im0)  ### 发送图像
                                 # print('seng img : ch0')
                             ## chanel-1
-                            if label_chanel == '1':
+                            if label_chanel == '1'and emit_frame_flag:
                                 self.send_img_ch1.emit(im0)  ### 发送图像
                                 # print('seng img : ch1')
                             # chanel-2
-                            if label_chanel == '2':
+                            if label_chanel == '2'and emit_frame_flag:
                                 self.send_img_ch2.emit(im0)  ### 发送图像fi
                                 # print('seng img : ch2')
                             ## chanel-3
-                            if label_chanel == '3':
+                            if label_chanel == '3'and emit_frame_flag:
                                 self.send_img_ch3.emit(im0)  #### 发送图像
                                 # print('seng img : ch3')
                             ## chanel-4
-                            if label_chanel == '4':
+                            if label_chanel == '4'and emit_frame_flag:
                                 self.send_img_ch4.emit(im0)  #### 发送图像
                                 # print('seng img : ch4')
                             ## chanel-5
-                            if label_chanel == '5':
+                            if label_chanel == '5'and emit_frame_flag:
                                 self.send_img_ch5.emit(im0)  #### 发送图像
                                 # print('seng img : ch5')
                             ### ## send the detected result
@@ -281,7 +282,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                         pred = non_max_suppression(pred, self.conf_thres, self.iou_thres, classes, agnostic_nms, max_det=max_det)
 
                         # Apply Classifier
-                        if classify: #classify = False
+                        if classify:  # classify = False
                             pred = apply_classifier(pred, modelc, img, im0s)
                             print(f'type pred:', type(pred), len(pred))
 
@@ -350,28 +351,35 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                         statistic_dic[names[c]] += 1
                                         # print('statisstic_dic-2',statistic_dic)
                                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+                                        print(f'label: {label}', type(label))
+                                        # 使用 split 方法按空格拆分 label 变量
+                                        parts = label.split()
+                                        # 分别取出类别和置信度，并赋值给新变量
+                                        det_name = parts[0]
+                                        det_confidence = float(parts[1])  # 将置信度转换为浮点数
                                         plot_one_box(xyxy, im0, label=label, color=colors(c, True),
                                                      line_thickness=line_thickness)
-                                        print(f'label: {label}', type(label))
-                                        #### save NG image at here
 
-                                        # auto_save  Write results  save NG image in floder jpg
 
-                                        if self.save_fold:  #### when checkbox: autosave is  setcheck
-                                            os.makedirs(self.save_fold, exist_ok=True)
+                                        # save NG image at here
+                                        # funtion auto_save  Write results  save NG image in floder jpg
+
+                                        if self.save_folder:  #### when checkbox: autosave is  setcheck, self.save_folder = true
+                                            os.makedirs(self.save_folder, exist_ok=True)
                                             if len(det):
-                                                # if names[c] == 'impress':  # 限定保存类型，特定名称
+
+                                                # if names[c] == 'impress' or 'scar' or 'hole':  # 限定保存类型，特定名称
                                                 if names[c]:  # 不限定保存类型，非空即保存
-                                                    save_path = os.path.join(self.save_fold,
-                                                                             f'{names[c]}_' + time.strftime('%Y_%m_%d_%H_%M_%S',
-                                                                                           time.localtime()) + f'_Cam{label_chanel}' + '.jpg')
-                                                    # todo 选择SAVE图像类型 box
-                                                    add_box = myWin.box_CheckBox.isChecked()
+                                                    save_path = os.path.join(self.save_folder,
+                                                                             f'{det_name}_'+ time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                                           time.localtime()) + f'_Cam{label_chanel}' +  f'{det_confidence}_'+'.jpg')
+                                                    # todo funtion auto_save : 选择SAVE图像类型 box
+                                                    add_box = myWin.plot_box_CheckBox.isChecked()
                                                     # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
                                                     # cv2.imwrite(save_path, imc)  # imc = no box
                                                     im = imc if not add_box else im0
                                                     cv2.imwrite(save_path, im)  # save image
-                                                    print('box_CheckBox', myWin.box_CheckBox.isChecked())
+                                                    # print('plot_box_CheckBox', myWin.plot_box_CheckBox.isChecked())
                                                     print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
                                                     print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
                                         if save_crop:
@@ -399,34 +407,35 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                             cv2.putText(im0, str(f'FSP. {fsp}  CAM. {label_chanel}'), (40, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                             im0 = cv2.resize(im0, None, fx=0.4, fy=0.4, interpolation=cv2.INTER_CUBIC)
                             # chanel-0  ##### show images
-                            if label_chanel == '0':
+
+                            if label_chanel == '0' and emit_frame_flag:
                                 self.send_img_ch0.emit(im0)  ### 发送图像
                                 # print('seng img : ch0')
                             # chanel-1
-                            if label_chanel == '1':
+                            if label_chanel == '1'and emit_frame_flag:
                                 self.send_img_ch1.emit(im0)  ### 发送图像
                                 # print('seng img : ch1')
                             # chanel-2
-                            if label_chanel == '2':
+                            if label_chanel == '2'and emit_frame_flag:
                                 self.send_img_ch2.emit(im0)  ### 发送图像fi
                                 # print('seng img : ch2')
                             # chanel-3
-                            if label_chanel == '3':
+                            if label_chanel == '3'and emit_frame_flag:
                                 self.send_img_ch3.emit(im0)  #### 发送图像
                                 # print('seng img : ch3')
                             # chanel-4
-                            if label_chanel == '4':
+                            if label_chanel == '4'and emit_frame_flag:
                                  self.send_img_ch4.emit(im0)  #### 发送图像
                                  # print('seng img : ch4')
                             # chanel-5
-                            if label_chanel == '5':
+                            if label_chanel == '5'and emit_frame_flag:
                                  self.send_img_ch5.emit(im0)  #### 发送图像
                                  # print('seng img : ch5')
                             # ##send the detected result
                             self.send_statistic.emit(statistic_dic)  #发送 检测结果 statistic_dic
                     # #end line  if pred_flag __________________________________________________________
                     '''
-                    if self.save_fold:  #### when checkbox: autosave is  setcheck
+                    if self.save_folder:  #### when checkbox: autosave is  setcheck
                         # save as mp4
                         if self.vid_cap is None:  ####save as .mp4
                             # else: ### self.vid_cap is cv2capture save as .mp4
@@ -437,7 +446,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                 # width = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                                 # height = int(self.vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                                 width, height = im0.shape[1], im0.shape[0]
-                                save_path = os.path.join(self.save_fold, time.strftime('%Y_%m_%d_%H_%M_%S',
+                                save_path = os.path.join(self.save_folder, time.strftime('%Y_%m_%d_%H_%M_%S',
                                                                                        time.localtime()) + '.mp4')
                                 self.out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*"mp4v"), ori_fps,
                                                            (width, height))
@@ -872,9 +881,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def auto_save_folder(self): ###auto_save folder
         if self.CheckBox_autoSave.isChecked():
-            self.det_thread.save_fold = r'.\auto_save\jpg\pt0410'  ### save result as .mp4
+            self.det_thread.save_folder = r'.\auto_save\jpg\pt1105'  ### save result as .mp4
         else:
-            self.det_thread.save_fold = None
+            self.det_thread.save_folder = None
     def pred_run(self):
         if self.pred_CheckBox.isChecked():
             self.det_thread.pred_flag = True
@@ -1023,8 +1032,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             open_fold = os.getcwd()
         name, _ = QFileDialog.getOpenFileName(self, 'Video/image', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv "
                                                                           "*.jpg *.png)")
-        if name:
+        if name: ###打开对象属于指定类型的文件时 ↓
             self.det_thread.source = name
+            self.textBrowser.setText(name)
             self.statistic_msg('Loaded file：{}'.format(os.path.basename(name)))
             config['open_fold'] = os.path.dirname(name)
             config_json = json.dumps(config, ensure_ascii=False, indent=2)
@@ -1093,7 +1103,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             if len(results):
                 # ngCounter += 1
                 self.label_ngCounter.setText(str(ngCounter))
-                print(f'ngCounter: {ngCounter}')
+                # print(f'ngCounter: {ngCounter}')
                 self.pushButton_okng.setText(f"NG: {len(results)}")
                 self.pushButton_okng.setStyleSheet('''QPushButton{
                         font-size: 20px;
@@ -1183,7 +1193,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             # print('load config:', type(config), config)
-            if len(config) < 5 : ### 参数不足时  补充参数
+            if len(config) < 8 : ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
                 rate = 10
@@ -1219,7 +1229,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
-        self.box_CheckBox.setCheckState(add_box)
+        self.plot_box_CheckBox.setCheckState(add_box)
 
     def closeEvent(self, event): ###点击关闭开关按钮执行 以下
         print('execute : closeEvent of main window')
@@ -1250,7 +1260,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
-        config['add_box'] = self.box_CheckBox.checkState()
+        config['add_box'] = self.plot_box_CheckBox.checkState()
 
         # config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
         # config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
@@ -1422,41 +1432,7 @@ class setting_page(QMainWindow, Ui_TRG):
                 except Exception as e:
                     print('close port erro-2', e)
                     # self.statistic_msg(str(e))
-        # if self.checkBox_3.isChecked():
-        #     print('sensor_switch.isChecked')
-        #     sensor_is_open = True
-        #     print('set  sensor is open = True')
-        #     try:
-        #         ser2, ret2, error2 = modbus_rtu.openport('com10', 38400, 1)  # 打开端口
-        #     except Exception as e:
-        #         print('openport erro -1', e)
-        #         self.statistic_msg(str(e))
-        #
-        #     if not ret2:
-        #         self.checkBox_3.setChecked(False)
-        #         MessageBox(
-        #             self.closeButton, title='Error', text='Connection Error: '+ str(error2), time=2000,
-        #             auto=True).exec_()
-        #         print('port did not open')
-        #         try:
-        #             ser2, ret2, error2 = modbus_rtu.openport('com10', 38400, 1)  # 打开端口
-        #             if ret2:
-        #                 print("_thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环")
-        #         except Exception as e:
-        #             print('openport erro-2', e)
-        #             self.statistic_msg(str(e))
-        #     else: # self.ret is  True
-        #         self.checkBox_3.setChecked(True)
-        #         print("_thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环")
-        #         # self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
-        # else: # shut down modbus
-        #     print('sensor switch.is unChecked')
-        #     sensor_is_open = False
-        #     self.checkBox_3.setChecked(False)
-        #     try:
-        #         ser2.close
-        #     except:
-        #         print('shut down sensor = False')
+
 
 
 ####  for  testing  ↓ ##################################################
