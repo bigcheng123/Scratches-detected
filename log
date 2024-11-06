@@ -1,0 +1,4 @@
+  File "E:\code\scratch-detect\main.py", line 1268
+    IOError, e:
+              ^
+SyntaxError: invalid syntax
