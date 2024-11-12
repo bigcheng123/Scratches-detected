@@ -362,10 +362,8 @@ class Ui_mainWindow(object):
 "")
         self.groupBox_8.setTitle("")
         self.groupBox_8.setObjectName("groupBox_8")
-        self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.groupBox_8)
-        self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_8.setSpacing(11)
-        self.verticalLayout_8.setObjectName("verticalLayout_8")
+        self.formLayout = QtWidgets.QFormLayout(self.groupBox_8)
+        self.formLayout.setObjectName("formLayout")
         self.groupBox_2 = QtWidgets.QGroupBox(self.groupBox_8)
         self.groupBox_2.setMinimumSize(QtCore.QSize(0, 42))
         self.groupBox_2.setMaximumSize(QtCore.QSize(16777215, 42))
@@ -442,7 +440,7 @@ class Ui_mainWindow(object):
         self.toolButton_2 = QtWidgets.QToolButton(self.groupBox_2)
         self.toolButton_2.setObjectName("toolButton_2")
         self.horizontalLayout_35.addWidget(self.toolButton_2)
-        self.verticalLayout_8.addWidget(self.groupBox_2)
+        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.groupBox_2)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setContentsMargins(11, -1, 11, -1)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -473,7 +471,7 @@ class Ui_mainWindow(object):
 "border:none;}\n"
 "QComboBox{\n"
 "font-family: \"Microsoft YaHei\";\n"
-"font-size: 16px;\n"
+"font-size: 14px;\n"
 "color: rgb(218, 218, 218);\n"
 "border-width:0px;\n"
 "border-color:white;\n"
@@ -500,7 +498,8 @@ class Ui_mainWindow(object):
 "{\n"
 "    font-size: 14px;\n"
 "    font-family: \"Microsoft YaHei\";\n"
-"    font-weight: bold;\n"
+"    font-weight: regular;\n"
+"\n"
 "         border-radius:9px;\n"
 "        background:rgba(66, 195, 255, 0);\n"
 "color: rgb(218, 218, 218);\n"
@@ -540,7 +539,7 @@ class Ui_mainWindow(object):
         self.comboBox_device.addItem("")
         self.comboBox_device.addItem("")
         self.horizontalLayout_2.addWidget(self.comboBox_device)
-        self.verticalLayout_8.addLayout(self.horizontalLayout_2)
+        self.formLayout.setLayout(1, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_2)
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setContentsMargins(11, -1, 0, -1)
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
@@ -579,8 +578,8 @@ class Ui_mainWindow(object):
 "QPushButton:focus{outline: none;}\n"
 "\n"
 "QPushButton::pressed{font-family: \"Microsoft YaHei\";\n"
-"                     font-size: 14px;\n"
-"                     font-weight: bold;\n"
+"                     font-size: 12px;\n"
+"                     font-weight: regular;\n"
 "                     color:rgb(200,200,200);\n"
 "                     text-align: center center;\n"
 "                     padding-left: 5px;\n"
@@ -671,16 +670,17 @@ class Ui_mainWindow(object):
 "border-width: 0px;\n"
 "border-radius: 0px;\n"
 "background-color: rgba(48,148,243,80);}")
+        self.cameraButton.setText("")
         icon9 = QtGui.QIcon()
         icon9.addPixmap(QtGui.QPixmap(":/icon/ui_files/icon/open_camera.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.cameraButton.setIcon(icon9)
         self.cameraButton.setObjectName("cameraButton")
         self.horizontalLayout_8.addWidget(self.cameraButton)
         self.comboBox_source = QtWidgets.QComboBox(self.groupBox_5)
-        self.comboBox_source.setMinimumSize(QtCore.QSize(50, 28))
+        self.comboBox_source.setMinimumSize(QtCore.QSize(90, 28))
         self.comboBox_source.setStyleSheet("QComboBox QAbstractItemView {\n"
 "font-family: \"Microsoft YaHei\";\n"
-"font-size: 11px;\n"
+"font-size: 12px;\n"
 "background:rgba(200, 200, 200,150);\n"
 "selection-background-color: rgba(200, 200, 200,50);\n"
 "color: rgb(218, 218, 218);\n"
@@ -688,7 +688,7 @@ class Ui_mainWindow(object):
 "border:none;}\n"
 "QComboBox{\n"
 "font-family: \"Microsoft YaHei\";\n"
-"font-size: 11px;\n"
+"font-size: 14px;\n"
 "color: rgb(218, 218, 218);\n"
 "border-width:0px;\n"
 "border-color:white;\n"
@@ -710,6 +710,8 @@ class Ui_mainWindow(object):
         self.comboBox_source.addItem("")
         self.comboBox_source.addItem("")
         self.comboBox_source.addItem("")
+        self.comboBox_source.addItem("")
+        self.comboBox_source.setItemText(7, "")
         self.horizontalLayout_8.addWidget(self.comboBox_source)
         self.rtspButton = QtWidgets.QPushButton(self.groupBox_5)
         self.rtspButton.setMinimumSize(QtCore.QSize(40, 28))
@@ -772,13 +774,37 @@ class Ui_mainWindow(object):
         self.horizontalLayout_8.addWidget(self.rtspButton)
         self.horizontalLayout_11.addWidget(self.groupBox_5)
         self.horizontalLayout_9.addLayout(self.horizontalLayout_11)
-        self.verticalLayout_8.addLayout(self.horizontalLayout_9)
-        self.line = QtWidgets.QFrame(self.groupBox_8)
-        self.line.setStyleSheet("")
-        self.line.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
-        self.verticalLayout_8.addWidget(self.line)
+        self.formLayout.setLayout(2, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_9)
+        self.horizontalLayout_12 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
+        self.label_9 = QtWidgets.QLabel(self.groupBox_8)
+        self.label_9.setMinimumSize(QtCore.QSize(0, 28))
+        self.label_9.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.label_9.setStyleSheet("QLabel\n"
+"{\n"
+"    font-size: 14px;\n"
+"    font-family: \"Microsoft YaHei\";\n"
+"    font-weight: bold;\n"
+"         border-radius:9px;\n"
+"        background:rgba(66, 195, 255, 0);\n"
+"color: rgb(218, 218, 218);\n"
+"}\n"
+"")
+        self.label_9.setObjectName("label_9")
+        self.horizontalLayout_12.addWidget(self.label_9)
+        self.textBrowser = QtWidgets.QTextBrowser(self.groupBox_8)
+        self.textBrowser.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.textBrowser.setAutoFillBackground(False)
+        self.textBrowser.setStyleSheet("font-size: 12px;\n"
+"background-color: rgb(111, 111, 111);\n"
+"selection-background-color: rgba(200, 200, 200,50);\n"
+"color: rgb(218, 218, 218);\n"
+"outline:none;\n"
+"border:none;\n"
+"")
+        self.textBrowser.setObjectName("textBrowser")
+        self.horizontalLayout_12.addWidget(self.textBrowser)
+        self.formLayout.setLayout(3, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_12)
         self.horizontalLayout_15 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_15.setContentsMargins(11, -1, 11, -1)
         self.horizontalLayout_15.setObjectName("horizontalLayout_15")
@@ -863,7 +889,7 @@ class Ui_mainWindow(object):
         self.label_6.setObjectName("label_6")
         self.horizontalLayout_15.addWidget(self.label_6)
         self.comboBox_port = QtWidgets.QComboBox(self.groupBox_8)
-        self.comboBox_port.setMinimumSize(QtCore.QSize(60, 28))
+        self.comboBox_port.setMinimumSize(QtCore.QSize(70, 28))
         self.comboBox_port.setStyleSheet("QComboBox QAbstractItemView {\n"
 "font-family: \"Microsoft YaHei\";\n"
 "font-size: 12px;\n"
@@ -900,7 +926,7 @@ class Ui_mainWindow(object):
         self.comboBox_port.addItem("")
         self.comboBox_port.addItem("")
         self.horizontalLayout_15.addWidget(self.comboBox_port)
-        self.verticalLayout_8.addLayout(self.horizontalLayout_15)
+        self.formLayout.setLayout(4, QtWidgets.QFormLayout.LabelRole, self.horizontalLayout_15)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setContentsMargins(11, -1, 11, -1)
         self.verticalLayout_3.setSpacing(4)
@@ -983,15 +1009,15 @@ class Ui_mainWindow(object):
         self.iouSlider.setOrientation(QtCore.Qt.Horizontal)
         self.iouSlider.setObjectName("iouSlider")
         self.horizontalLayout_4.addWidget(self.iouSlider)
-        self.box_CheckBox = QtWidgets.QCheckBox(self.groupBox_8)
-        self.box_CheckBox.setMinimumSize(QtCore.QSize(0, 28))
+        self.plot_box_CheckBox = QtWidgets.QCheckBox(self.groupBox_8)
+        self.plot_box_CheckBox.setMinimumSize(QtCore.QSize(0, 28))
         font = QtGui.QFont()
         font.setFamily("Microsoft YaHei")
         font.setPointSize(-1)
         font.setBold(True)
         font.setWeight(75)
-        self.box_CheckBox.setFont(font)
-        self.box_CheckBox.setStyleSheet("\n"
+        self.plot_box_CheckBox.setFont(font)
+        self.plot_box_CheckBox.setStyleSheet("\n"
 "QCheckBox\n"
 "{font-size: 14px;\n"
 "    font-family: \"Microsoft YaHei\";\n"
@@ -1013,11 +1039,11 @@ class Ui_mainWindow(object):
 "    url(:/icon/ui_files/icon/button-on.png);\n"
 "}\n"
 "")
-        self.box_CheckBox.setChecked(True)
-        self.box_CheckBox.setObjectName("box_CheckBox")
-        self.horizontalLayout_4.addWidget(self.box_CheckBox)
+        self.plot_box_CheckBox.setChecked(True)
+        self.plot_box_CheckBox.setObjectName("plot_box_CheckBox")
+        self.horizontalLayout_4.addWidget(self.plot_box_CheckBox)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
-        self.verticalLayout_8.addLayout(self.verticalLayout_3)
+        self.formLayout.setLayout(5, QtWidgets.QFormLayout.LabelRole, self.verticalLayout_3)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setContentsMargins(11, -1, 11, -1)
         self.verticalLayout.setSpacing(4)
@@ -1134,7 +1160,7 @@ class Ui_mainWindow(object):
         self.pred_CheckBox.setObjectName("pred_CheckBox")
         self.horizontalLayout_3.addWidget(self.pred_CheckBox)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
-        self.verticalLayout_8.addLayout(self.verticalLayout)
+        self.formLayout.setLayout(6, QtWidgets.QFormLayout.LabelRole, self.verticalLayout)
         self.verticalLayout_5 = QtWidgets.QVBoxLayout()
         self.verticalLayout_5.setContentsMargins(11, -1, 11, -1)
         self.verticalLayout_5.setSpacing(4)
@@ -1249,7 +1275,7 @@ class Ui_mainWindow(object):
         self.checkBox_latency.setObjectName("checkBox_latency")
         self.horizontalLayout_13.addWidget(self.checkBox_latency)
         self.verticalLayout_5.addLayout(self.horizontalLayout_13)
-        self.verticalLayout_8.addLayout(self.verticalLayout_5)
+        self.formLayout.setLayout(7, QtWidgets.QFormLayout.LabelRole, self.verticalLayout_5)
         self.verticalLayout_7 = QtWidgets.QVBoxLayout()
         self.verticalLayout_7.setContentsMargins(-1, 0, -1, 0)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
@@ -1361,7 +1387,7 @@ class Ui_mainWindow(object):
         self.verticalLayout_9.addWidget(self.resultWidget)
         self.verticalLayout_7.addWidget(self.groupBox_10)
         self.verticalLayout_7.setStretch(1, 1)
-        self.verticalLayout_8.addLayout(self.verticalLayout_7)
+        self.formLayout.setLayout(8, QtWidgets.QFormLayout.LabelRole, self.verticalLayout_7)
         self.horizontalLayout_7.addWidget(self.groupBox_8)
         self.groupBox_201 = QtWidgets.QGroupBox(self.groupBox_18)
         self.groupBox_201.setStyleSheet("#groupBox_201{\n"
@@ -1506,6 +1532,26 @@ class Ui_mainWindow(object):
         self.tab.setObjectName("tab")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.tab)
         self.gridLayout_3.setObjectName("gridLayout_3")
+        self.video_label_ch3 = Label_click_Mouse(self.tab)
+        self.video_label_ch3.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.video_label_ch3.sizePolicy().hasHeightForWidth())
+        self.video_label_ch3.setSizePolicy(sizePolicy)
+        self.video_label_ch3.setMinimumSize(QtCore.QSize(200, 0))
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        font.setPointSize(36)
+        self.video_label_ch3.setFont(font)
+        self.video_label_ch3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.video_label_ch3.setAutoFillBackground(True)
+        self.video_label_ch3.setStyleSheet("color: rgb(218, 218, 218);\n"
+"")
+        self.video_label_ch3.setScaledContents(False)
+        self.video_label_ch3.setAlignment(QtCore.Qt.AlignCenter)
+        self.video_label_ch3.setObjectName("video_label_ch3")
+        self.gridLayout_3.addWidget(self.video_label_ch3, 1, 0, 1, 1)
         self.video_label_ch0 = Label_click_Mouse(self.tab)
         self.video_label_ch0.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1528,28 +1574,6 @@ class Ui_mainWindow(object):
         self.video_label_ch0.setAlignment(QtCore.Qt.AlignCenter)
         self.video_label_ch0.setObjectName("video_label_ch0")
         self.gridLayout_3.addWidget(self.video_label_ch0, 0, 0, 1, 1)
-        self.video_label_ch12 = Label_click_Mouse(self.tab)
-        self.video_label_ch12.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch12.sizePolicy().hasHeightForWidth())
-        self.video_label_ch12.setSizePolicy(sizePolicy)
-        self.video_label_ch12.setMinimumSize(QtCore.QSize(200, 0))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        font.setPointSize(36)
-        self.video_label_ch12.setFont(font)
-        self.video_label_ch12.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch12.setAutoFillBackground(True)
-        self.video_label_ch12.setStyleSheet("color: rgb(218, 218, 218);\n"
-"border-color: rgb(255, 0, 0);\n"
-"border-width: 2px;\n"
-"")
-        self.video_label_ch12.setScaledContents(False)
-        self.video_label_ch12.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch12.setObjectName("video_label_ch12")
-        self.gridLayout_3.addWidget(self.video_label_ch12, 1, 2, 1, 1)
         self.video_label_ch2 = Label_click_Mouse(self.tab)
         self.video_label_ch2.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1591,26 +1615,6 @@ class Ui_mainWindow(object):
         self.video_label_ch1.setAlignment(QtCore.Qt.AlignCenter)
         self.video_label_ch1.setObjectName("video_label_ch1")
         self.gridLayout_3.addWidget(self.video_label_ch1, 0, 1, 1, 1)
-        self.video_label_ch3 = Label_click_Mouse(self.tab)
-        self.video_label_ch3.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.video_label_ch3.sizePolicy().hasHeightForWidth())
-        self.video_label_ch3.setSizePolicy(sizePolicy)
-        self.video_label_ch3.setMinimumSize(QtCore.QSize(200, 0))
-        font = QtGui.QFont()
-        font.setFamily("微软雅黑")
-        font.setPointSize(36)
-        self.video_label_ch3.setFont(font)
-        self.video_label_ch3.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.video_label_ch3.setAutoFillBackground(True)
-        self.video_label_ch3.setStyleSheet("color: rgb(218, 218, 218);\n"
-"")
-        self.video_label_ch3.setScaledContents(False)
-        self.video_label_ch3.setAlignment(QtCore.Qt.AlignCenter)
-        self.video_label_ch3.setObjectName("video_label_ch3")
-        self.gridLayout_3.addWidget(self.video_label_ch3, 1, 0, 1, 1)
         self.video_label_ch11 = Label_click_Mouse(self.tab)
         self.video_label_ch11.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
@@ -1633,6 +1637,28 @@ class Ui_mainWindow(object):
         self.video_label_ch11.setAlignment(QtCore.Qt.AlignCenter)
         self.video_label_ch11.setObjectName("video_label_ch11")
         self.gridLayout_3.addWidget(self.video_label_ch11, 1, 1, 1, 1)
+        self.video_label_ch12 = Label_click_Mouse(self.tab)
+        self.video_label_ch12.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.video_label_ch12.sizePolicy().hasHeightForWidth())
+        self.video_label_ch12.setSizePolicy(sizePolicy)
+        self.video_label_ch12.setMinimumSize(QtCore.QSize(200, 0))
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        font.setPointSize(36)
+        self.video_label_ch12.setFont(font)
+        self.video_label_ch12.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.video_label_ch12.setAutoFillBackground(True)
+        self.video_label_ch12.setStyleSheet("color: rgb(218, 218, 218);\n"
+"border-color: rgb(255, 0, 0);\n"
+"border-width: 2px;\n"
+"")
+        self.video_label_ch12.setScaledContents(False)
+        self.video_label_ch12.setAlignment(QtCore.Qt.AlignCenter)
+        self.video_label_ch12.setObjectName("video_label_ch12")
+        self.gridLayout_3.addWidget(self.video_label_ch12, 1, 2, 1, 1)
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -2018,9 +2044,8 @@ class Ui_mainWindow(object):
         self.comboBox_device.setItemText(2, _translate("mainWindow", "2"))
         self.comboBox_device.setItemText(3, _translate("mainWindow", "cpu"))
         self.fileButton.setToolTip(_translate("mainWindow", "file"))
-        self.fileButton.setText(_translate("mainWindow", "File"))
+        self.fileButton.setText(_translate("mainWindow", "Media"))
         self.cameraButton.setToolTip(_translate("mainWindow", "camera"))
-        self.cameraButton.setText(_translate("mainWindow", "CAM"))
         self.comboBox_source.setItemText(0, _translate("mainWindow", "streams.txt"))
         self.comboBox_source.setItemText(1, _translate("mainWindow", "0"))
         self.comboBox_source.setItemText(2, _translate("mainWindow", "1"))
@@ -2030,6 +2055,7 @@ class Ui_mainWindow(object):
         self.comboBox_source.setItemText(6, _translate("mainWindow", "5"))
         self.rtspButton.setToolTip(_translate("mainWindow", "rtsp"))
         self.rtspButton.setText(_translate("mainWindow", "RTSP"))
+        self.label_9.setText(_translate("mainWindow", "Source"))
         self.CheckBox_autoSave.setText(_translate("mainWindow", "Auto Save"))
         self.comboBox_5.setItemText(0, _translate("mainWindow", ".jpeg"))
         self.comboBox_5.setItemText(1, _translate("mainWindow", ".bmp"))
@@ -2046,7 +2072,7 @@ class Ui_mainWindow(object):
         self.comboBox_port.setItemText(8, _translate("mainWindow", "COM8"))
         self.comboBox_port.setItemText(9, _translate("mainWindow", "COM9"))
         self.label_2.setText(_translate("mainWindow", "IoU"))
-        self.box_CheckBox.setText(_translate("mainWindow", "Add_Box"))
+        self.plot_box_CheckBox.setText(_translate("mainWindow", "plot_box"))
         self.label.setText(_translate("mainWindow", "Confidence"))
         self.pred_CheckBox.setText(_translate("mainWindow", "Pred_Flag"))
         self.label_8.setText(_translate("mainWindow", "Latency"))
@@ -2071,12 +2097,12 @@ class Ui_mainWindow(object):
         self.checkBox_15.setText(_translate("mainWindow", "DI 5"))
         self.checkBox_16.setText(_translate("mainWindow", "DI 6"))
         self.checkBox_17.setText(_translate("mainWindow", "DI 7"))
+        self.video_label_ch3.setText(_translate("mainWindow", "CAM 3"))
         self.video_label_ch0.setText(_translate("mainWindow", "CAM 0"))
-        self.video_label_ch12.setText(_translate("mainWindow", "CAM 5"))
         self.video_label_ch2.setText(_translate("mainWindow", "CAM 2"))
         self.video_label_ch1.setText(_translate("mainWindow", "CAM 1"))
-        self.video_label_ch3.setText(_translate("mainWindow", "CAM 3"))
         self.video_label_ch11.setText(_translate("mainWindow", "CAM 4"))
+        self.video_label_ch12.setText(_translate("mainWindow", "CAM 5"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("mainWindow", "Multipel"))
         self.video_label_ch4.setText(_translate("mainWindow", "CAM 0"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("mainWindow", "CAM_0"))

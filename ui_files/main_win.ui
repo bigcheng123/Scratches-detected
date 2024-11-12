@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1365</width>
-    <height>684</height>
+    <width>1658</width>
+    <height>983</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -2175,7 +2175,7 @@ color: rgb(218, 218, 218);
 </string>
                    </property>
                    <property name="text">
-                    <string>Result Statistics</string>
+                    <string>statistic_msg</string>
                    </property>
                   </widget>
                  </item>
@@ -2346,6 +2346,33 @@ color: rgb(0, 0, 0);
                    </property>
                    <property name="wordWrap">
                     <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_12">
+                   <property name="font">
+                    <font>
+                     <family>Microsoft YaHei</family>
+                     <pointsize>-1</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QLabel
+{
+	font-size: 18px;
+	font-family: &quot;Microsoft YaHei&quot;;
+	font-weight: bold;
+ 		border-radius:9px;
+		background:rgba(66, 195, 255, 0);
+color: rgb(218, 218, 218);
+}
+</string>
+                   </property>
+                   <property name="text">
+                    <string>results=[statistic_dic]</string>
                    </property>
                   </widget>
                  </item>
@@ -3564,7 +3591,7 @@ border-radius:0px;}</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1365</width>
+     <width>1658</width>
      <height>23</height>
     </rect>
    </property>
