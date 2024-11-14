@@ -140,15 +140,15 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
         # Dataloader
         if webcam:  # self.source.isnumeric() or self.source.endswith('.txt') or
             # print('if webcam is running')
-            view_img = check_imshow()
+            view_img = check_imshow()  # from utils.general
             cudnn.benchmark = True  # set True to speed up constant image size inference
-            dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)   # loadstreams  return self.sources, img, img0, None
+            dataset = LoadStreams(self.source, img_size=imgsz, stride=stride)  # loadstreams  return self.sources, img, img0, None
             # print('dataset type', type(dataset), dataset)
             bs = len(dataset)  # batch_size
             # print('len(dataset)=', bs)
             # #### streams = LoadStreams
 
-        else:  # load the images
+        else:  # load the images or .mp4
             print('if webcam false')
             dataset = LoadImages(self.source, img_size=imgsz, stride=stride)
             bs = 1  # batch_size
@@ -275,8 +275,10 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
 
                     # Inference prediction
                     # TODO ： 原来的代码  输出 推理后的 图像  im0 = with box  imc= without box
-                    if self.pred_flag and self.is_continue:
-                        # pred = model(img, augment=augment)[0] #### 预测  使用loadWebcam是 加载的model
+                    if self.pred_flag and self.is_continue:  # 预测后 再输出图像  add box 为可选项目
+                        add_box = myWin.plot_box_CheckBox.isChecked()
+
+                        # pred = model(img, augment=augment)[0] # 预测  使用loadWebcam是 加载的model
                         # print('pred_flag = true pred')
                         pred = model(img,
                                      augment=augment,
@@ -337,63 +339,65 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                 for c in det[:, -1].unique():
                                     n = (det[:, -1] == c).sum()  # detections per class
                                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-                                # save_txt / plot one box /save image
+                                # function: save_txt / plot one box /save image
                                 for *xyxy, conf, cls in reversed(det):
                                     if save_txt:  # save_txt=False,  # save results to *.txt
                                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(
                                             -1).tolist()  # normalized xywh
                                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                                        print('line:', line)
                                         with open(txt_path + '.txt', 'a') as f:
                                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
                                             # print(txt_path + '.txt')
                                     # plot_one_box here
-                                    if save_img or save_crop or view_img:  # Add bbox to image
-                                        # print('plot_one_box', save_img, save_crop, view_img)
-                                        # save_img = not nosave and not self.source.endswith('.txt')  # save inference images
-                                        # save_crop=False,  # save cropped prediction boxes
-                                        # view_img =check_inshow() # Check if environment supports image displays
-                                        # print(f'Line 317 save_img {save_img},save_crop {save_crop},view_img {view_img}')
-                                        c = int(cls)  # index of class
-                                        quantity_dic[names[c]] += 1 # 统计匹配目标的个数
-                                        # print('quantity_dic-2',quantity_dic) # 输出示例 statisstic_dic-2 {'block': 0, 'scratch': 0, 'edge': 0, 'fibre': 0, 'spot': 3}
-                                        label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-                                        # print(f'label: {label}', type(label)) # 输出示例 label: spot 0.97 <class 'str'>
-                                        # 使用 split 方法按空格拆分 label 变量
-                                        parts = label.split()
-                                        # 分别取出类别和置信度，并赋值给新变量
-                                        det_name = parts[0]
-                                        det_confidence = float(parts[1])  # 将置信度转换为浮点数
-                                        confidence_dic[det_name] = det_confidence # 更新字典中的对应键值
+                                    # if save_img or save_crop or view_img:  # Add bbox to image
+                                    # if self.pred_flag:  # Add bbox to image
+                                    # print('plot_one_box', save_img, save_crop, view_img)
+                                    # save_img = not nosave and not self.source.endswith('.txt')  # save inference images
+                                    # save_crop=False,  # save cropped prediction boxes
+                                    # view_img =check_inshow() # Check if environment supports image displays
+                                    # print(f'Line 317 save_img {save_img},save_crop {save_crop},view_img {view_img}')
+                                    c = int(cls)  # index of class
+                                    quantity_dic[names[c]] += 1 # 统计匹配目标的个数
+                                    # print('quantity_dic-2',quantity_dic) # 输出示例 statisstic_dic-2 {'block': 0, 'scratch': 0, 'edge': 0, 'fibre': 0, 'spot': 3}
+                                    label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+                                    # print(f'label: {label}', type(label)) # 输出示例 label: spot 0.97 <class 'str'>
+                                    # 使用 split 方法按空格拆分 label 变量
+                                    parts = label.split()
+                                    # 分别取出类别和置信度，并赋值给新变量
+                                    det_name = parts[0]
+                                    det_confidence = float(parts[1])  # 将置信度转换为浮点数
+                                    confidence_dic[det_name] = det_confidence  # 更新字典中的对应键值 置信度
+                                    values = [float(tensor.item()) for tensor in xyxy]  # 提取数值并添加到新的列表中
+                                    w = int(values[2] - values[0])
+                                    h = int(values[3] - values[1])
+                                    area_dic[det_name] = w*h  # 更新字典中的对应键值 像素面积
+                                    print('wh:', w, h)
+                                    print('area_dic', area_dic)
 
-                                        print('confidence_dic', confidence_dic)
-                                        plot_one_box(xyxy, im0, label=label, color=colors(c, True),
-                                                     line_thickness=line_thickness)
+                                    plot_one_box(xyxy, im0, label=label, color=colors(c, True),
+                                             line_thickness=line_thickness)
 
+                                    # save NG image  here ↓
+                                    # function auto_save  Write results  save NG image in floder jpg
 
-                                        # save NG image at here
-                                        # funtion auto_save  Write results  save NG image in floder jpg
+                                    if self.save_folder :  #### when checkbox: autosave is  setcheck, self.save_folder = true
+                                        os.makedirs(self.save_folder, exist_ok=True)
+                                        if len(det):
+                                            if det_name != 'spot':  # 限定保存类型，特定名称
+                                            # if names[c]:  # 不限定保存类型，非空即保存
+                                                save_path = os.path.join(self.save_folder,
+                                                                         f'{det_name}_'+ time.strftime('%Y_%m_%d_%H_%M_%S',
+                                                                                       time.localtime()) + f'_Cam{label_chanel}' +  f'{det_confidence}_'+'.jpg')
+                                                # todo funtion auto_save : 选择SAVE图像类型 box
+                                                add_box = myWin.plot_box_CheckBox.isChecked()
+                                                # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
+                                                # cv2.imwrite(save_path, imc)  # imc = no box
+                                                im = imc if not add_box else im0
+                                                cv2.imwrite(save_path, im)  # save image
+                                                # print('plot_box_CheckBox', myWin.plot_box_CheckBox.isChecked())
+                                                print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
+                                                print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
 
-                                        if self.save_folder:  #### when checkbox: autosave is  setcheck, self.save_folder = true
-                                            os.makedirs(self.save_folder, exist_ok=True)
-                                            if len(det):
-
-                                                if det_name != 'spot':  # 限定保存类型，特定名称
-                                                # if names[c]:  # 不限定保存类型，非空即保存
-                                                    save_path = os.path.join(self.save_folder,
-                                                                             f'{det_name}_'+ time.strftime('%Y_%m_%d_%H_%M_%S',
-                                                                                           time.localtime()) + f'_Cam{label_chanel}' +  f'{det_confidence}_'+'.jpg')
-                                                    # todo funtion auto_save : 选择SAVE图像类型 box
-                                                    add_box = myWin.plot_box_CheckBox.isChecked()
-                                                    # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
-                                                    # cv2.imwrite(save_path, imc)  # imc = no box
-                                                    im = imc if not add_box else im0
-                                                    cv2.imwrite(save_path, im)  # save image
-                                                    # print('plot_box_CheckBox', myWin.plot_box_CheckBox.isChecked())
-                                                    print(str(f'save as .jpg im{i} , CAM = {label_chanel},save_path={save_path}'))  # & str(save_path))
-                                                    print('CheckBox_autoSave', myWin.CheckBox_autoSave.isChecked())
-                                        if save_crop:
-                                            print('save_one_box')
 
                                 # print('detection is running')
 
@@ -443,7 +447,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                  # print('seng img : ch5')
                             # ##send the detected result
                             # self.send_statistic.emit(quantity_dic)  #发送 检测结果 quantity_dic name:数量
-                            self.send_statistic.emit(confidence_dic)  # 发送 检测结果 confidence_dic  name：置信度
+                            # self.send_statistic.emit(confidence_dic)  # 发送 检测结果 confidence_dic  name：置信度
+                            self.send_statistic.emit(area_dic)  # 发送 检测结果 confidence_dic  name：置信度
                     # #end line  if pred_flag __________________________________________________________
                     '''
                     if self.save_folder:  #### when checkbox: autosave is  setcheck
@@ -465,7 +470,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                             print(str(f'save as .mp4  CAM = {label_chanel}'))  # & str(save_path))
                     '''
                     if self.rate_check:
-                        time.sleep(1/self.rate)
+                        time.sleep(1/self.rate)  # self.det_thread.rate =  self.rateSpinBox.setValue(x)  * 10
+
                     # im0 = annotator.result()
                     # Write results
 
@@ -473,8 +479,9 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                         print('jump_out push-2', self.jump_out)
                         global cam_stop
                         cam_stop = True
-                        stopcam = LoadStreams()
-                        stopcam.stop_cam()  # 使用非streams.txt时存在bug，默认Stop参数为streams.txt
+                        if streams_list: # 摄像头启动列表非空时 方可加载
+                            stopcam = LoadStreams()
+                            stopcam.stop_cam()  # 使用非streams.txt时存在bug，默认Stop参数为streams.txt
                         # if self.vid_cap.isOpened():
                         #     self.vid_cap.release()  # todo bug-2  无法释放摄像头  未解决
                         #     logging.info("vid_cap.release...")

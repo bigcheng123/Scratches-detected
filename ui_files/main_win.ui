@@ -1590,7 +1590,7 @@ color: rgb(218, 218, 218);
 </string>
                 </property>
                 <property name="text">
-                 <string>IoU</string>
+                 <string>IoU（0~1）</string>
                 </property>
                </widget>
               </item>
@@ -1690,7 +1690,7 @@ QSlider::sub-page:horizontal{
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="box_CheckBox">
+                 <widget class="QCheckBox" name="plot_box_CheckBox">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -1767,7 +1767,7 @@ color: rgb(218, 218, 218);
 </string>
                 </property>
                 <property name="text">
-                 <string>Confidence</string>
+                 <string>Confidence （0~1）</string>
                 </property>
                </widget>
               </item>
@@ -1937,9 +1937,12 @@ QCheckBox::indicator:checked {
                <widget class="QLabel" name="label_8">
                 <property name="maximumSize">
                  <size>
-                  <width>80</width>
+                  <width>300</width>
                   <height>16777215</height>
                  </size>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
                 </property>
                 <property name="styleSheet">
                  <string notr="true">QLabel
@@ -1954,7 +1957,7 @@ color: rgb(218, 218, 218);
 </string>
                 </property>
                 <property name="text">
-                 <string>Latency</string>
+                 <string>Latency = 1/(10*x）</string>
                 </property>
                </widget>
               </item>
@@ -2175,7 +2178,7 @@ color: rgb(218, 218, 218);
 </string>
                    </property>
                    <property name="text">
-                    <string>statistic_msg</string>
+                    <string>statistic_label</string>
                    </property>
                   </widget>
                  </item>
