@@ -156,7 +156,7 @@ class _RepeatSampler:
             yield from iter(self.sampler)
 
 
-class LoadImages:
+class LoadImages: # 加载Image 或者 .mp4 需要传入文件路径path
     # YOLOv5 image/video dataloader, i.e. `python detect.py --source image.jpg/vid.mp4`
     def __init__(self, path, img_size=640, stride=32, auto=True):
         p = str(Path(path).resolve())  # os-agnostic absolute path
@@ -280,11 +280,11 @@ class LoadWebcam:  # for inference
         return 0
 
 
-class LoadStreams:
+class LoadStreams:  #
     # YOLOv5 streamloader, i.e. `python detect.py --source 'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP streams`
     def __init__(self, sources='streams.txt', img_size=640, stride=32, auto=True):
         self.mode = 'stream'
-        self.img_size = img_size  #(2160,2600) # img_size
+        self.img_size = img_size  # (2160,2600) # img_size
         self.stride = stride
         self.cap = None
         if os.path.isfile(sources):
@@ -305,26 +305,30 @@ class LoadStreams:
                     check_requirements(('pafy', 'youtube_dl==2020.12.2'))
                     import pafy
                     s = pafy.new(s).getbest(preftype="mp4").url  # YouTube URL
+
                 s = eval(s) if s.isnumeric() else s  # i.e. s = '0' local webcam
-                self.cap = cv2.VideoCapture(s) ### get  the streams
+                self.cap = cv2.VideoCapture(s)  ### get  the streams
                 assert self.cap.isOpened(), f'{st}Failed to open {s}'
-                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
-                h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 2160))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
+                w = int(self.cap.set(cv2.CAP_PROP_FRAME_WIDTH,
+                                     2600))  # w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)) current = 2600
+                h = int(self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT,
+                                     960))  # h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) current = 1000
                 fps = self.cap.get(cv2.CAP_PROP_FPS)  # warning: may return 0 or nan
-                self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float('inf')  # infinite stream fallback
+                self.frames[i] = max(int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT)), 0) or float(
+                    'inf')  # infinite stream fallback
                 self.fps[i] = max((fps if math.isfinite(fps) else 0) % 100, 0) or 30  # 30 FPS fallback
                 _, self.imgs[i] = self.cap.read()  # guarantee first frame
                 self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
                 LOGGER.info(f"{st} Success ({self.frames[i]} frames {w}x{h} at {self.fps[i]:.2f} FPS)")
 
 
-            except:# 20240220 by alex
+            except:  # 20240220 by alex
                 print(f'无法启动摄像头线程{i}')
 
                 self.threads[i].john()
                 break
 
-            else:# 20240220 by alex
+            else:  # 20240220 by alex
                 self.threads[i].start()
                 print(f'open cam {i} succesfully')
         LOGGER.info('')  # newline
@@ -334,7 +338,8 @@ class LoadStreams:
         self.rect = np.unique(s, axis=0).shape[0] == 1  # rect inference if all shapes equal
         if not self.rect:
             LOGGER.warning('WARNING: Stream shapes differ. For optimal performance supply similarly-shaped streams.')
-    def stop_cam(self, sources = 'streams.txt'):
+
+    def stop_cam(self, sources='streams.txt'):
         if os.path.isfile(sources):
             with open(sources) as f:
                 sources = [x.strip() for x in f.read().strip().splitlines() if len(x.strip())]
@@ -343,7 +348,7 @@ class LoadStreams:
         for i, s in enumerate(sources):  # index, source
             try:
                 self.threads[i].join()
-                self.cap = cv2.VideoCapture(s) ### get  the streams
+                self.cap = cv2.VideoCapture(s)  ### get  the streams
                 # self.threads[i] = Thread(target=self.update, args=([i, self.cap, s]), daemon=True)
                 self.cap.release()
                 print(f'loop {i}')
@@ -1081,15 +1086,15 @@ if __name__ == "__main__":  # __init__(self, sources='streams.txt', img_size=640
 
         # print('n: ', n)
         # if n == 2000 or key == ord('q') or key == 27:  # q to quit or ESC key
-        for path, img, im0s, vid_cap in dataset: ## loop
+        for path, img, im0s, vid_cap in dataset:  ## loop
             n += 1
             print(n)
             start = time.time()
             for x in path:
-                winname = 'ch'+ str(x)
+                winname = 'ch' + str(x)
                 index = int(x)
                 frame = im0s[index]
-                fsp = 0 if start-stop <= 0 else int(1/(start-stop))
+                fsp = 0 if start - stop <= 0 else int(1 / (start - stop))
                 cv2.putText(frame, str(f'FPS. {fsp}  CAM. {x}'), (40, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                 frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)

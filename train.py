@@ -454,10 +454,10 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default='pt/yolov5s.pt', help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='models/yolov5s.yaml', help='model.yaml path')
-    parser.add_argument('--data', type=str, default='D:/code/dataset/0-impress-train.yaml', help='dataset.yaml path')
-    parser.add_argument('--hyp', type=str, default='data/hyps/hyp.scratch-low.yaml', help='hyperparameters path')
+    parser.add_argument('--weights', type=str, default='pt/yolov5s.pt', help='initial weights path') ###预训练模型 不用改变
+    parser.add_argument('--cfg', type=str, default='models/yolov5s.yaml', help='model.yaml path') ###预训练模型参数 不用改变
+    parser.add_argument('--data', type=str, default='D:/code/dataset/tube-gap.yaml', help='dataset.yaml path')### 设置数据集配置文件
+    parser.add_argument('--hyp', type=str, default='data/hyps/hyp.scratch-low.yaml', help='hyperparameters path') ##设置超参 不用修改
     parser.add_argument('--epochs', type=int, default=500)
     parser.add_argument('--batch-size', type=int, default=-1, help='total batch size for all GPUs, -1 for autobatch')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='train, val image size (pixels)')

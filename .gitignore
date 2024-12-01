@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.idea
 .Python
 build/
 develop-eggs/
@@ -152,6 +153,7 @@ folderName
 # !auto_save/jpg/.gitkeep 表示 保留auto_save/jpg文件夹本身
 auto_save/jpg/
 !auto_save/jpg/.gitkeep
+
 
 ### 忽略特定目录下的所有文件和子目录（例如一个名为"temp"的目录）
 !runs/*

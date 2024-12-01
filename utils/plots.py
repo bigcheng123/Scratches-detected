@@ -7,6 +7,7 @@ import math
 import os
 from copy import copy
 from pathlib import Path
+from random import random
 
 import cv2
 import matplotlib
@@ -15,6 +16,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 import torch
+import yaml
 from PIL import Image, ImageDraw, ImageFont
 
 from utils.general import (CONFIG_DIR, FONT, LOGGER, Timeout, check_font, check_requirements, clip_coords,
