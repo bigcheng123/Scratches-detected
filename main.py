@@ -221,11 +221,11 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                     # print('names:', names)
                     # print('quantity_dic-1', quantity_dic)
                     count += 1  # ### FSP counter
-                    if count % 30 == 0 and count >= 30:
-                        loopcycle = int(30/(time.time()-start_time))  #### 大循环周期
+                    if count % 30 == 0 and count >= 30:  # 大循环Loop 执行10的倍数次时，更新FSP
+                        loopcycle = int(30/(time.time()-start_time))  #大 循环周期
                         self.send_fps.emit('fsp:'+str(loopcycle))
                         start_time = time.time()  # update start-time
-                    if self.vid_cap:
+                    if self.vid_cap:  # 显示视频进度条（当输入为video文件时）
                         percent = int(count/self.vid_cap.get(cv2.CAP_PROP_FRAME_COUNT)*self.percent_length)
                         self.send_percent.emit(percent)
                     else:
@@ -245,33 +245,29 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                         cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                             im0 = cv2.resize(im0, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
                             ## chanel-0  ##### show images
-                            if label_chanel == '0'and emit_frame_flag:
+                            if label_chanel == '0' and emit_frame_flag:
                                 self.send_img_ch0.emit(im0)  ### 发送图像
                                 # print('seng img : ch0')
                             ## chanel-1
-                            if label_chanel == '1'and emit_frame_flag:
+                            if label_chanel == '1' and emit_frame_flag:
                                 self.send_img_ch1.emit(im0)  ### 发送图像
                                 # print('seng img : ch1')
                             # chanel-2
-                            if label_chanel == '2'and emit_frame_flag:
+                            if label_chanel == '2' and emit_frame_flag:
                                 self.send_img_ch2.emit(im0)  ### 发送图像fi
                                 # print('seng img : ch2')
                             ## chanel-3
-                            if label_chanel == '3'and emit_frame_flag:
+                            if label_chanel == '3' and emit_frame_flag:
                                 self.send_img_ch3.emit(im0)  #### 发送图像
                                 # print('seng img : ch3')
                             ## chanel-4
-                            if label_chanel == '4'and emit_frame_flag:
+                            if label_chanel == '4' and emit_frame_flag:
                                 self.send_img_ch4.emit(im0)  #### 发送图像
                                 # print('seng img : ch4')
                             ## chanel-5
-                            if label_chanel == '5'and emit_frame_flag:
+                            if label_chanel == '5' and emit_frame_flag:
                                 self.send_img_ch5.emit(im0)  #### 发送图像
                                 # print('seng img : ch5')
-                            ### ## send the detected result
-                            # self.send_statistic.emit(quantity_dic)  # 发送 检测结果 quantity_dic name：数量
-                            # self.send_statistic.emit(confidence_dic)  # 发送 检测结果 confidence_dic  name：置信度
-                            # print('emit quantity_dic', quantity_dic)
 
                     # Inference prediction
                     # TODO ： 原来的代码  输出 推理后的 图像  im0 = with box  imc= without box
@@ -357,7 +353,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                     # view_img =check_inshow() # Check if environment supports image displays
                                     # print(f'Line 317 save_img {save_img},save_crop {save_crop},view_img {view_img}')
                                     c = int(cls)  # index of class
-                                    quantity_dic[names[c]] += 1 # 统计匹配目标的个数
+                                    quantity_dic[names[c]] += 1  # 统计匹配目标的个数
                                     # print('quantity_dic-2',quantity_dic) # 输出示例 statisstic_dic-2 {'block': 0, 'scratch': 0, 'edge': 0, 'fibre': 0, 'spot': 3}
                                     label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                     # print(f'label: {label}', type(label)) # 输出示例 label: spot 0.97 <class 'str'>
@@ -371,8 +367,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                     w = int(values[2] - values[0])
                                     h = int(values[3] - values[1])
                                     area_dic[det_name] = w*h  # 更新字典中的对应键值 像素面积
-                                    print('wh:', w, h)
-                                    print('area_dic', area_dic)
+                                    # print('wh:', w, h)
+                                    # print('area_dic', area_dic)
 
                                     plot_one_box(xyxy, im0, label=label, color=colors(c, True),
                                              line_thickness=line_thickness)
@@ -730,25 +726,28 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # 将CRC校验码添加到原始数据后面
         crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
         return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
-    def thread_mudbus_run(self):  ###  PC → PLC  通讯线程 ↓
+    def thread_mudbus_run(self):  ###  PC → PLC  通讯线程 ↓  CRC校验计算 [站号(DEC) , 功能码(DEC), 软元件地址（DEC) , 读写位数/数据(DEC)] 示例raw_data = [1, 6, 10, 111]
         global modbus_flag, okCounter, ngCounter
         modbus_flag = True
-        DO0_ON = self.calculate_crc([1, 5, 13066, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        DO0_ON = self.calculate_crc([1, 5, 13064, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13064 = Y8
         # print(DO0_ON)
-
-        DO0_OFF = self.calculate_crc([1, 5, 13066, 0])  # hex2dec: 线圈OFF=0000 = 0
+        DO0_OFF = self.calculate_crc([1, 5, 13064, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13064 = Y8
         # print(DO0_OFF)
-
-        DO2_ON = self.calculate_crc([1, 5, 13068, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        DO1_ON = self.calculate_crc([1, 5, 13065, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13065 = Y9
         # print(DO2_ON)
-
-        DO2_OFF = self.calculate_crc([1, 5, 13068, 0])  # hex2dec: 线圈OFF=0000 = 0
+        DO1_OFF = self.calculate_crc([1, 5, 13065, 0])  # hex2dec: 线圈OFF=0000 = 0  地址 13065 = Y9
         # print(DO2_OFF)
-
-        DO3_ON = self.calculate_crc([1, 5, 13067, 65280])  # hex2dec: 线圈ON=FF00 = 65280
+        DO2_ON = self.calculate_crc([1, 5, 13066, 65280])  # hex2dec: 线圈ON=FF00 = 65280  地址 13066 = Y10
+        # print(DO2_ON)
+        DO2_OFF = self.calculate_crc([1, 5, 13066, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13066 = Y10
+        # print(DO2_OFF)
+        DO3_ON = self.calculate_crc([1, 5, 13067, 65280])  # hex2dec: 线圈ON=FF00 = 65280  ### NG信号输出  地址DEC格式 13067 = Y11
         # print(DO3_ON)
-
-        DO3_OFF = self.calculate_crc([1, 5, 13067, 0])  # hex2dec: 线圈OFF=0000 = 0
+        DO3_OFF = self.calculate_crc([1, 5, 13067, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y11
+        # print(DO3_OFF)
+        DO4_ON = self.calculate_crc([1, 5, 13068, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
+        # print(DO3_ON)
+        DO4_OFF = self.calculate_crc([1, 5, 13068, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
         # print(DO3_OFF)
 
         DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'  # '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
@@ -772,7 +771,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             global write_m21_off
             write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
-            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
+            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M21线圈闭合状态，
             while self.runButton_modbus.isChecked() and modbus_flag:
                 m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
                 if m21_result == '010101019048':
@@ -808,28 +807,35 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
-                output_box_list = [self.checkBox_2.isChecked()]#,self.checkBox_3.isChecked(),self.checkBox_4.isChecked(),self.checkBox_5.isChecked()]
+                output_box_list = [self.checkBox_2.isChecked(), self.checkBox_3.isChecked(), self.checkBox_4.isChecked(), self.checkBox_5.isChecked(), self.checkBox_6.isChecked()]
 
                 for i, n in enumerate(output_box_list):
-                    # if self.runButton.isChecked():     #240505fix:取消黄灯输出，PLC设定设备启动未检测时亮黄灯
-                    #     modbus_rtu.writedata(self.ser, DO0_ON)  # yellow
-                    # else:  # stop_button
-                    #     modbus_rtu.writedata(self.ser, DO0_OFF)  # yellow
-                    #     modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228
-                    #     modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
-                    if n:  # output NG
-                        print('scratch detected')
-                        print('d3', DO3_ON)
-                        global feedback_data_D3
-                        feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
-                        print("ng output", feedback_data_D3)
-                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
-                    if not n and self.runButton.isChecked():
-                        # print('scratch has not detected')
-                        feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
-                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228     #240505fix：新增继电器，取消绿灯输出
-                        # time.sleep(0.02)
-                        # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
+                    if len(output_box_list) >= 5:
+                        if i == 0:
+                            modbus_rtu.writedata(self.ser, DO0_ON) if n else modbus_rtu.writedata(self.ser, DO0_OFF)
+                        if i == 1:
+                            modbus_rtu.writedata(self.ser, DO1_ON) if n else modbus_rtu.writedata(self.ser, DO1_OFF)
+                        if i == 2:
+                            modbus_rtu.writedata(self.ser, DO2_ON) if n else modbus_rtu.writedata(self.ser, DO2_OFF)
+                        if i == 3:
+                            modbus_rtu.writedata(self.ser, DO3_ON) if n else modbus_rtu.writedata(self.ser, DO3_OFF)
+                        if i == 4:
+                            modbus_rtu.writedata(self.ser, DO4_ON) if n else modbus_rtu.writedata(self.ser, DO4_OFF)
+
+                    # if n:  # output NG
+                    #     print('scratch detected')
+                    #     print('d3', DO3_ON)
+                    #     global feedback_data_D3
+                    #     feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
+                    #     print("ng output", feedback_data_D3)
+                    #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
+                    # if not n and self.runButton.isChecked():
+                    #     # print('scratch has not detected')
+                    #     feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
+                    #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228     #240505fix：新增继电器，取消绿灯输出
+                    #     # time.sleep(0.02)
+                    #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
+
                 stop = time.time()
                 freq = int(1/(stop-start))
                 self.label_modbus.setText(str(freq))
@@ -1112,12 +1118,41 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         try:
             self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
             self.resultWidget.clear()
-            statistic_dic = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
-            statistic_dic = [i for i in statistic_dic if i[1] > 0] ## append to List  while the value greater than 0
-            results = [' '+str(i[0]) + '：' + str(i[1]) for i in statistic_dic]  ### reform the list
-            # print('output result:', type(results), results)
+            # print('statistic_dic:', statistic_dic) # NG项目位置固定
+            dic2list = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
+
+            dic2list = [i for i in dic2list if i[1] > 0]  # append to List  while the value greater than 0
+            results = [' '+str(i[0]) + '：' + str(i[1]) for i in dic2list]  # reform the list
+            # print('statistic result_list:',  results)  # NG项目排列在前面
             self.resultWidget.addItems(results)
             self.label_okCounter.setText(str(loopCounter))
+
+            for index, (key, value) in enumerate(statistic_dic.items()):
+                print(f"Position: {index}, Key: {key}, Value: {value}")
+                if index == 0:
+                    self.checkBox_2.setChecked(True) if value > 0 else self.checkBox_2.setChecked(False)
+                    self.checkBox_2.setText(key)
+                if index == 1:
+                    self.checkBox_3.setChecked(True) if value > 0 else self.checkBox_3.setChecked(False)
+                    self.checkBox_3.setText(key)
+                if index == 2:
+                    self.checkBox_4.setChecked(True) if value > 0 else self.checkBox_4.setChecked(False)
+                    self.checkBox_4.setText(key)
+                if index == 3:
+                    self.checkBox_5.setChecked(True) if value > 0 else self.checkBox_5.setChecked(False)
+                    self.checkBox_5.setText(key)
+                if index == 4:
+                    self.checkBox_6.setChecked(True) if value > 0 else self.checkBox_6.setChecked(False)
+                    self.checkBox_6.setText(key)
+                if index == 5:
+                    self.checkBox_7.setChecked(True) if value > 0 else self.checkBox_7.setChecked(False)
+                    self.checkBox_7.setText(key)
+                if index == 6:
+                    self.checkBox_8.setChecked(True) if value > 0 else self.checkBox_8.setChecked(False)
+                    self.checkBox_8.setText(key)
+                if index == 7:
+                    self.checkBox_9.setChecked(True) if value > 0 else self.checkBox_9.setChecked(False)
+                    self.checkBox_9.setText(key)
             if len(results):
                 # ngCounter += 1
                 self.label_ngCounter.setText(str(ngCounter))
@@ -1131,25 +1166,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         background-color: rgb(240,20,30);
                         color: rgb(255, 255, 255);
                         }''')
-                for i, n in enumerate(results): ###遍历检测结果 并且同步更新 UI显示 DO CHECK BOX
-                    # str = re.sub("[\u4e00-\u9fa5\0-9\,\。]", "", i)
-                    # print('class name = ', n)
-                    if i == 0:
-                        self.checkBox_2.setChecked(True)
-                    if i == 1:
-                        self.checkBox_3.setChecked(True)
-                    if i == 2:
-                        self.checkBox_4.setChecked(True)
-                    if i == 3:
-                        self.checkBox_5.setChecked(True)
-                    if i == 4:
-                        self.checkBox_6.setChecked(True)
-                    if i == 5:
-                        self.checkBox_7.setChecked(True)
-                    if i == 6:
-                        self.checkBox_8.setChecked(True)
-                    if i == 7:
-                        self.checkBox_9.setChecked(True)
             else:
                 self.pushButton_okng.setText(f"OK")
                 self.pushButton_okng.setStyleSheet('''QPushButton{
@@ -1160,14 +1176,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                         background-color: rgb(0,220,127);
                         color: rgb(255, 255, 255);
                         }''')
-                self.checkBox_2.setChecked(False)
-                self.checkBox_3.setChecked(False)
-                self.checkBox_4.setChecked(False)
-                self.checkBox_5.setChecked(False)
-                self.checkBox_6.setChecked(False)
-                self.checkBox_7.setChecked(False)
-                self.checkBox_8.setChecked(False)
-                self.checkBox_9.setChecked(False)
+
         except Exception as e:
             print(repr(e))
 
