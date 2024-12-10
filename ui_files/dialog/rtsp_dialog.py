@@ -87,4 +87,5 @@ class Ui_Form(object):
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label.setText(_translate("Form", "rtsp address:"))
         self.rtspButton.setText(_translate("Form", "confirm"))
+# from ui_files.apprcc_rc import  *
 import apprcc_rc

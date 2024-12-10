@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMenu, QAction
 
-import SQL_write
+from sql_folder import SQL_write
 from ui_files.main_win import Ui_mainWindow
 from ui_files.dialog.rtsp_win import Window
 from ui_files.setting_TRG import Ui_TRG
@@ -32,7 +32,7 @@ from utils.plots import Annotator, colors, save_one_box, plot_one_box
 
 from utils.torch_utils import select_device, time_sync, load_classifier
 from utils.capnums import Camera
-from SQL_write import writesql, closesql
+from sql_folder.SQL_write import writesql, closesql
 import logging
 # ↓ 【set global variable】 设置全局变量  ↓
 results = None
@@ -688,8 +688,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton.setText('RUN')
             self.statistic_msg('Pause')
             # print('self.det_thread.is_continue', self.det_thread.is_continue)
-    def calculate_crc(self, raw_data):  #计算CRC校验码   raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
-        # 将 raw_data 转换为 hex_data
+    def calculate_crc(self, raw_data):  #计算CRC校验码
+        # 参数raw_data 全部采用十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+        # 将 raw_data（DEC格式） 转换为 hex_data
         hex_data = [format(x, 'X').zfill(4) for x in raw_data]
         string = hex_data[0]
         hex_data[0] = string[-2:]
@@ -725,7 +726,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     crc >>= 1
         # 将CRC校验码添加到原始数据后面
         crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
-        return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
+        return crc_code  # return HEX str , example crc_data: 01 06 00 0A 00 6F E9 E4
     def thread_mudbus_run(self):  ###  PC → PLC  通讯线程 ↓  CRC校验计算 [站号(DEC) , 功能码(DEC), 软元件地址（DEC) , 读写位数/数据(DEC)] 示例raw_data = [1, 6, 10, 111]
         global modbus_flag, okCounter, ngCounter
         modbus_flag = True
@@ -798,11 +799,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             while computer_is_open and modbus_flag:
                 start = time.time()
                 # writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
-                writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])
+                writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
                 modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
                 # writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
-                writeD11 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
-                modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
+                writeD12 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
+                modbus_rtu.writedata(self.ser, writeD12)  # 向 PLC 检查次数 D11 写入 100
                 # print("check counter", loopCounter)
 
                 #### 同步UI 信号
