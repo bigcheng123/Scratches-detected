@@ -34,13 +34,14 @@ from utils.torch_utils import select_device, time_sync, load_classifier
 from utils.capnums import Camera
 from sql_folder.SQL_write import writesql, closesql
 import logging
+
 # ↓ 【set global variable】 设置全局变量  ↓
 results = None
 modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
-emit_frame_flag = True # 测试传输frame到UI ,对检查循环速度的影响
+emit_frame_flag = True  # 测试传输frame到UI ,对检查循环速度的影响
 computer_is_open = False
 # 光电传感器状态初始化，默认为不活跃
 current_state = 'inactive'  # 初始状态为不活跃
@@ -53,7 +54,8 @@ feedback_data_D3 = None
 SQL_is_open = False
 sensor_is_open = False
 
-class DetThread(QThread): # ## 检测功能主线程  继承 QThread
+
+class DetThread(QThread):  # ## 检测功能主线程  继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  # ## CH0 output image
     send_img_ch1 = pyqtSignal(np.ndarray)  # ## CH1 output image
     send_img_ch2 = pyqtSignal(np.ndarray)  # ## CH2 output image
@@ -74,18 +76,18 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
         self.source = '0'
         self.device = '0'
         self.conf_thres = 0.50  # 置信度 阈值
-        self.iou_thres = 0.45   # iou 阈值
-        self.jump_out = False                   # jump out of the loop
-        self.is_continue = False                # continue/pause
-        self.percent_length = 1000              # progress bar
-        self.rate_check = True                  # Whether to enable delay
+        self.iou_thres = 0.45  # iou 阈值
+        self.jump_out = False  # jump out of the loop
+        self.is_continue = False  # continue/pause
+        self.percent_length = 1000  # progress bar
+        self.rate_check = True  # Whether to enable delay
         self.rate = 100
         self.save_folder = None  ####'./auto_save/jpg'
-        self.pred_flag = False  #pred_CheckBox
+        self.pred_flag = False  # pred_CheckBox
 
     @torch.no_grad()
     def run(self,
-            imgsz=640,  #1440 # inference size (pixels)//推理大小 current value=640
+            imgsz=640,  # 1440 # inference size (pixels)//推理大小 current value=640
             max_det=3,  # maximum detections per image//每个图像的最大检测次数 current value =40
             # self.source = '0'
             # self.device='0',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -106,7 +108,7 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
             hide_labels=False,  # hide labels
             hide_conf=False,  # hide confidences
             half=True,  # use FP16 half-precision inference
-            loop_flag = True
+            loop_flag=True
             , streams_list=None):
 
         save_img = not nosave and not self.source.endswith('.txt')  # save inference images
@@ -154,7 +156,6 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
             bs = 1  # batch_size
         vid_path, vid_writer = [None] * bs, [None] * bs
 
-
         # Run inference 推理
         if device.type == 'cpu':  # != '0' or 'cpu'
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
@@ -191,7 +192,6 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                 if device.type == 'cpu':  #'cpu' or GPU '0' '1''2'
                     model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
                 self.current_weight = self.weights
-
 
             # load  streams
             # _pred_flag = True
@@ -355,7 +355,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                     c = int(cls)  # index of class
                                     quantity_dic[names[c]] += 1  # 统计匹配目标的个数
                                     # print('quantity_dic-2',quantity_dic) # 输出示例 statisstic_dic-2 {'block': 0, 'scratch': 0, 'edge': 0, 'fibre': 0, 'spot': 3}
-                                    label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+                                    label = None if hide_labels else (
+                                        names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                                     # print(f'label: {label}', type(label)) # 输出示例 label: spot 0.97 <class 'str'>
                                     # 使用 split 方法按空格拆分 label 变量
                                     parts = label.split()
@@ -382,8 +383,9 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
                                             if det_name != 'spot':  # 限定保存类型，特定名称
                                             # if names[c]:  # 不限定保存类型，非空即保存
                                                 save_path = os.path.join(self.save_folder,
-                                                                         f'{det_name}_'+ time.strftime('%Y_%m_%d_%H_%M_%S',
-                                                                                       time.localtime()) + f'_Cam{label_chanel}' +  f'{det_confidence}_'+'.jpg')
+                                                                         f'{det_name}_' + time.strftime(
+                                                                             '%Y_%m_%d_%H_%M_%S',
+                                                                             time.localtime()) + f'_Cam{label_chanel}' + f'{det_confidence}_' + '.jpg')
                                                 # todo funtion auto_save : 选择SAVE图像类型 box
                                                 add_box = myWin.plot_box_CheckBox.isChecked()
                                                 # cv2.imwrite(save_path, im0)  # im0 = im0s.copy()  with box
@@ -492,18 +494,14 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
 
                 self.is_continue = False  # exit inner loop
                 print('self.is_continue set False')
-                # if not self.vid_cap.isOpened():
-                #     loop_flag = False  # exit main loop
 
-                # if percent == self.percent_length:
-                #     print(count)
-                #     self.send_percent.emit(0)
-                #     self.send_msg.emit('finished')
-                #     if hasattr(self, 'out'):
-                #         self.out.release()
-                #     break
             else:
                 print('is_continue break', self.is_continue)
+                # 暂停时 重置输出 IO
+
+                self.send_statistic.emit(area_dic)
+
+
             if not self.vid_cap.isOpened():
                 loop_flag = False  # exit main loop  # todo bug 此处退出会卡死
 
@@ -518,7 +516,8 @@ class DetThread(QThread): # ## 检测功能主线程  继承 QThread
         # except Exception as e:
         #     self.send_msg.emit('%s' % e)
 
-def read_sensor(): ### 检查触发开关
+
+def read_sensor():  ### 检查触发开关
     global ser2
     # print("in read sensor")
     # ser2 = serial.Serial('com10', 38400, 8, 'N', 1, 0.3)    #将串口设置为全局变量可有效降低通讯延时，def内延时0.3~4S不等，全局变量0.3S
@@ -558,14 +557,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.qtimer.timeout.connect(lambda: self.statistic_label.clear())
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_sensor_data)   #  sensor data update
+        self.timer.timeout.connect(self.update_sensor_data)  # sensor data update
         self.timer.start(1000)
 
         # search models automatically
         self.comboBox_model.clear()  ### clear model
         self.pt_list = os.listdir('./pt')
         self.pt_list = [file for file in self.pt_list if file.endswith('.pt')]
-        self.pt_list.sort(key=lambda x: os.path.getsize('./pt/'+x))
+        self.pt_list.sort(key=lambda x: os.path.getsize('./pt/' + x))
         self.comboBox_model.clear()
         self.comboBox_model.addItems(self.pt_list)
 
@@ -635,7 +634,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.load_setting()  # Set MainWindow
 
-
         self.actionGeneral.triggered.connect(self.setting_ui)  # 设置按键跳转至设置UI
         # # 加载设置页选项，开启com口
         # setting_page.runsql()
@@ -662,9 +660,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     self.runButton.setChecked(False)
                     self.runButton.setText('RUN')
                     self.det_thread.is_continue = False
+
+                    self.checkBox_2.set
+
+
                     # self.run_or_continue()
                 current_state = new_state
                 # print(new_state)
+
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
@@ -679,7 +682,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             source = os.path.basename(self.det_thread.source)  ### 引用 det_thread类的 self.source
             source = str(source) if source.isnumeric() else source  ### source为 int时 转换为 str
             self.statistic_msg('Detecting >> model：{}，device: {}, source：{}'.
-                               format(os.path.basename(self.det_thread.weights),device,
+                               format(os.path.basename(self.det_thread.weights), device,
                                       source))
             print('self.det_thread.is_continue', self.det_thread.is_continue)
 
@@ -687,7 +690,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.det_thread.is_continue = False
             self.runButton.setText('RUN')
             self.statistic_msg('Pause')
+
+
             # print('self.det_thread.is_continue', self.det_thread.is_continue)
+
+
     def calculate_crc(self, raw_data):  #计算CRC校验码
         # 参数raw_data 全部采用十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
         # 将 raw_data（DEC格式） 转换为 hex_data
@@ -697,16 +704,16 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         string = hex_data[1]
         hex_data[1] = string[-2:]
         try:
-            hex_data[4]   # 确认是否有第五位→多寄存器读写
+            hex_data[4]  # 确认是否有第五位→多寄存器读写
         except:
             print("no hex 4")
         else:
             string = hex_data[4]
-            hex_data[4] = string[-2:]   # 多寄存器位数信息
+            hex_data[4] = string[-2:]  # 多寄存器位数信息
             string = hex_data[5]
-            hex_data[5] = string.zfill(8)   # 写入2个寄存器/补充至8位16进制数
+            hex_data[5] = string.zfill(8)  # 写入2个寄存器/补充至8位16进制数
             string = hex_data[5]
-            string1 = string[-4:]     # 串口写入高低位与PLC高低位逻辑不一致，需要高低4位互换
+            string1 = string[-4:]  # 串口写入高低位与PLC高低位逻辑不一致，需要高低4位互换
             string2 = string[:4]
             hex_data[5] = ''.join([string1, string2])
         # 将 hex_data 转换为 str_data
@@ -726,63 +733,80 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     crc >>= 1
         # 将CRC校验码添加到原始数据后面
         crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
-        return crc_code  # return HEX str , example crc_data: 01 06 00 0A 00 6F E9 E4
+        return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
+
+    # def thread_mudbus_run(
+    #         self):  ###  PC → PLC  通讯线程 ↓  CRC校验计算 [站号(DEC) , 功能码(DEC), 软元件地址（DEC) , 读写位数/数据(DEC)] 示例raw_data = [1, 6, 10, 111]
+    #     return crc_code  # return HEX str , example crc_data: 01 06 00 0A 00 6F E9 E4
     def thread_mudbus_run(self):  ###  PC → PLC  通讯线程 ↓  CRC校验计算 [站号(DEC) , 功能码(DEC), 软元件地址（DEC) , 读写位数/数据(DEC)] 示例raw_data = [1, 6, 10, 111]
         global modbus_flag, okCounter, ngCounter
         modbus_flag = True
-        DO0_ON = self.calculate_crc([1, 5, 13064, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13064 = Y8
+        DO0_ON = self.calculate_crc([1, 5, 80, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13064 = Y8  M80 = DEC 80 功能码 5
         # print(DO0_ON)
-        DO0_OFF = self.calculate_crc([1, 5, 13064, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13064 = Y8
+        DO0_OFF = self.calculate_crc([1, 5, 80, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13064 = Y8
         # print(DO0_OFF)
-        DO1_ON = self.calculate_crc([1, 5, 13065, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13065 = Y9
+        DO1_ON = self.calculate_crc([1, 5, 81, 65280])  # hex2dec: 线圈ON=FF00 = 65280   地址 13065 = Y9
         # print(DO2_ON)
-        DO1_OFF = self.calculate_crc([1, 5, 13065, 0])  # hex2dec: 线圈OFF=0000 = 0  地址 13065 = Y9
+        DO1_OFF = self.calculate_crc([1, 5, 81, 0])  # hex2dec: 线圈OFF=0000 = 0  地址 13065 = Y9
         # print(DO2_OFF)
-        DO2_ON = self.calculate_crc([1, 5, 13066, 65280])  # hex2dec: 线圈ON=FF00 = 65280  地址 13066 = Y10
+        DO2_ON = self.calculate_crc([1, 5, 82, 65280])  # hex2dec: 线圈ON=FF00 = 65280  地址 13066 = Y10
         # print(DO2_ON)
-        DO2_OFF = self.calculate_crc([1, 5, 13066, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13066 = Y10
+        DO2_OFF = self.calculate_crc([1, 5, 82, 0])  # hex2dec: 线圈OFF=0000 = 0   地址 13066 = Y10
         # print(DO2_OFF)
-        DO3_ON = self.calculate_crc([1, 5, 13067, 65280])  # hex2dec: 线圈ON=FF00 = 65280  ### NG信号输出  地址DEC格式 13067 = Y11
+        DO3_ON = self.calculate_crc([1, 5, 83, 65280])  # hex2dec: 线圈ON=FF00 = 65280  ### NG信号输出  地址DEC格式 13067 = Y11
         # print(DO3_ON)
-        DO3_OFF = self.calculate_crc([1, 5, 13067, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y11
+        DO3_OFF = self.calculate_crc([1, 5, 83, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y11
         # print(DO3_OFF)
-        DO4_ON = self.calculate_crc([1, 5, 13068, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
+        DO4_ON = self.calculate_crc([1, 5, 84, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
         # print(DO3_ON)
-        DO4_OFF = self.calculate_crc([1, 5, 13068, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
+        DO4_OFF = self.calculate_crc([1, 5, 84, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
         # print(DO3_OFF)
-
+        DO5_ON = self.calculate_crc([1, 5, 85, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
+        # print(DO3_ON)
+        DO5_OFF = self.calculate_crc([1, 5, 85, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
+        # print(DO3_OFF)
+        DO6_ON = self.calculate_crc([1, 5, 86, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
+        # print(DO3_ON)
+        DO6_OFF = self.calculate_crc([1, 5, 86, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
+        # print(DO3_OFF)
+        DO7_ON = self.calculate_crc([1, 5, 87, 65280])  # hex2dec: 线圈ON=FF00 = 65280 地址DEC格式 13068 = Y12
+        # print(DO3_ON)
+        DO7_OFF = self.calculate_crc([1, 5, 87, 0])  # hex2dec: 线圈OFF=0000 = 0 地址DEC格式 13067 = Y12
+        # print(DO3_OFF)
         DO_ALL_OFF = '01 0F 33 0A 00 03 01 00 12 95'  # '01 0F 00 00 00 04 01 00 3E 96' ##OUT1-4  OFF  全部继电器关闭  初始化
 
         self.port_type = self.comboBox_port.currentText()  # 6070:COM7  8072:5
         print(type(self.port_type), self.port_type)
 
-
-        if self.ret: ### openport sucessfully
-            feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+        if self.ret:  ### openport sucessfully
+            # feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
             self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
 
             write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M20线圈，给触摸屏电脑已开机信号
-            test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
+            test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])  # 4294967295 寄存器溢出 写两个寄存器
             # print(write_m20_on)
             modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
-            print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
+            print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))  # 050014ff00cc3e
             global write_m20_off
             global write_m21_off
             write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
-            read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M21线圈闭合状态，
+            read_m21 = self.calculate_crc([1, 1, 21, 1])  # GOT M21=检查启动/停止按钮 预留触摸屏开关用，读取M21线圈闭合状态，
             while self.runButton_modbus.isChecked() and modbus_flag:
-                m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
-                if m21_result == '010101019048':
+                m21_result = modbus_rtu.writedata(self.ser,
+                                                  read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
+                # print('m21_result:010101019048',m21_result)
+                if m21_result == '010101019048':   # m21 on = 010101019048  m21 off = 010101005188
                     global computer_is_open
                     computer_is_open = True
-                    self.runButton.setChecked(True)
+                    self.runButton.setChecked(True)  #启动检测
                     self.run_or_continue()
                     break
                 else:
                     computer_is_open = False
+                    # break  ###测试用 强制退出
             # else:
             #     modbus_flag = False
             #     print('modbus shut off')
@@ -794,9 +818,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             #     modbus_rtu.writedata(self.ser, write_m21_off)
             #     self.ser.close()
 
-
             # while self.runButton_modbus.isChecked() and modbus_flag:
-            while computer_is_open and modbus_flag:
+            while computer_is_open and modbus_flag:   # computer_is_open = PLC m21=1
+            # while modbus_flag:
+                # print('target marker')
                 start = time.time()
                 # writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
                 writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
@@ -808,20 +833,34 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
-                output_box_list = [self.checkBox_2.isChecked(), self.checkBox_3.isChecked(), self.checkBox_4.isChecked(), self.checkBox_5.isChecked(), self.checkBox_6.isChecked()]
+                output_box_list = [self.checkBox_2.isChecked(), self.checkBox_3.isChecked(),
+                                   self.checkBox_4.isChecked(), self.checkBox_5.isChecked(),
+                                   self.checkBox_6.isChecked()]
 
                 for i, n in enumerate(output_box_list):
-                    if len(output_box_list) >= 5:
+                    # print('len(output_box_list)', i, output_box_list)
+                    if len(output_box_list) >= 1:
                         if i == 0:
                             modbus_rtu.writedata(self.ser, DO0_ON) if n else modbus_rtu.writedata(self.ser, DO0_OFF)
+                            # time.sleep(0.1)
                         if i == 1:
                             modbus_rtu.writedata(self.ser, DO1_ON) if n else modbus_rtu.writedata(self.ser, DO1_OFF)
+                            # time.sleep(0.1)
                         if i == 2:
                             modbus_rtu.writedata(self.ser, DO2_ON) if n else modbus_rtu.writedata(self.ser, DO2_OFF)
+                            # time.sleep(0.1)
                         if i == 3:
                             modbus_rtu.writedata(self.ser, DO3_ON) if n else modbus_rtu.writedata(self.ser, DO3_OFF)
+                            # time.sleep(0.1)
                         if i == 4:
                             modbus_rtu.writedata(self.ser, DO4_ON) if n else modbus_rtu.writedata(self.ser, DO4_OFF)
+                        if i == 5:
+                            modbus_rtu.writedata(self.ser, DO5_ON) if n else modbus_rtu.writedata(self.ser, DO5_OFF)
+                        if i == 6:
+                            modbus_rtu.writedata(self.ser, DO6_ON) if n else modbus_rtu.writedata(self.ser, DO6_OFF)
+                        if i == 7:
+                            modbus_rtu.writedata(self.ser, DO7_ON) if n else modbus_rtu.writedata(self.ser, DO7_OFF)
+
 
                     # if n:  # output NG
                     #     print('scratch detected')
@@ -838,21 +877,22 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
 
                 stop = time.time()
-                freq = int(1/(stop-start))
+                freq = int(1 / (stop - start))
                 self.label_modbus.setText(str(freq))
                 # print(f'modbus freq: {freq}Hz,{(stop-start)*1000}ms')
             else:
                 modbus_flag = False
                 print('modbus shut off')
                 time.sleep(0.2)
-                shut_coil = modbus_rtu.writedata(self.ser, DO3_OFF)
+                # shut_coil = modbus_rtu.writedata(self.ser, DO3_OFF)
                 # shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
                 time.sleep(0.2)
-                modbus_rtu.writedata(self.ser, write_m20_off)
+                # modbus_rtu.writedata(self.ser, write_m20_off)
                 time.sleep(0.2)
                 modbus_rtu.writedata(self.ser, write_m21_off)
                 self.ser.close()
-    def modbus_on_off(self): ### modbus控制开关↓
+
+    def modbus_on_off(self):  ### modbus控制开关↓
         global modbus_flag
         # if not modbus_flag:
         if self.runButton_modbus.isChecked():
@@ -869,7 +909,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 self.runButton_modbus.setChecked(False)
                 # self.runButton_modbus.setStyleSheet('background-color:rgb(220,0,0)') ### background = red
                 MessageBox(
-                    self.closeButton, title='Error', text='Connection Error: '+ str(error), time=2000,
+                    self.closeButton, title='Error', text='Connection Error: ' + str(error), time=2000,
                     auto=True).exec_()
                 print('port did not open')
                 try:
@@ -879,15 +919,16 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 except Exception as e:
                     print('openport erro-2', e)
                     self.statistic_msg(str(e))
-            else: # self.ret is  True
+            else:  # self.ret is  True
                 self.runButton_modbus.setChecked(True)
                 _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
                 # self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
-        else: # shut down modbus
+        else:  # shut down modbus
             print('runButton_modbus.is unChecked')
             modbus_flag = False
             self.runButton_modbus.setChecked(False)
-            print('shut down modbus_flag = False') ####  ###
+            print('shut down modbus_flag = False')  ####  ###
+
     def stop(self):  # connect stopButton  主窗口停止按键
         if not self.det_thread.jump_out:
             self.det_thread.jump_out = True
@@ -904,11 +945,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.comboBox.clear()
             self.comboBox.addItems(self.pt_list)
 
-    def auto_save_folder(self): ###auto_save folder
+    def auto_save_folder(self):  ###auto_save folder
         if self.CheckBox_autoSave.isChecked():
             self.det_thread.save_folder = r'.\auto_save\jpg\pt1105'  ### save result as .mp4
         else:
             self.det_thread.save_folder = None
+
     def pred_run(self):
         if self.pred_CheckBox.isChecked():
             self.det_thread.pred_flag = True
@@ -952,12 +994,13 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         except Exception as e:
             self.statistic_msg('%s' % e)
 
-    def chose_cam(self): #UI bottun 'cameraButton'
+    def chose_cam(self):  # UI bottun 'cameraButton'
         try:
             self.stop()  # stop running thread
             print('chose_cam run')
             MessageBox(
-                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()# self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
+                self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000,
+                auto=True).exec_()  # self.closeButton, title='Enumerate Cameras', text='Loading camera', time=2000, auto=True).exec_()
             # get the number of local cameras
             _, cams = Camera().get_cam_num()
             print('enum_camera:', cams)
@@ -997,15 +1040,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def change_val(self, x, flag):
         if flag == 'confSpinBox':
-            self.confSlider.setValue(int(x*100))
+            self.confSlider.setValue(int(x * 100))
         elif flag == 'confSlider':
-            self.confSpinBox.setValue(x/100)
-            self.det_thread.conf_thres = x/100
+            self.confSpinBox.setValue(x / 100)
+            self.det_thread.conf_thres = x / 100
         elif flag == 'iouSpinBox':
-            self.iouSlider.setValue(int(x*100))
+            self.iouSlider.setValue(int(x * 100))
         elif flag == 'iouSlider':
-            self.iouSpinBox.setValue(x/100)
-            self.det_thread.iou_thres = x/100
+            self.iouSpinBox.setValue(x / 100)
+            self.det_thread.iou_thres = x / 100
         elif flag == 'rateSpinBox':
             self.rateSlider.setValue(x)
         elif flag == 'rateSlider':
@@ -1028,7 +1071,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # self.CheckBox_autoSave.setEnabled(True)
 
     def change_model(self, x):
-        self.model_type = self.comboBox_model.currentText()  #comboBox
+        self.model_type = self.comboBox_model.currentText()  # comboBox
         self.det_thread.weights = "./pt/%s" % self.model_type
         self.statistic_msg('Change model to %s' % x)
 
@@ -1037,7 +1080,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.det_thread.device = self.device_type
         self.statistic_msg('Change device to %s' % x)
 
-    def change_source(self, x): # while the comboBox_source has changed
+    def change_source(self, x):  # while the comboBox_source has changed
         self.source_type = self.comboBox_source.currentText()
         self.det_thread.source = self.source_type
         self.statistic_msg('Change source to %s' % x)
@@ -1047,7 +1090,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # self.det_thread.source = self.source_type
         self.statistic_msg('Change port to %s' % x)
 
-
     def open_file(self):
         config_file = 'config/fold.json'
         # config = json.load(open(config_file, 'r', encoding='utf-8'))
@@ -1056,8 +1098,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         if not os.path.exists(open_fold):
             open_fold = os.getcwd()
         name, _ = QFileDialog.getOpenFileName(self, 'Video/image', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv "
-                                                                          "*.jpg *.png)")
-        if name: ###打开对象属于指定类型的文件时 ↓
+                                                                              "*.jpg *.png)")
+        if name:  ###打开对象属于指定类型的文件时 ↓
             self.det_thread.source = name
             self.textBrowser.setText(name)
             self.statistic_msg('Loaded file：{}'.format(os.path.basename(name)))
@@ -1094,7 +1136,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             w = label.geometry().width()
             h = label.geometry().height()
             # keep original aspect ratio
-            if iw/w > ih/h:
+            if iw / w > ih / h:
                 scal = w / iw
                 nw = w
                 nh = int(scal * ih)
@@ -1117,19 +1159,19 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def show_statistic(self, statistic_dic):  ### predicttion  output  resultWidget
         global results, okCounter, ngCounter
         try:
-            self.dateTimeEdit.setDateTime(QDateTime.currentDateTime()) # emit dateTime to UI
+            self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
             self.resultWidget.clear()
             # print('statistic_dic:', statistic_dic) # NG项目位置固定
             dic2list = sorted(statistic_dic.items(), key=lambda x: x[1], reverse=True)
 
             dic2list = [i for i in dic2list if i[1] > 0]  # append to List  while the value greater than 0
-            results = [' '+str(i[0]) + '：' + str(i[1]) for i in dic2list]  # reform the list
+            results = [' ' + str(i[0]) + '：' + str(i[1]) for i in dic2list]  # reform the list
             # print('statistic result_list:',  results)  # NG项目排列在前面
             self.resultWidget.addItems(results)
             self.label_okCounter.setText(str(loopCounter))
 
             for index, (key, value) in enumerate(statistic_dic.items()):
-                print(f"Position: {index}, Key: {key}, Value: {value}")
+                # print(f"Position: {index}, Key: {key}, Value: {value}")
                 if index == 0:
                     self.checkBox_2.setChecked(True) if value > 0 else self.checkBox_2.setChecked(False)
                     self.checkBox_2.setText(key)
@@ -1181,7 +1223,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         except Exception as e:
             print(repr(e))
 
-    def load_setting(self): ### laoding mainwindow object...'
+    def load_setting(self):  ### laoding mainwindow object...'
         print(' loading mainwindows setting')
         config_file = 'config/setting.json'
         ### 加载 子窗口参数 ↓
@@ -1217,7 +1259,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         else:
             config = json.load(open(config_file, 'r', encoding='utf-8'))
             # print('load config:', type(config), config)
-            if len(config) < 8 : ### 参数不足时  补充参数
+            if len(config) < 8:  ### 参数不足时  补充参数
                 iou = 0.26
                 conf = 0.33
                 rate = 10
@@ -1235,8 +1277,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 rate = config['rate']
                 latency = config['latency']
                 auto_save = config['auto_save']
-                device = config['device'] ## index number
-                port = config['port'] ## index number
+                device = config['device']  ## index number
+                port = config['port']  ## index number
                 source = config['source']
                 model = config['model']
                 add_box = config['add_box']
@@ -1248,14 +1290,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.checkBox_latency.setCheckState(latency)
         self.det_thread.rate_check = latency
         self.CheckBox_autoSave.setCheckState(auto_save)
-        self.auto_save_folder() ### creat path of  auto_save img
-        self.comboBox_device.setCurrentIndex(device) # 设置当前索引号 "device": 0
+        self.auto_save_folder()  ### creat path of  auto_save img
+        self.comboBox_device.setCurrentIndex(device)  # 设置当前索引号 "device": 0
         self.comboBox_port.setCurrentIndex(port)  # 设置当前索引号 "port": "COM0"
         self.comboBox_source.setCurrentIndex(source)  # 设置当前索引号 "port": "COM0"
         self.comboBox_model.setCurrentIndex(model)  # 设置当前索引号 "port": "COM0"
         self.plot_box_CheckBox.setCheckState(add_box)
 
-    def closeEvent(self, event): ###点击关闭开关按钮执行 以下
+    def closeEvent(self, event):  ###点击关闭开关按钮执行 以下
         print('execute : closeEvent of main window')
         global modbus_flag, sensor_is_open, SQL_is_open, ser2
         modbus_flag = False
@@ -1264,7 +1306,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # if not ser2 == None:
         if sensor_is_open:
             try:
-                ser2.close()  #240704
+                ser2.close()  # 240704
                 sensor_is_open = False
                 ser2 = None
             except:
@@ -1276,11 +1318,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         config_path = 'config/setting.json'
         config = dict()
         config['iou'] = self.iouSpinBox.value()
-        config['conf'] = self.confSpinBox.value() #self.confSpinBox.value()
+        config['conf'] = self.confSpinBox.value()  # self.confSpinBox.value()
         config['rate'] = self.rateSpinBox.value()
         config['latency'] = self.checkBox_latency.checkState()  ### Latency funtion .checkState()
-        config['auto_save'] = self.CheckBox_autoSave.checkState() ### Auto Save check box .checkState()
-        config['device'] = self.comboBox_device.currentIndex() ### 获取当前索引号
+        config['auto_save'] = self.CheckBox_autoSave.checkState()  ### Auto Save check box .checkState()
+        config['device'] = self.comboBox_device.currentIndex()  ### 获取当前索引号
         config['port'] = self.comboBox_port.currentIndex()  ### 获取当前索引号
         config['source'] = self.comboBox_source.currentIndex()  ### 获取当前索引号
         config['model'] = self.comboBox_model.currentIndex()  ### 获取当前索引号 20240403
@@ -1327,12 +1369,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     #       print('openport erro', e)
     #       self.statistic_msg(str(e))
 
-
     def setting_ui(self):  ### 菜单栏设定 genaral
         print("into setting")
         self.trg_setting_ui = setting_page()
         self.trg_setting_ui.show()
-
 
 
 #  Class child Window子窗口  参数设置页面 ↓
@@ -1347,11 +1387,11 @@ class setting_page(QMainWindow, Ui_TRG):
         self.checkBox_3.clicked.connect(self.sensor_on_off)
         self.load_setting()
 
-    def load_setting(self): #### sql config setting.json'
+    def load_setting(self):  #### sql config setting.json'
         # print("into load setting")
         config_file = 'config/setting2.json'
 
-        if not os.path.exists(config_file): #### 如果.json文件不存在则创建文件 ↓
+        if not os.path.exists(config_file):  #### 如果.json文件不存在则创建文件 ↓
             sensor_switch = 0
             SQL_switch = 2
             server = 'DESKTOP-QGKNIRA'
@@ -1379,7 +1419,7 @@ class setting_page(QMainWindow, Ui_TRG):
                 self.database = 'PE_DataBase'
                 self.username = 'TRG-PE'
                 self.password = '705705'
-            else: ####更新UI参数 ↓
+            else:  ####更新UI参数 ↓
                 sensor_switch = config['sensor_switch']
                 SQL_switch = config['SQL_switch']
                 self.server = config['server']
@@ -1397,7 +1437,7 @@ class setting_page(QMainWindow, Ui_TRG):
         print("into save setting")
         config_path = 'config/setting2.json'
         config = dict()
-        config['sensor_port'] = self.checkbox.isChecked() # 保存传感器COM口
+        config['sensor_port'] = self.checkbox.isChecked()  # 保存传感器COM口
         config['sensor_switch'] = self.checkBox_3.checkState()  # 保存开关勾选状态
         config['SQL_switch'] = self.checkBox_2.checkState()  # 保存开关勾选状态
         config['server'] = self.lineEdit.text()
@@ -1444,7 +1484,6 @@ class setting_page(QMainWindow, Ui_TRG):
             except Exception as e:
                 print('openport erro-2', e)
 
-
         if not self.checkBox_3.isChecked():
             # self.checkBox_2.setChecked(False)
             sensor_is_open = False
@@ -1458,7 +1497,6 @@ class setting_page(QMainWindow, Ui_TRG):
                     self.statistic_msg(str(e))
 
 
-
 ####  for  testing  ↓ ##################################################
 def cvshow_image(img):  ### input img_src  output to pyqt label
     try:
@@ -1468,13 +1506,12 @@ def cvshow_image(img):  ### input img_src  output to pyqt label
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
-    myWin = MainWindow() #### 实例化
+    myWin = MainWindow()  #### 实例化
     myWin.show()
     print('prameters load completed')
     myWin.runButton_modbus.setChecked(True)
-    myWin.modbus_on_off()### start modbus
+    myWin.modbus_on_off()  ### start modbus
     # time.sleep(1)
     # print('thread_mudbus_run start')
     # _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
