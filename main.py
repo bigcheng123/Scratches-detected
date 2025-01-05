@@ -696,7 +696,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
 
     def calculate_crc(self, raw_data):  #计算CRC校验码
-        # 参数raw_data 全部采用十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+        # 参数raw_data 全部采用十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数, 数据] 示例raw_data = [1, 6, 10, 2, 111]
         # 将 raw_data（DEC格式） 转换为 hex_data
         hex_data = [format(x, 'X').zfill(4) for x in raw_data]
         string = hex_data[0]
@@ -827,7 +827,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
                 modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
                 # writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
-                writeD12 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
+                writeD12 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter]) ## 批量寄存器写入 D12 + D13 (2表示写入2位）
                 modbus_rtu.writedata(self.ser, writeD12)  # 向 PLC 检查次数 D11 写入 100
                 # print("check counter", loopCounter)
 
@@ -900,7 +900,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             modbus_flag = True
             print('set  modbus_flag = True')
             try:
-                self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                self.port_type = 'COM51'
+                self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口self.port_type
+
             except Exception as e:
                 print('openport erro -1', e)
                 self.statistic_msg(str(e))
@@ -917,7 +919,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     if self.ret:
                         _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
                 except Exception as e:
-                    print('openport erro-2', e)
+                    print('openport error-2', e)
                     self.statistic_msg(str(e))
             else:  # self.ret is  True
                 self.runButton_modbus.setChecked(True)
