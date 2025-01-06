@@ -119,6 +119,46 @@ def str2bool(feedback_data):
 
     return (BOOL)
 
+def calculate_crc(raw_data):  #计算CRC校验码
+        # 参数raw_data 全部采用十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数, 数据] 示例raw_data = [1, 6, 10, 2, 111]
+        # 将 raw_data（DEC格式） 转换为 hex_data
+        hex_data = [format(x, 'X').zfill(4) for x in raw_data]
+        string = hex_data[0]
+        hex_data[0] = string[-2:]
+        string = hex_data[1]
+        hex_data[1] = string[-2:]
+        try:
+            hex_data[4]  # 确认是否有第五位→多寄存器读写
+        except:
+            print("no hex 4")
+        else:
+            string = hex_data[4]
+            hex_data[4] = string[-2:]  # 多寄存器位数信息
+            string = hex_data[5]
+            hex_data[5] = string.zfill(8)  # 写入2个寄存器/补充至8位16进制数
+            string = hex_data[5]
+            string1 = string[-4:]  # 串口写入高低位与PLC高低位逻辑不一致，需要高低4位互换
+            string2 = string[:4]
+            hex_data[5] = ''.join([string1, string2])
+        # 将 hex_data 转换为 str_data
+        str_data = ' '.join([x[i:i + 2] for x in hex_data for i in range(0, len(x), 2)])
+        # 将字符串转换为十六进制数组
+        data_array = [int(x, 16) for x in str_data.split(' ')]
+
+        # 计算CRC校验码
+        crc = 0xFFFF
+        for i in range(len(data_array)):
+            crc ^= data_array[i]
+            for j in range(8):
+                if crc & 1:
+                    crc >>= 1
+                    crc ^= 0xA001
+                else:
+                    crc >>= 1
+        # 将CRC校验码添加到原始数据后面
+        crc_code = str_data + ' ' + format(crc & 0xFF, '02X') + ' ' + format((crc >> 8) & 0xFF, '02X')
+        return crc_code  # return str  crc_data: 01 06 00 0A 00 6F E9 E4
+
 
 if __name__ == '__main__':
     #### hexcode  ######
@@ -141,82 +181,35 @@ if __name__ == '__main__':
 
 
     # read_in1()
-    ser, ret, _ = openport(port='COM5', baudrate=9600, timeout=5) #打开端口port,baudrate,timeout
+    ser, ret, _ = openport(port='COM51', baudrate=9600, timeout=5) #打开端口port,baudrate,timeout
     n=10
     str_result=''
 
     while  n:
         # t = threading.Thread(target= writedata,args=(ser,'01 02 00 00 00 01 B9 CA'))
         # print(t)
-        # t.start()
-
-        feedback_data_IN1 = writedata(ser,IN0_READ)  #### 检查IN1 触发 返回01020100a188
-        DAM4040_IN1 = feedback_data_IN1[0:8] ##读取字符
-        print('IN1 feedback_data',feedback_data_IN1) 
-        print('IN1',DAM4040_IN1)
-        if DAM4040_IN1 == '01020101':  ####010201016048
-            # 改变指示灯------------------------------------
-            # # self.radioButton_ready.setChecked(False) #ready off
-            # self.radioButton_run.setChecked(True) #  run  on
-            # # self.radioButton_stop.setChecked(False) #stop  off
-            # self.label_image1.setText('checking')
-            # self.label_image2.setText('checking')
-            # self.label_image3.setText('checking')
-            on_run = writedata(ser,DO2_ON) ###2号继电器打开  运行中
-        if not feedback_data_IN1:  ##如果接收到的数据位 None  则输出异常信号
-            no_feedback = writedata(ser,DO3_ON) ###3号继电器打开   控制器无返回数据
-
-        feedback_data = writedata(ser,DO1_ON)  ###1号继电器打开  运行准备
-        # feedback_data = mymodbus.writedata(self.ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
-            # self.lineEdit_result.setText('停止')
-        
-        feedback_data_IN2 = writedata(ser,IN2_READ)  ### IN2 读取
-        DAM4040_IN2 =  feedback_data_IN2[0:8] ##读取BOOL值  返回代码
-        print('IN2 feedback_data',feedback_data_IN2)
-        print('IN2',DAM4040_IN2)
-        if DAM4040_IN2 == '01020101':  #010201016048
-            print('in2_on')
-            # 改变指示灯------------------------------------
-
-        if not feedback_data_IN2:  ##如果接收到的数据位 None  则输出异常信号
-            no_feedback = writedata(ser,DO3_ON) ###3号继电器打开   控制器无返回数据
-
-        # feedback_data = writedata(ser,'01 02 00 00 00 01 B9 CA')  ### IN1 010201016048
-        # # if str_result:
-        # str_result = feedback_data[7:8]
-        # print('IN1',type(str_result),str_result)
-        # # time.sleep(0.1)
-        # print(type(feedback_data),feedback_data)
-        # # IN1 =  str2bool(feedback_data) ##读取BOOL值 
-        # # print('IN1',IN1) 
-        # # # print('IN1',IN1)
-        # # if IN1:
-        # feedback_data = writedata(ser,'01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备 
-        # feedback_data = writedata(ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
-
-        # feedback_data = writedata(ser,'01 02 00 01 00 01 E8 0A')  ### IN2 010201016048
-        # # if str_result:
-        # str_result = feedback_data[7:8]
-        # print('IN2',type(str_result),str_result)
-        # # time.sleep(0.1)
-        # print('IN2 feedback_data',feedback_data)
-        # # IN2 =  str2bool(feedback_data) ##读取BOOL值 
-        # # print('IN2',IN2) 
-        # # if IN2:
-        # feedback_data = writedata(ser,'01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备 
-        # feedback_data = writedata(ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
-
-        if cv2.waitKey(1) == ord('q'):
-            print('quit')
-            break
-        n-=1
-        print(n)
-    # colse_all_coil = writedata(ser,'01 0F 00 00 00 04 01 00 3E 96')
-    open_all_coil = writedata(ser, DO_ALL_OFF)
+        start = time.time()
+        # writ coil  [站号 , 功能码, 软元件地址 , 读写位数, 数据]
+        # write_m2_on = '01 05 00 02 FF 00 2D FA '#calculate_crc([1, 5, 2, 65280])
+        # writedata(ser, '01 05 00 01 FF 00 DD FA')
+        # print('write_m2_on', calculate_crc([1, 5, 2, 65280]))
+        # write_coil = writedata(ser, calculate_crc([1, 5, 3, 65280]))  # 程序运行后闭合线圈M10
+        # # write registers
+        time.sleep(0.2)
+        # writeD10 = calculate_crc([1, 16, 10, 2, 4, n])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
+        # print(f'writeD10 {writeD10}')
+        # write_register = writedata(ser, writeD10)  # 向 PLC NG计数 D10 写入
+        # writeD1 = calculate_crc([1, 16, 1, 2, 4, 22222])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
+        # print('writeD1', writeD1)
+        # writedata(ser, writeD1)  #
+        stop = time.time()
+        speed = (stop - start) * 1000 # 转化为 毫秒单位/ms
+        freq = 1000 / speed  ## 每秒钟循环次数
+        print(f'speed: {speed}ms', f'freq= {freq}')
+        n = n-1
 
     ser.close()
     print(('sel.close'))
-
 
 
 
