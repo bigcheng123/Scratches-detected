@@ -17,6 +17,7 @@ import os
 import time
 import cv2
 import modbus_rtu
+import modbus_tcp
 import _thread
 import serial
 
@@ -52,6 +53,10 @@ feedback_data_D3 = None
 # Initialization function "SQL_is_open", SQL writing disabled by default //初始化函数：SQL_is_open，默认不开启SQL写入
 SQL_is_open = False
 sensor_is_open = False
+# 250104-new
+modbus_ip = "192.168.3.100"  # 替换为您的 Modbus 服务器 IP
+modbus_port = 502            # 默认 Modbus TCP 端口
+# 250104-new
 
 class DetThread(QThread): # ## 检测功能主线程  继承 QThread
     send_img_ch0 = pyqtSignal(np.ndarray)  # ## CH0 output image
@@ -618,7 +623,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.rtspButton.clicked.connect(self.chose_rtsp)
 
         self.runButton.clicked.connect(self.run_or_continue)
-        self.runButton_modbus.clicked.connect(self.modbus_on_off)
+        # self.runButton_modbus.clicked.connect(self.modbus_on_off)
+        self.runButton_modbus.clicked.connect(self.modbustcp_on_off)
         self.stopButton.clicked.connect(self.stop)
 
         self.comboBox_model.currentTextChanged.connect(self.change_model)
@@ -646,10 +652,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         # setting_page.sensor_on_off()
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
-    def update_sensor_data(self):  ### 光纤开关信号reflash
+    def update_sensor_data(self):   # 光纤开关信号reflash-通过光电传感器控制检查开始及暂停
         sensor_data = read_sensor()
-        # print("sensor_data", sensor_data)
-        # current_state = 'inactive'  # 初始状态为不活跃
         if self.det_thread.isRunning():
             global current_state
             # print(current_state)
@@ -660,7 +664,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     self.runButton.setChecked(True)
                     self.runButton.setText('PAUSE')
                     self.det_thread.is_continue = True
-                    # self.run_or_continue()
                 elif sensor_data == 'inactive':
                     print("sensor stop")
                     self.runButton.setChecked(False)
@@ -668,7 +671,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     self.det_thread.is_continue = False
                     # self.run_or_continue()
                 current_state = new_state
-                # print(new_state)
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
         self.det_thread.jump_out = False
@@ -692,13 +694,14 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.runButton.setText('RUN')
             self.statistic_msg('Pause')
             # print('self.det_thread.is_continue', self.det_thread.is_continue)
-    def calculate_crc(self, raw_data):  #计算CRC校验码   raw_data 十进制格式列表： [站号 , 功能码, 软元件地址 , 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
+    def calculate_crc(self, raw_data):   # 计算CRC校验码   raw_data 十进制格式列表： [站号, 功能码, 软元件地址, 读写位数/数据] 示例raw_data = [1, 6, 10, 111]
         # 将 raw_data 转换为 hex_data
         hex_data = [format(x, 'X').zfill(4) for x in raw_data]
         string = hex_data[0]
         hex_data[0] = string[-2:]
         string = hex_data[1]
         hex_data[1] = string[-2:]
+        # 高低位互换
         try:
             hex_data[4]   # 确认是否有第五位→多寄存器读写
         except:
@@ -756,55 +759,49 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.port_type = self.comboBox_port.currentText()  # 6070:COM7  8072:5
         print(type(self.port_type), self.port_type)
 
+        print("in thread budbus run, ret", self.ret, self.runButton_modbus.isChecked(), modbus_flag)
 
         if self.ret: ### openport sucessfully
-            feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
+            print("openport success-250104")
+            # feedback_data = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化# 屏蔽240104-new
             self.runButton_modbus.setChecked(True)
             print('thread_mudbus_run modbus_flag = True')
             feedback_list = []
 
-            write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M20线圈，给触摸屏电脑已开机信号
-            test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
-            # print(write_m20_on)
-            modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
-            print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))
+            # write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M20线圈，给触摸屏电脑已开机信号 # 屏蔽240104-new
+            # test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])    #  4294967295 寄存器溢出 写两个寄存器
+            # modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10# 屏蔽240104-new
+            modbus_tcp.modbustcp_write_coil(8212, True)    # 250104_new
+            # print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))  # 屏蔽240104-new
             global write_m20_off
             global write_m21_off
             write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
             write_m21_off = self.calculate_crc([1, 5, 21, 0])
             read_m21 = self.calculate_crc([1, 1, 21, 1])  # 预留触摸屏开关用，读取M11线圈闭合状态，
-            while self.runButton_modbus.isChecked() and modbus_flag:
-                m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查
-                if m21_result == '010101019048':
-                    global computer_is_open
-                    computer_is_open = True
-                    self.runButton.setChecked(True)
-                    self.run_or_continue()
-                    break
-                else:
-                    computer_is_open = False
-            # else:
-            #     modbus_flag = False
-            #     print('modbus shut off')
-            #     time.sleep(0.1)
-            #     shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
-            #     time.sleep(0.1)
-            #     modbus_rtu.writedata(self.ser, write_m20_off)
-            #     time.sleep(0.1)
-            #     modbus_rtu.writedata(self.ser, write_m21_off)
-            #     self.ser.close()
-
-
             # while self.runButton_modbus.isChecked() and modbus_flag:
-            while computer_is_open and modbus_flag:
+            #     # m21_result = modbus_rtu.writedata(self.ser, read_m21)  # 如果返回值为：'01 01 0B 01 8C 08'，启动检查；为'01 01 0B 00 8C 08'停止检查 #屏蔽250104-new
+            #     m21_result = modbus_tcp.modbustcp_read_coil(21, 1)
+            #     if m21_result == '010101019048':
+            #         global computer_is_open
+            #         computer_is_open = True
+            #         self.runButton.setChecked(True)
+            #         self.run_or_continue()
+            #         break
+            #     else:
+            #         computer_is_open = False
+
+
+            while self.runButton_modbus.isChecked() and modbus_flag:
+            # while computer_is_open and modbus_flag:  # 250104-new屏蔽
                 start = time.time()
                 # writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
                 writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])
-                modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入
+                # modbus_rtu.writedata(self.ser, writeD10)  # 向 PLC NG计数 D10 写入  #屏蔽240104-new
                 # writeD11 = self.calculate_crc([1, 6, 11, loopCounter])  #
                 writeD11 = self.calculate_crc([1, 16, 12, 2, 4, loopCounter])
-                modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100
-                # print("check counter", loopCounter)
+                # modbus_rtu.writedata(self.ser, writeD11)  # 向 PLC 检查次数 D11 写入 100   #屏蔽240104-new
+                modbus_tcp.modbustcp_write_register(10, ngCounter)      # 250104_new
+                modbus_tcp.modbustcp_write_register(12, loopCounter)    # 250104_new
 
                 #### 同步UI 信号
                 # intput_box_list = [self.checkBox_10.isChecked(), self.checkBox_11.isChecked(), self.checkBox_12.isChecked(), self.checkBox_13.isChecked()]
@@ -819,14 +816,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     #     modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
                     if n:  # output NG
                         print('scratch detected')
-                        print('d3', DO3_ON)
                         global feedback_data_D3
-                        feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228
+                        # feedback_data_D3 = modbus_rtu.writedata(self.ser, DO3_ON)   # PLC控制，红灯ON-240228  #屏蔽240104-new
+                        feedback_data_D3 = modbus_tcp.modbustcp_write_coil(14, True)      # 250104-new
                         print("ng output", feedback_data_D3)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF)  # PLC控制，灭绿灯-240228    #240505fix：新增继电器，取消绿灯输出
                     if not n and self.runButton.isChecked():
                         # print('scratch has not detected')
-                        feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228
+                        # feedback_data = modbus_rtu.writedata(self.ser, DO3_OFF)  # PLC控制，红灯OFF-240228   #屏蔽240104-new
+                        feedback_data = modbus_tcp.modbustcp_write_coil(14, False)      # 250104_new
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_ON)  # PLC控制，亮绿灯-240228     #240505fix：新增继电器，取消绿灯输出
                         # time.sleep(0.02)
                         # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
@@ -838,13 +836,56 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                 modbus_flag = False
                 print('modbus shut off')
                 time.sleep(0.2)
-                shut_coil = modbus_rtu.writedata(self.ser, DO3_OFF)
+                # shut_coil = modbus_rtu.writedata(self.ser, DO3_OFF)  #屏蔽240104-new
+                shot_coil = modbus_tcp.modbustcp_write_coil(14, False)    # 250104_new
                 # shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
                 time.sleep(0.2)
-                modbus_rtu.writedata(self.ser, write_m20_off)
+                # modbus_rtu.writedata(self.ser, write_m20_off)   #屏蔽240104-new
+                modbus_tcp.modbustcp_write_coil(8212, False)     # 250104_new
                 time.sleep(0.2)
-                modbus_rtu.writedata(self.ser, write_m21_off)
-                self.ser.close()
+                # modbus_rtu.writedata(self.ser, write_m21_off)    #屏蔽240104-new
+                modbus_tcp.modbustcp_write_coil(8213, False)     # 250104_new
+                # self.ser.close()   #屏蔽240104-new
+                modbus_tcp.modbustcp_client_close()     # 250104_new
+# 250104-new
+    def modbustcp_on_off(self):
+        print("in modbus-tcp open port")
+        global modbus_flag
+        if self.runButton_modbus.isChecked():
+            print('runButton_modbus-tcp.isChecked')
+            modbus_flag = True
+            try:
+                self.client, self.ret, error = modbus_tcp.modbustcp_open_port(modbus_ip, modbus_port)  # 打开端口
+                print("tcp opened")
+            except Exception as e:
+                print('openport erro -1', e)
+                self.statistic_msg(str(e))
+
+            if not self.ret:
+                self.runButton_modbus.setChecked(False)
+                MessageBox(
+                    self.closeButton, title='Error', text='Connection Error: '+ str(error), time=2000,
+                    auto=True).exec_()
+                print('port did not open')
+                try:
+                    self.client, self.ret, error = modbus_tcp.modbustcp_open_port(modbus_ip, modbus_port)  # 打开端口
+                    if self.ret:
+                        _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
+                except Exception as e:
+                    print('openport erro-2', e)
+                    self.statistic_msg(str(e))
+            else: # self.ret is  True
+                self.runButton_modbus.setChecked(True)
+                _thread.start_new_thread(myWin.thread_mudbus_run, ())  # 启动检测 信号 循环
+                # self.runButton_modbus.setStyleSheet('background-color:rgb(0,0,0)')  ### background = red
+        else: # shut down modbus
+            print('runButton_modbus.is unChecked')
+            modbus_flag = False
+            self.runButton_modbus.setChecked(False)
+            print('shut down modbus_flag = False') ####  ###
+# 250104-new
+
+
     def modbus_on_off(self): ### modbus控制开关↓
         global modbus_flag
         # if not modbus_flag:
@@ -853,7 +894,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             modbus_flag = True
             print('set  modbus_flag = True')
             try:
-                self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口
+                # self.ser, self.ret, error = modbus_tcp.modbustcp_open_port(modbus_ip, modbus_port)
+                self.ser, self.ret, error = modbus_rtu.openport(self.port_type, 9600, 5)  # 打开端口 # 屏蔽240104-new
             except Exception as e:
                 print('openport erro -1', e)
                 self.statistic_msg(str(e))
@@ -1464,7 +1506,8 @@ if __name__ == "__main__":
     myWin.show()
     print('prameters load completed')
     myWin.runButton_modbus.setChecked(True)
-    myWin.modbus_on_off()### start modbus
+    # myWin.modbus_on_off()### start modbus   #屏蔽250104-new
+    myWin.modbustcp_on_off()
     # time.sleep(1)
     # print('thread_mudbus_run start')
     # _thread.start_new_thread(myWin.thread_mudbus_run, ())  #### 启动检测 信号 循环
