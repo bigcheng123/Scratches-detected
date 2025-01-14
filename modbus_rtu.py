@@ -138,8 +138,6 @@ if __name__ == '__main__':
     DO_ALL_ON = '01 0F 00 00 00 04 01 FF 7E D6'
     DO_ALL_OFF = '01 0F 00 00 00 04 01 00 3E 96'  ##OUT1-4  OFF  全部继电器关闭  初始化
 
-
-
     # read_in1()
     ser, ret, _ = openport(port='COM5', baudrate=9600, timeout=5) #打开端口port,baudrate,timeout
     n=10
@@ -149,11 +147,10 @@ if __name__ == '__main__':
         # t = threading.Thread(target= writedata,args=(ser,'01 02 00 00 00 01 B9 CA'))
         # print(t)
         # t.start()
-
         feedback_data_IN1 = writedata(ser,IN0_READ)  #### 检查IN1 触发 返回01020100a188
         DAM4040_IN1 = feedback_data_IN1[0:8] ##读取字符
         print('IN1 feedback_data',feedback_data_IN1) 
-        print('IN1',DAM4040_IN1)
+        print('IN1', DAM4040_IN1)
         if DAM4040_IN1 == '01020101':  ####010201016048
             # 改变指示灯------------------------------------
             # # self.radioButton_ready.setChecked(False) #ready off
@@ -181,30 +178,6 @@ if __name__ == '__main__':
         if not feedback_data_IN2:  ##如果接收到的数据位 None  则输出异常信号
             no_feedback = writedata(ser,DO3_ON) ###3号继电器打开   控制器无返回数据
 
-        # feedback_data = writedata(ser,'01 02 00 00 00 01 B9 CA')  ### IN1 010201016048
-        # # if str_result:
-        # str_result = feedback_data[7:8]
-        # print('IN1',type(str_result),str_result)
-        # # time.sleep(0.1)
-        # print(type(feedback_data),feedback_data)
-        # # IN1 =  str2bool(feedback_data) ##读取BOOL值 
-        # # print('IN1',IN1) 
-        # # # print('IN1',IN1)
-        # # if IN1:
-        # feedback_data = writedata(ser,'01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备 
-        # feedback_data = writedata(ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
-
-        # feedback_data = writedata(ser,'01 02 00 01 00 01 E8 0A')  ### IN2 010201016048
-        # # if str_result:
-        # str_result = feedback_data[7:8]
-        # print('IN2',type(str_result),str_result)
-        # # time.sleep(0.1)
-        # print('IN2 feedback_data',feedback_data)
-        # # IN2 =  str2bool(feedback_data) ##读取BOOL值 
-        # # print('IN2',IN2) 
-        # # if IN2:
-        # feedback_data = writedata(ser,'01 05 00 00 FF 00 8C 3A')  ###1号继电器打开  运行准备 
-        # feedback_data = writedata(ser,'01 05 00 01 00 00 9C 0A')  ###2号继电器关闭  运行中信号关闭
 
         if cv2.waitKey(1) == ord('q'):
             print('quit')
@@ -216,8 +189,6 @@ if __name__ == '__main__':
 
     ser.close()
     print(('sel.close'))
-
-
 
 
 ####    功能码  IN 读取操作
@@ -243,7 +214,6 @@ if __name__ == '__main__':
 # FE 02 00 03 00 01 5D C5 ## READ IN4
 # FE 02 01 00 91 9C ## IN4_OFF
 # FE 02 01 01 50 5C  ## IN4_ON
-
 
 
 # #####  线圈写操作
