@@ -55,25 +55,43 @@ def modbustcp_write_registers(address, n, decimal_value):  # 起始地址， 写
     low_16_bits = decimal_value & 0xFFFF  # 低16位
     high_16_bits = (decimal_value >> 16) & 0xFFFF  # 高16位
     # 将两个16位数分别存入寄存器
-    if n > 1:
+    if n >= 2:
         write_value = [low_16_bits, high_16_bits]  # [寄存器1（低16位）  寄存器2（高16位）]
-        print('write_value = [low_16_bits, high_16_bits]')
-    else:
+        # print('write_value = [low_16_bits, high_16_bits]')
+        try:
+            result = client.write_registers(address, write_value)
+            # print(result)
+            if result.isError():
+                print(f"写入失败：{result}")
+        except Exception as e:
+            print(f"写寄存器发生错误：{e}")
+    if n == 1:
         write_value = [low_16_bits]
-        print('write_value = [low_16_bits, high_16_bits]')
-    try:
-        result = client.write_registers(address, write_value)
-        print(result)
-        if result.isError():
-            print(f"写入失败：{result}")
+        # print('write_value = [low_16_bits, high_16_bits]')
+        try:
+            result = client.write_register(address, write_value[0])
+            # print(result)
+            if result.isError():
+                print(f"写入失败：{result}")
+        except Exception as e:
+            print(f"写寄存器发生错误：{e}")
         # else:
         #     print(f"成功写入寄存器 {address}，值：{write_value}")
-    except Exception as e:
-        print(f"写寄存器发生错误：{e}")
+
 
 
 def modbustcp_read_register(address, decimal_value):
     print('read the register form PLC')
+
+
+
+def reset_register(address, zero_value):
+    try:
+        result = client.write_registers(address, zero_value)
+        if result.isError():
+            print(f"置0失败：{result}")
+    except Exception as e:
+        print(f"重置寄存器发生错误：{e}")
 
 
 def modbustcp_client_close():

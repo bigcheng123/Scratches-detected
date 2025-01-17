@@ -42,7 +42,7 @@ modbus_flag = Falseresults = []
 okCounter = 0
 ngCounter = 0
 loopCounter = 0
-output_box_list = []
+output_box_list = [0, 0]
 emit_frame_flag = True  # 测试传输frame到UI ,对检查循环速度的影响
 computer_is_open = False
 # 光电传感器状态初始化，默认为不活跃
@@ -658,10 +658,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.dateTimeEdit.setDateTime(QDateTime.currentDateTime())  # emit dateTime to UI
 
     def update_sensor_data(self):  ### 光纤开关信号reflash
+        global output_box_list
         sensor_data = read_sensor()
-        # print("sensor_data", sensor_data)
+        print("sensor_data", sensor_data)
         # current_state = False  # 初始状态为不活跃
-        if self.det_thread.isRunning():
+        # if self.det_thread.isRunning():
+        if sensor_is_open:
             global current_state
             # print(current_state)
             new_state = sensor_data
@@ -671,11 +673,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     self.runButton.setChecked(True)
                     self.runButton.setText('PAUSE')
                     self.det_thread.is_continue = True
-                    # self.run_or_continue()
-                elif not sensor_data:
+                    if not self.det_thread.isRunning():
+                        self.run_or_continue()
+
+                else:
                     print("sensor stop")
                     # reset output
-                    self.det_thread.is_continue = False
                     self.checkBox_2.setChecked(False)
                     self.checkBox_3.setChecked(False)
                     self.checkBox_4.setChecked(False)
@@ -684,13 +687,21 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     self.checkBox_7.setChecked(False)
                     self.checkBox_8.setChecked(False)
                     self.checkBox_9.setChecked(False)
+                    output_box_list = [0, 0]
+                    # if len(output_box_list):
+                    #     for i in len(output_box_list):
+                    #         output_box_list[i] = 0
                     print('reset output')
                     time.sleep(0.5)  # wait the checkbox set false
+                    self.det_thread.is_continue = False
                     self.runButton.setChecked(False)
                     self.runButton.setText('RUN')
+                    # todo  此处执行寄存器写入 结束时 闪退
+                    # reset_register = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # 重置D20-D34
+                    # modbus_tcp.register_address(20, reset_register)
 
                 current_state = new_state
-                # print(new_state)
+
 
     def run_or_continue(self):  # runButton.clicked.connect
         # self.det_thread.source = 'streams.txt'
@@ -810,8 +821,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             write_m20_on = self.calculate_crc([1, 5, 20, 65280])  # 预留触摸屏开关用,闭合M20线圈，给触摸屏电脑已开机信号
             test_hex = self.calculate_crc([1, 16, 10, 2, 4, 0])  # 4294967295 寄存器溢出 写两个寄存器
             # print(write_m20_on)
-            modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
-            print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))  # 050014ff00cc3e
+            # modbus_rtu.writedata(self.ser, write_m20_on)  # 程序运行后闭合线圈M10
+            # print("M20已闭合", modbus_rtu.writedata(self.ser, write_m20_on))  # 050014ff00cc3e
             # global write_m20_off
             # global write_m21_off
             # write_m20_off = self.calculate_crc([1, 5, 20, 0])  # 预留触摸屏开关用,断开M20线圈，给触摸屏电脑关机/检查程序关闭信号
@@ -833,18 +844,18 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             # else:
             #     modbus_flag = False
             #     print('modbus shut off')
-            #     time.sleep(0.1)
+            #     time.sleep(0.05)
             #     shut_coil = modbus_rtu.writedata(self.ser, DO_ALL_OFF)  ###OUT1-4  OFF  全部继电器关闭  初始化
-            #     time.sleep(0.1)
+            #     time.sleep(0.05)
             #     modbus_rtu.writedata(self.ser, write_m20_off)
-            #     time.sleep(0.1)
+            #     time.sleep(0.05)
             #     modbus_rtu.writedata(self.ser, write_m21_off)
             #     self.ser.close()
 
             while self.runButton_modbus.isChecked() and modbus_flag:
                 # while computer_is_open and modbus_flag:   # computer_is_open = PLC m21=1
                 # while modbus_flag:
-                print('target marker')
+                # print('target marker')
                 start = time.time()
                 # writeD10 = self.calculate_crc([1, 6, 10, ngCounter])
                 # writeD10 = self.calculate_crc([1, 16, 10, 2, 4, ngCounter])  ## 批量寄存器写入 D10 + D11 (2表示写入2位）
@@ -865,46 +876,54 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     if len(output_box_list) >= 1:
                         if i == 0:
                             # modbus_rtu.writedata(self.ser, DO0_ON) if n else modbus_rtu.writedata(self.ser, DO0_OFF)
-                            modbus_tcp.modbustcp_write_registers(20, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(20, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 20,
                                 1, 0)
                             # modbus_tcp.modbustcp_write_coil()
                             # time.sleep(0.1)
                         if i == 1:
                             # modbus_rtu.writedata(self.ser, DO1_ON) if n else modbus_rtu.writedata(self.ser, DO1_OFF)
-                            modbus_tcp.modbustcp_write_registers(22, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(22, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 22,
                                 1, 0)
                             # time.sleep(0.1)
                         if i == 2:
                             # modbus_rtu.writedata(self.ser, DO2_ON) if n else modbus_rtu.writedata(self.ser, DO2_OFF)
-                            modbus_tcp.modbustcp_write_registers(24, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(24, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 24,
                                 1, 0)
                         if i == 3:
                             # modbus_rtu.writedata(self.ser, DO3_ON) if n else modbus_rtu.writedata(self.ser, DO3_OFF)
-                            modbus_tcp.modbustcp_write_registers(26, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(26, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 26,
                                 1, 0)
                             # time.sleep(0.1)
                         if i == 4:
                             # modbus_rtu.writedata(self.ser, DO4_ON) if n else modbus_rtu.writedata(self.ser, DO4_OFF)
-                            modbus_tcp.modbustcp_write_registers(28, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(28, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 28,
                                 1, 0)
                         if i == 5:
                             # modbus_rtu.writedata(self.ser, DO5_ON) if n else modbus_rtu.writedata(self.ser, DO5_OFF)
-                            modbus_tcp.modbustcp_write_registers(30, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(30, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 30,
                                 1, 0)
                         if i == 6:
                             # modbus_rtu.writedata(self.ser, DO6_ON) if n else modbus_rtu.writedata(self.ser, DO6_OFF)
-                            modbus_tcp.modbustcp_write_registers(32, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(32, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 32,
                                 1, 0)
                         if i == 7:
                             # modbus_rtu.writedata(self.ser, DO7_ON) if n else modbus_rtu.writedata(self.ser, DO7_OFF)
-                            modbus_tcp.modbustcp_write_registers(34, 1, 1) if n else modbus_tcp.modbustcp_write_registers(
+                            modbus_tcp.modbustcp_write_registers(34, 1,
+                                                                 1) if n else modbus_tcp.modbustcp_write_registers(
                                 34,
                                 1, 0)
 
@@ -929,7 +948,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     #     # feedback_data = modbus_rtu.writedata(self.ser, DO2_OFF) # PLC控制，绿灯OFF-240228
 
                 stop = time.time()
-                print(f'modbus_tcp {(stop - start) * 1000} ms')
+                # print(f'modbus_tcp {(stop - start) * 1000} ms')
                 freq = int(1 / (stop - start))
                 self.label_modbus.setText(str(freq))
                 # print(f'modbus freq: {freq}Hz,{(stop-start)*1000}ms')
